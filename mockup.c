@@ -3,19 +3,26 @@
 #include "image_types.h"
 #include "dialogs.h"
 
-typedef struct window_data {
+typedef struct tv_data {
     GtkWidget *ttv;
     GtkWidget *etv;
-    /* Need to pass these on since the first page will be hidden/destroyed */
-    GtkWidget *app_box;
-    GtkWidget *window;
 } tv_data;
 
-GtkWidget *create_welcome_box(GtkWidget *window);
+typedef struct globals {
+    GtkWidget *window;
+    GtkWidget *notebook;
+    ImageInfo *user_info;
+} globals;
+
 static void activate(GtkApplication *app, gpointer user_data);
+void notebook_previous_page();
+void create_welcome_box();
 GtkWidget *create_block_devices_treeview();
 void check_tv_and_next(GtkWidget *w, gpointer udata);
-void create_target_interface(GtkWidget *window, ImageInfo *info);
+void create_target_interface();
+
+
+globals g_OBJS;  
 
 int main (int argc, char **argv) {
   GtkApplication *app;
@@ -29,7 +36,30 @@ int main (int argc, char **argv) {
   return status;
 }
 
-GtkWidget *create_welcome_box(GtkWidget *window) {
+static void activate(GtkApplication *app, gpointer user_data) {
+    GtkWidget *window;
+    GtkWidget *notebook;
+    GtkWidget *app_box;
+
+    window = gtk_application_window_new(app);
+    g_OBJS.window = window;
+
+    notebook = gtk_notebook_new();
+    gtk_notebook_set_show_tabs(GTK_NOTEBOOK(notebook), FALSE);
+    g_OBJS.notebook = notebook;
+    gtk_container_add(GTK_CONTAINER(window), notebook);
+
+    gtk_window_set_title(GTK_WINDOW(window), "CCTC Imaging ToolKit");
+    gtk_window_fullscreen(GTK_WINDOW(window));
+
+    create_welcome_box();
+}
+
+void notebook_previous_page(GtkWidget *button, gpointer data) {
+    gtk_notebook_prev_page(GTK_NOTEBOOK(g_OBJS.notebook));
+}
+
+void create_welcome_box() {
     GtkWidget *app_box;
     GtkWidget *button_box;
     GtkWidget *button;
@@ -66,14 +96,12 @@ GtkWidget *create_welcome_box(GtkWidget *window) {
     targ_device_tv = create_block_devices_treeview(HIDE_INT);
     gtk_box_pack_start(GTK_BOX(app_box), targ_device_tv, TRUE, TRUE, 10);
 
+    udata->etv = evid_device_tv;
+    udata->ttv = targ_device_tv;
+
     button = gtk_button_new_with_label("Utilities");
     gtk_container_add(GTK_CONTAINER(button_box), button);
     
-    udata->etv = evid_device_tv;
-    udata->ttv = targ_device_tv;
-    udata->app_box = app_box;
-    udata->window = window;
-
     button = gtk_button_new_with_label("Next");
     gtk_widget_set_size_request(button, -1, 50);
     g_signal_connect(button, "clicked", G_CALLBACK(check_tv_and_next), udata);
@@ -81,26 +109,13 @@ GtkWidget *create_welcome_box(GtkWidget *window) {
     
     button = gtk_button_new_with_label("Quit");
     g_signal_connect_swapped(button, "clicked", 
-            G_CALLBACK(gtk_widget_destroy), window);
+            G_CALLBACK(gtk_widget_destroy), g_OBJS.window);
     gtk_container_add(GTK_CONTAINER(button_box), button);
 
     gtk_container_add(GTK_CONTAINER(app_box), button_box);
     
-    return app_box;
-}
-
-static void activate(GtkApplication *app, gpointer user_data) {
-    GtkWidget *window;
-    GtkWidget *app_box;
-
-    window = gtk_application_window_new(app);
-    gtk_window_set_title(GTK_WINDOW(window), "CCTC Imaging ToolKit");
-    gtk_window_fullscreen(GTK_WINDOW(window));
-
-    app_box = create_welcome_box(window);
-
-    gtk_container_add(GTK_CONTAINER(window), app_box);
-    gtk_widget_show_all(window);
+    gtk_notebook_append_page(GTK_NOTEBOOK(g_OBJS.notebook), app_box, NULL);
+    gtk_widget_show_all(g_OBJS.window);
 }
 
 GtkTreeModel *create_block_devices_liststore(int hide_internal) {
@@ -189,6 +204,7 @@ void check_tv_and_next(GtkWidget *w, gpointer udata) {
     ImageInfo *info = malloc(sizeof(ImageInfo*));
 
     tv_data *data = udata;
+    g_OBJS.user_info = info;
 
     /* Get evidence device name */
     sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(data->etv));
@@ -198,7 +214,7 @@ void check_tv_and_next(GtkWidget *w, gpointer udata) {
         info->evidence_device = name;
     } 
     else {
-        diag = create_no_device_dialog(data->window, "evidence");
+        diag = create_no_device_dialog(g_OBJS.window, "evidence");
         gtk_dialog_run(GTK_DIALOG(diag));
         gtk_widget_destroy(diag);
         return;
@@ -212,16 +228,65 @@ void check_tv_and_next(GtkWidget *w, gpointer udata) {
         info->target_device = name;
     } 
     else {
-        diag = create_no_device_dialog(data->window, "target");
+        diag = create_no_device_dialog(g_OBJS.window, "target");
         gtk_dialog_run(GTK_DIALOG(diag));
         gtk_widget_destroy(diag);
         return;
     }
+    
+    if (strcmp(info->evidence_device, info->target_device) == 0) {
+        diag = create_same_device_dialog(g_OBJS.window);
+        gtk_dialog_run(GTK_DIALOG(diag));
+        return;
+    }
 
-    gtk_widget_destroy(data->app_box);
-    create_target_interface(data->window, info);
+    diag = create_confirm_target_device_dialog(g_OBJS.window, info->target_device);
+    int result = gtk_dialog_run(GTK_DIALOG(diag));
+    gtk_widget_destroy(diag);
+
+    if (result != GTK_RESPONSE_ACCEPT)
+        return;
+
+    create_target_interface();
 }
 
-void create_target_interface(GtkWidget *window, ImageInfo *info) {
-    gtk_widget_destroy(window);
+void create_target_interface() {
+    GtkWidget *app_box;
+    GtkWidget *button_box;
+    GtkWidget *button;
+
+    app_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+    
+    gtk_box_pack_start(GTK_BOX(app_box), 
+            gtk_label_new(g_OBJS.user_info->evidence_device),
+            TRUE, TRUE, 0); 
+
+    button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
+    gtk_button_box_set_layout(GTK_BUTTON_BOX(button_box), GTK_BUTTONBOX_EDGE);
+
+    gtk_widget_set_margin_start(button_box, 30);
+    gtk_widget_set_margin_end(button_box, 30);
+    gtk_widget_set_margin_bottom(button_box, 50);
+    gtk_widget_set_size_request(button_box, -1, 100);
+
+    button = gtk_button_new_with_label("Previous");
+    gtk_container_add(GTK_CONTAINER(button_box), button);
+    g_signal_connect(button, "clicked", G_CALLBACK(notebook_previous_page), NULL);
+    
+    button = gtk_button_new_with_label("Next");
+    gtk_widget_set_size_request(button, -1, 50);
+    g_signal_connect(button, "clicked", G_CALLBACK(check_tv_and_next), NULL);
+    gtk_container_add(GTK_CONTAINER(button_box), button);
+    
+    button = gtk_button_new_with_label("Quit");
+    g_signal_connect_swapped(button, "clicked", 
+            G_CALLBACK(gtk_widget_destroy), g_OBJS.window);
+    gtk_container_add(GTK_CONTAINER(button_box), button);
+
+    gtk_box_pack_end(GTK_BOX(app_box), button_box, TRUE, TRUE, 0);
+
+    gtk_notebook_append_page(GTK_NOTEBOOK(g_OBJS.notebook), app_box, NULL);
+    gtk_widget_show_all(g_OBJS.window);
+    gtk_notebook_next_page(GTK_NOTEBOOK(g_OBJS.notebook));
+
 }
