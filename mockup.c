@@ -11,10 +11,12 @@ typedef struct tv_data {
 typedef struct globals {
     GtkWidget *window;
     GtkWidget *notebook;
+    GtkWidget *header;
     ImageInfo *user_info;
 } globals;
 
 static void activate(GtkApplication *app, gpointer user_data);
+void notebook_append_with_title(GtkWidget *nb, const char *title);
 void notebook_previous_page();
 void create_welcome_box();
 GtkWidget *create_block_devices_treeview();
@@ -40,14 +42,24 @@ static void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *window;
     GtkWidget *notebook;
     GtkWidget *app_box;
+    GtkWidget *header_bar;
+    GtkWidget *_app_box;
 
     window = gtk_application_window_new(app);
     g_OBJS.window = window;
 
+    header_bar = gtk_header_bar_new();
+    g_OBJS.header = header_bar;
+
+    _app_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_box_pack_start(GTK_BOX(_app_box), header_bar, FALSE, FALSE, 0);
+
     notebook = gtk_notebook_new();
     gtk_notebook_set_show_tabs(GTK_NOTEBOOK(notebook), FALSE);
     g_OBJS.notebook = notebook;
-    gtk_container_add(GTK_CONTAINER(window), notebook);
+    gtk_box_pack_end(GTK_BOX(_app_box), notebook, TRUE, TRUE, 0);
+
+    gtk_container_add(GTK_CONTAINER(window), _app_box);
 
     gtk_window_set_title(GTK_WINDOW(window), "CCTC Imaging ToolKit");
     gtk_window_fullscreen(GTK_WINDOW(window));
@@ -55,8 +67,23 @@ static void activate(GtkApplication *app, gpointer user_data) {
     create_welcome_box();
 }
 
+void notebook_append_with_title(GtkWidget *ch, const char *title) {
+    gtk_notebook_append_page(GTK_NOTEBOOK(g_OBJS.notebook), ch, gtk_label_new(title));
+    gtk_header_bar_set_title(GTK_HEADER_BAR(g_OBJS.header), title);
+}
+
 void notebook_previous_page(GtkWidget *button, gpointer data) {
-    gtk_notebook_prev_page(GTK_NOTEBOOK(g_OBJS.notebook));
+    GtkWidget *nb = g_OBJS.notebook;
+    
+    int current_page;
+    GtkWidget *current_child;
+    const char *tab_label;
+    
+    gtk_notebook_prev_page(GTK_NOTEBOOK(nb));
+    current_page = gtk_notebook_get_current_page(GTK_NOTEBOOK(nb));
+    current_child = gtk_notebook_get_nth_page(GTK_NOTEBOOK(nb), current_page);
+    tab_label = gtk_notebook_get_tab_label_text(GTK_NOTEBOOK(nb), current_child);
+    gtk_header_bar_set_title(GTK_HEADER_BAR(g_OBJS.header), tab_label);
 }
 
 void create_welcome_box() {
@@ -114,7 +141,7 @@ void create_welcome_box() {
 
     gtk_container_add(GTK_CONTAINER(app_box), button_box);
     
-    gtk_notebook_append_page(GTK_NOTEBOOK(g_OBJS.notebook), app_box, NULL);
+    notebook_append_with_title(app_box, "Evidence and Target Devices");
     gtk_widget_show_all(g_OBJS.window);
 }
 
@@ -285,7 +312,8 @@ void create_target_interface() {
 
     gtk_box_pack_end(GTK_BOX(app_box), button_box, TRUE, TRUE, 0);
 
-    gtk_notebook_append_page(GTK_NOTEBOOK(g_OBJS.notebook), app_box, NULL);
+    notebook_append_with_title(app_box, "Target Device Information");
+
     gtk_widget_show_all(g_OBJS.window);
     gtk_notebook_next_page(GTK_NOTEBOOK(g_OBJS.notebook));
 
