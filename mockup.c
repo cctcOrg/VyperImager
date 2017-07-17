@@ -416,7 +416,7 @@ void get_target_info_and_next(GtkWidget *w, gpointer udata) {
     }
 
     entry_tmp = gtk_entry_get_text(GTK_ENTRY(entry));
-    entry_data = malloc(strlen(entry_tmp)*sizeof(char));
+    entry_data = malloc((strlen(entry_tmp)+1)*sizeof(char));
     strcpy(entry_data, entry_tmp);
     printf("%s\n", entry_data);
 
