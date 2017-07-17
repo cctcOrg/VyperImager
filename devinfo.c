@@ -23,10 +23,6 @@ Device **get_blockdev_info(int *num_blockdevs) {
         return NULL;
     }    
     
-    /*for (int j=0; j<i; j++)*/
-        /*printf("Device: %s\nModel: %sSize: %s\n", */
-                /*device_info[j]->name, device_info[j]->model, device_info[j]->size);*/
-
     *num_blockdevs = i;
     return device_info;
 }
@@ -35,8 +31,9 @@ Device *get_blockdev_struct(char *name) {
     FILE *info_file;
     char info_path[40];
     
-    char *devname = malloc(strlen(name)*sizeof(char));
-    char *model = malloc(40*sizeof(char));
+    /* strlen doesn't count the null character, need to do that */
+    char *devname = malloc((strlen(name)+1)*sizeof(char));
+    char *model = malloc(60*sizeof(char));
 
     char *size = malloc(15*sizeof(char));
     char size_raw[15];
@@ -51,7 +48,7 @@ Device *get_blockdev_struct(char *name) {
 
     sprintf(info_path, "/sys/block/%s/device/model", name);
     info_file = fopen(info_path, "r");
-    fgets(model, 40, info_file);
+    fgets(model, 60, info_file);
     /* Remove trailing \n */
     model[strlen(model)-1] = 0;
     fclose(info_file);

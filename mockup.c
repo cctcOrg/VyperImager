@@ -7,7 +7,8 @@ typedef struct cb_data {
     GtkWidget *ttv;
     GtkWidget *etv;
     GtkWidget **buttons;
-} cb_data;
+    GtkWidget *entry;
+} cb_data; 
 
 typedef struct globals {
     GtkWidget *window;
@@ -47,7 +48,9 @@ static void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *notebook;
     GtkWidget *app_box;
     GtkWidget *header_bar;
+
     ImageInfo *info = malloc(sizeof(ImageInfo*));
+    g_OBJS.user_info = info;
 
     window = gtk_application_window_new(app);
     g_OBJS.window = window;
@@ -242,10 +245,8 @@ void check_tv_and_next(GtkWidget *w, gpointer udata) {
     GtkWidget *diag;
     
     char *name;
-    ImageInfo *info = malloc(sizeof(ImageInfo*));
-
     cb_data *data = udata;
-    g_OBJS.user_info = info;
+    ImageInfo *info = g_OBJS.user_info;
 
     /* Get evidence device name */
     sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(data->etv));
@@ -293,9 +294,13 @@ void check_tv_and_next(GtkWidget *w, gpointer udata) {
 
 GtkWidget *create_target_interface(GtkWidget *window) {
     GtkWidget *app_box;
-    GtkWidget *button_box;
+    GtkWidget *box;
     GtkWidget *button;
     GtkWidget *image;
+    GtkWidget *entry;
+
+    cb_data *udata = malloc(sizeof(cb_data*));
+    udata->buttons = malloc(3*sizeof(GtkWidget*));
     
     char *format = "icons/%s_200px.svg";
     char *os_names[] = {"Linux", "Windows", "Apple"};
@@ -310,8 +315,8 @@ GtkWidget *create_target_interface(GtkWidget *window) {
             TRUE, TRUE, 0); 
 
     /* OS Button box */
-    button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
-    gtk_button_box_set_layout(GTK_BUTTON_BOX(button_box), GTK_BUTTONBOX_SPREAD);
+    box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
+    gtk_button_box_set_layout(GTK_BUTTON_BOX(box), GTK_BUTTONBOX_SPREAD);
 
     for (int i=0; i<3; i++) {
         sprintf(filename, format, os_names[i]);
@@ -321,39 +326,104 @@ GtkWidget *create_target_interface(GtkWidget *window) {
         gtk_button_set_image(GTK_BUTTON(button), image);
         gtk_widget_set_tooltip_text(button, os_names[i]);
 
-        gtk_container_add(GTK_CONTAINER(button_box), button);
+        gtk_container_add(GTK_CONTAINER(box), button);
+        udata->buttons[i] = button;
     }
 
-    gtk_box_pack_start(GTK_BOX(app_box), button_box, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(app_box), box, TRUE, TRUE, 0);
+
+    /* Filename box */
+    box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
+    gtk_box_pack_start(GTK_BOX(box), gtk_label_new("Filename: "), 
+            FALSE, FALSE, 10);
+
+    entry = gtk_entry_new();
+    gtk_box_pack_start(GTK_BOX(box), entry, TRUE, TRUE, 0);
+    udata->entry = entry;
+
+    gtk_box_pack_start(GTK_BOX(app_box), box, FALSE, FALSE, 0);
 
     /* Control button box */
-    button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
-    gtk_button_box_set_layout(GTK_BUTTON_BOX(button_box), GTK_BUTTONBOX_EDGE);
-    gtk_widget_set_size_request(button_box, -1, 100);
+    box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
+    gtk_button_box_set_layout(GTK_BUTTON_BOX(box), GTK_BUTTONBOX_EDGE);
+    gtk_widget_set_size_request(box, -1, 100);
 
     button = gtk_button_new_with_label("Previous");
-    gtk_container_add(GTK_CONTAINER(button_box), button);
+    gtk_container_add(GTK_CONTAINER(box), button);
     g_signal_connect(button, "clicked", G_CALLBACK(notebook_previous_page), NULL);
     
     button = gtk_button_new_with_label("Next");
     gtk_widget_set_size_request(button, -1, 50);
-    g_signal_connect(button, "clicked", G_CALLBACK(check_tv_and_next), NULL);
-    gtk_container_add(GTK_CONTAINER(button_box), button);
+    g_signal_connect(button, "clicked", G_CALLBACK(get_target_info_and_next), udata);
+    gtk_container_add(GTK_CONTAINER(box), button);
     
     button = gtk_button_new_with_label("Quit");
     g_signal_connect_swapped(button, "clicked", 
             G_CALLBACK(gtk_widget_destroy), window);
-    gtk_container_add(GTK_CONTAINER(button_box), button);
+    gtk_container_add(GTK_CONTAINER(box), button);
 
-    gtk_box_pack_end(GTK_BOX(app_box), button_box, FALSE, FALSE, 0);
+    gtk_box_pack_end(GTK_BOX(app_box), box, FALSE, FALSE, 0);
 
     free(filename);
+
     set_box_margins(app_box);
 
     return app_box;
 }
 
 void get_target_info_and_next(GtkWidget *w, gpointer udata) {
+    GtkWidget *diag;
+    GtkWidget *entry;
+
     cb_data *data = udata;
-    gtk_notebook_next_page(GTK_NOTEBOOK(g_OBJS.notebook));
+    char buttons_state = 0;
+    char *fs_choice = malloc(7*sizeof(char));
+    char *entry_data;
+    char *entry_tmp;
+    
+    entry = data->entry;
+
+    for (int i=0; i<3; i++) {
+        if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(data->buttons[i])))
+            buttons_state |= 1<<i;
+    }
+    
+    switch (buttons_state) {
+        /* Windows, Mac, Linux */
+        case 0b011:
+        case 0b111:
+        case 0b110:
+            strcpy(fs_choice, "vfat");
+            break;
+        /* Mac, Linux */
+        case 0b100:
+        case 0b101:
+            strcpy(fs_choice, "hfsplus");
+            break;
+        /* Windows */
+        case 0b010:
+            strcpy(fs_choice, "ntfs");
+            break;
+        /* Linux */
+        case 0b001:
+            strcpy(fs_choice, "ext4");
+            break;
+        default:
+            diag = create_please_choose_system_dialog(g_OBJS.window);
+            gtk_dialog_run(GTK_DIALOG(diag));
+            gtk_widget_destroy(diag);
+            return;
+    }
+
+    entry_tmp = gtk_entry_get_text(GTK_ENTRY(entry));
+    entry_data = malloc(strlen(entry_tmp)*sizeof(char));
+    strcpy(entry_data, entry_tmp);
+    printf("%s\n", entry_data);
+
+    g_OBJS.user_info->target_filesystem = fs_choice; 
+
+    free(data->buttons);
+    free(udata);
+
+    /*gtk_notebook_next_page(GTK_NOTEBOOK(g_OBJS.notebook));*/
 }

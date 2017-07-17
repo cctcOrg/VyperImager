@@ -1,8 +1,3 @@
-typedef struct TargetData {
-    char *directory;
-    char *filename;
-} TargetData;
-
 typedef struct Case {
     char *casenum;
     char *itemnum;
@@ -14,7 +9,8 @@ typedef struct Case {
 typedef struct ImageInfo {
     char *evidence_device;
     char *target_device;
-    TargetData *target_info;
+    char *target_filesystem;
+    char *target_filename;
     int device_type;
     int hash_type;
     int compression_type;
