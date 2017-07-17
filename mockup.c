@@ -3,10 +3,11 @@
 #include "image_types.h"
 #include "dialogs.h"
 
-typedef struct tv_data {
+typedef struct cb_data {
     GtkWidget *ttv;
     GtkWidget *etv;
-} tv_data;
+    GtkWidget **buttons;
+} cb_data;
 
 typedef struct globals {
     GtkWidget *window;
@@ -16,13 +17,16 @@ typedef struct globals {
 } globals;
 
 static void activate(GtkApplication *app, gpointer user_data);
+void set_box_margins(GtkWidget *w);
 void notebook_append_with_title(GtkWidget *nb, const char *title);
 void notebook_previous_page();
-void create_welcome_box();
+GtkWidget *create_welcome_box(GtkWidget *window);
 GtkWidget *create_block_devices_treeview();
-void check_tv_and_next(GtkWidget *w, gpointer udata);
-void create_target_interface();
+GtkWidget *create_target_interface(GtkWidget *window);
 
+// Callbacks
+void check_tv_and_next(GtkWidget *w, gpointer udata);
+void get_target_info_and_next(GtkWidget *w, gpointer udata);
 
 globals g_OBJS;  
 
@@ -43,7 +47,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *notebook;
     GtkWidget *app_box;
     GtkWidget *header_bar;
-    GtkWidget *_app_box;
+    ImageInfo *info = malloc(sizeof(ImageInfo*));
 
     window = gtk_application_window_new(app);
     g_OBJS.window = window;
@@ -51,20 +55,32 @@ static void activate(GtkApplication *app, gpointer user_data) {
     header_bar = gtk_header_bar_new();
     g_OBJS.header = header_bar;
 
-    _app_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-    gtk_box_pack_start(GTK_BOX(_app_box), header_bar, FALSE, FALSE, 0);
+    app_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    gtk_box_pack_start(GTK_BOX(app_box), header_bar, FALSE, FALSE, 0);
+    gtk_container_add(GTK_CONTAINER(window), app_box);
 
     notebook = gtk_notebook_new();
     gtk_notebook_set_show_tabs(GTK_NOTEBOOK(notebook), FALSE);
-    g_OBJS.notebook = notebook;
-    gtk_box_pack_end(GTK_BOX(_app_box), notebook, TRUE, TRUE, 0);
 
-    gtk_container_add(GTK_CONTAINER(window), _app_box);
+    g_OBJS.notebook = notebook;
+    gtk_box_pack_end(GTK_BOX(app_box), notebook, TRUE, TRUE, 0);
 
     gtk_window_set_title(GTK_WINDOW(window), "CCTC Imaging ToolKit");
     gtk_window_fullscreen(GTK_WINDOW(window));
 
-    create_welcome_box();
+    app_box = create_welcome_box(window);
+    notebook_append_with_title(app_box, "Evidence and Target Devices");
+
+    app_box = create_target_interface(window);
+    notebook_append_with_title(app_box, "Target Device Information");
+
+    gtk_widget_show_all(window);
+}
+
+void set_box_margins(GtkWidget *w) {
+    gtk_widget_set_margin_start(w, 30);
+    gtk_widget_set_margin_end(w, 30);
+    gtk_widget_set_margin_bottom(w, 50);
 }
 
 void notebook_append_with_title(GtkWidget *ch, const char *title) {
@@ -86,22 +102,20 @@ void notebook_previous_page(GtkWidget *button, gpointer data) {
     gtk_header_bar_set_title(GTK_HEADER_BAR(g_OBJS.header), tab_label);
 }
 
-void create_welcome_box() {
+GtkWidget *create_welcome_box(GtkWidget *window) {
     GtkWidget *app_box;
     GtkWidget *button_box;
     GtkWidget *button;
     GtkWidget *evid_device_tv;
     GtkWidget *targ_device_tv;
 
-    tv_data *udata = malloc(sizeof(tv_data*));
+    cb_data *udata = malloc(sizeof(cb_data*));
 
     app_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
 
     button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
     gtk_button_box_set_layout(GTK_BUTTON_BOX(button_box), GTK_BUTTONBOX_EDGE);
 
-    gtk_widget_set_margin_start(button_box, 30);
-    gtk_widget_set_margin_end(button_box, 30);
     gtk_widget_set_margin_bottom(button_box, 50);
     gtk_widget_set_size_request(button_box, -1, 100);
 
@@ -136,13 +150,13 @@ void create_welcome_box() {
     
     button = gtk_button_new_with_label("Quit");
     g_signal_connect_swapped(button, "clicked", 
-            G_CALLBACK(gtk_widget_destroy), g_OBJS.window);
+            G_CALLBACK(gtk_widget_destroy), window);
     gtk_container_add(GTK_CONTAINER(button_box), button);
 
     gtk_container_add(GTK_CONTAINER(app_box), button_box);
-    
-    notebook_append_with_title(app_box, "Evidence and Target Devices");
-    gtk_widget_show_all(g_OBJS.window);
+    set_box_margins(app_box);
+
+    return app_box;
 }
 
 GtkTreeModel *create_block_devices_liststore(int hide_internal) {
@@ -230,7 +244,7 @@ void check_tv_and_next(GtkWidget *w, gpointer udata) {
     char *name;
     ImageInfo *info = malloc(sizeof(ImageInfo*));
 
-    tv_data *data = udata;
+    cb_data *data = udata;
     g_OBJS.user_info = info;
 
     /* Get evidence device name */
@@ -274,26 +288,47 @@ void check_tv_and_next(GtkWidget *w, gpointer udata) {
     if (result != GTK_RESPONSE_ACCEPT)
         return;
 
-    create_target_interface();
+    gtk_notebook_next_page(GTK_NOTEBOOK(g_OBJS.notebook));
 }
 
-void create_target_interface() {
+GtkWidget *create_target_interface(GtkWidget *window) {
     GtkWidget *app_box;
     GtkWidget *button_box;
     GtkWidget *button;
+    GtkWidget *image;
+    
+    char *format = "icons/%s_200px.svg";
+    char *os_names[] = {"Linux", "Windows", "Apple"};
+    char *filename = malloc(strlen(format)+15);
 
     app_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     
     gtk_box_pack_start(GTK_BOX(app_box), 
-            gtk_label_new(g_OBJS.user_info->evidence_device),
+            gtk_label_new(("Please select which types of systems "
+                    "you would like to read this drive from "
+                    "(Linux/Windows/Apple)")),
             TRUE, TRUE, 0); 
 
+    /* OS Button box */
+    button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
+    gtk_button_box_set_layout(GTK_BUTTON_BOX(button_box), GTK_BUTTONBOX_SPREAD);
+
+    for (int i=0; i<3; i++) {
+        sprintf(filename, format, os_names[i]);
+        button = gtk_toggle_button_new();
+        image = gtk_image_new_from_file(filename);
+
+        gtk_button_set_image(GTK_BUTTON(button), image);
+        gtk_widget_set_tooltip_text(button, os_names[i]);
+
+        gtk_container_add(GTK_CONTAINER(button_box), button);
+    }
+
+    gtk_box_pack_start(GTK_BOX(app_box), button_box, TRUE, TRUE, 0);
+
+    /* Control button box */
     button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
     gtk_button_box_set_layout(GTK_BUTTON_BOX(button_box), GTK_BUTTONBOX_EDGE);
-
-    gtk_widget_set_margin_start(button_box, 30);
-    gtk_widget_set_margin_end(button_box, 30);
-    gtk_widget_set_margin_bottom(button_box, 50);
     gtk_widget_set_size_request(button_box, -1, 100);
 
     button = gtk_button_new_with_label("Previous");
@@ -307,14 +342,18 @@ void create_target_interface() {
     
     button = gtk_button_new_with_label("Quit");
     g_signal_connect_swapped(button, "clicked", 
-            G_CALLBACK(gtk_widget_destroy), g_OBJS.window);
+            G_CALLBACK(gtk_widget_destroy), window);
     gtk_container_add(GTK_CONTAINER(button_box), button);
 
-    gtk_box_pack_end(GTK_BOX(app_box), button_box, TRUE, TRUE, 0);
+    gtk_box_pack_end(GTK_BOX(app_box), button_box, FALSE, FALSE, 0);
 
-    notebook_append_with_title(app_box, "Target Device Information");
+    free(filename);
+    set_box_margins(app_box);
 
-    gtk_widget_show_all(g_OBJS.window);
+    return app_box;
+}
+
+void get_target_info_and_next(GtkWidget *w, gpointer udata) {
+    cb_data *data = udata;
     gtk_notebook_next_page(GTK_NOTEBOOK(g_OBJS.notebook));
-
 }
