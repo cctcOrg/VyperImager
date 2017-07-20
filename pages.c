@@ -3,10 +3,86 @@
 #include "devinfo.h"
 #include "dialogs.h"
 
-void set_box_margins(GtkWidget *w) {
+static void set_box_margins(GtkWidget *w) {
     gtk_widget_set_margin_start(w, 30);
     gtk_widget_set_margin_end(w, 30);
     gtk_widget_set_margin_bottom(w, 50);
+}
+
+static GtkTreeModel *create_block_devices_liststore(int hide_internal) {
+    GtkListStore  *store;
+    GtkTreeIter    iter;
+
+    int num_blockdevs;
+    Device **blockdev_info;
+
+    /* Device, model, size */
+    store = gtk_list_store_new(NUM_COLS, G_TYPE_STRING, 
+            G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+    blockdev_info = get_blockdev_info(&num_blockdevs);
+
+    for (int i=0; i<num_blockdevs; i++) {
+        if (hide_internal)
+            if (!blockdev_info[i]->removable)
+                continue;
+
+        gtk_list_store_append(store, &iter);
+        gtk_list_store_set(store, &iter,
+                COL_DEV, blockdev_info[i]->name,
+                COL_MODEL, blockdev_info[i]->model,
+                COL_SIZE, blockdev_info[i]->size,
+                COL_REMOVABLE, (blockdev_info[i]->removable) ? "Yes" : "No",
+                -1);
+    }
+    return GTK_TREE_MODEL(store);
+}
+
+static GtkWidget *create_block_devices_treeview(int hide_internal) {
+    GtkCellRenderer     *renderer;
+    GtkTreeModel        *model;
+    GtkWidget           *treeview;
+    
+    treeview = gtk_tree_view_new();
+
+    renderer = gtk_cell_renderer_text_new();
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview),
+            -1,      
+            "Device",  
+            renderer,
+            "text", COL_DEV,
+            NULL);
+
+    renderer = gtk_cell_renderer_text_new();
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview),
+            -1,      
+            "Model",  
+            renderer,
+            "text", COL_MODEL,
+            NULL);
+
+    renderer = gtk_cell_renderer_text_new();
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview),
+            -1,      
+            "Size",  
+            renderer,
+            "text", COL_SIZE,
+            NULL);
+
+    if (!hide_internal) {
+        renderer = gtk_cell_renderer_text_new();
+        gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW(treeview),
+                -1,      
+                "Removable",  
+                renderer,
+                "text", COL_REMOVABLE,
+                NULL);
+    }
+
+    model = create_block_devices_liststore(hide_internal);
+    gtk_tree_view_set_model(GTK_TREE_VIEW(treeview), model);
+    g_object_unref(model);
+
+    return treeview;
 }
 
 GtkWidget *create_welcome_box(app_objects *globals) {
@@ -62,82 +138,6 @@ GtkWidget *create_welcome_box(app_objects *globals) {
     set_box_margins(app_box);
 
     return app_box;
-}
-
-GtkTreeModel *create_block_devices_liststore(int hide_internal) {
-    GtkListStore  *store;
-    GtkTreeIter    iter;
-
-    int num_blockdevs;
-    Device **blockdev_info;
-
-    /* Device, model, size */
-    store = gtk_list_store_new(NUM_COLS, G_TYPE_STRING, 
-            G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
-    blockdev_info = get_blockdev_info(&num_blockdevs);
-
-    for (int i=0; i<num_blockdevs; i++) {
-        if (hide_internal)
-            if (!blockdev_info[i]->removable)
-                continue;
-
-        gtk_list_store_append(store, &iter);
-        gtk_list_store_set(store, &iter,
-                COL_DEV, blockdev_info[i]->name,
-                COL_MODEL, blockdev_info[i]->model,
-                COL_SIZE, blockdev_info[i]->size,
-                COL_REMOVABLE, (blockdev_info[i]->removable) ? "Yes" : "No",
-                -1);
-    }
-    return GTK_TREE_MODEL(store);
-}
-
-GtkWidget *create_block_devices_treeview(int hide_internal) {
-    GtkCellRenderer     *renderer;
-    GtkTreeModel        *model;
-    GtkWidget           *treeview;
-    
-    treeview = gtk_tree_view_new();
-
-    renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview),
-            -1,      
-            "Device",  
-            renderer,
-            "text", COL_DEV,
-            NULL);
-
-    renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview),
-            -1,      
-            "Model",  
-            renderer,
-            "text", COL_MODEL,
-            NULL);
-
-    renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview),
-            -1,      
-            "Size",  
-            renderer,
-            "text", COL_SIZE,
-            NULL);
-
-    if (!hide_internal) {
-        renderer = gtk_cell_renderer_text_new();
-        gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW(treeview),
-                -1,      
-                "Removable",  
-                renderer,
-                "text", COL_REMOVABLE,
-                NULL);
-    }
-
-    model = create_block_devices_liststore(hide_internal);
-    gtk_tree_view_set_model(GTK_TREE_VIEW(treeview), model);
-    g_object_unref(model);
-
-    return treeview;
 }
 
 GtkWidget *create_target_interface(app_objects *globals) {

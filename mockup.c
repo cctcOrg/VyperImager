@@ -5,7 +5,7 @@
 #include "pages.h"
 
 static void activate(GtkApplication *app, gpointer user_data);
-void notebook_append_with_title(app_objects *globals, GtkWidget *nb, const char *title);
+static void notebook_append_with_title(app_objects *globals, GtkWidget *nb, const char *title);
 
 int main (int argc, char **argv) {
   GtkApplication *app;
@@ -19,7 +19,9 @@ int main (int argc, char **argv) {
   return status;
 }
 
-static void activate(GtkApplication *app, gpointer user_data) {
+static void activate(GtkApplication* app, gpointer user_data) {
+    (void) app;
+    (void) user_data;
     GtkWidget *window;
     GtkWidget *notebook;
     GtkWidget *app_box;
@@ -58,7 +60,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_widget_show_all(window);
 }
 
-void notebook_append_with_title(app_objects *globals, GtkWidget *ch, const char *title) {
+static void notebook_append_with_title(app_objects *globals, GtkWidget *ch, const char *title) {
     gtk_notebook_append_page(GTK_NOTEBOOK(globals->notebook), ch, gtk_label_new(title));
     gtk_header_bar_set_title(GTK_HEADER_BAR(globals->header), title);
 }

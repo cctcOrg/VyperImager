@@ -5,6 +5,7 @@
 #include "dialogs.h"
 
 void notebook_previous_page(GtkWidget *button, gpointer udata) {
+    (void) button;
     app_objects *globals = udata;
     GtkWidget *nb = globals->notebook;
     
@@ -20,6 +21,7 @@ void notebook_previous_page(GtkWidget *button, gpointer udata) {
 }
 
 void check_tv_and_next(GtkWidget *w, gpointer udata) {
+    (void) w;
     app_objects *globals = udata;
     GtkWidget *window = globals->window;
     ImageInfo *info = globals->user_info;
@@ -77,6 +79,7 @@ void check_tv_and_next(GtkWidget *w, gpointer udata) {
 }
 
 void get_target_info_and_next(GtkWidget *w, gpointer udata) {
+    (void) w;
     app_objects *globals = udata;
 
     GtkWidget *diag;
