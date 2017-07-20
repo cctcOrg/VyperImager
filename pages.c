@@ -1,7 +1,13 @@
 #include "pages.h"
-
+#include "callbacks.h"
 #include "devinfo.h"
 #include "dialogs.h"
+
+void set_box_margins(GtkWidget *w) {
+    gtk_widget_set_margin_start(w, 30);
+    gtk_widget_set_margin_end(w, 30);
+    gtk_widget_set_margin_bottom(w, 50);
+}
 
 GtkWidget *create_welcome_box(app_objects *globals) {
     GtkWidget *app_box;
@@ -9,8 +15,6 @@ GtkWidget *create_welcome_box(app_objects *globals) {
     GtkWidget *button;
     GtkWidget *evid_device_tv;
     GtkWidget *targ_device_tv;
-
-    /*cb_data *udata = malloc(sizeof(cb_data*));*/
 
     app_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
 
@@ -96,7 +100,7 @@ GtkWidget *create_block_devices_treeview(int hide_internal) {
     treeview = gtk_tree_view_new();
 
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW(treeview),
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview),
             -1,      
             "Device",  
             renderer,
@@ -104,7 +108,7 @@ GtkWidget *create_block_devices_treeview(int hide_internal) {
             NULL);
 
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW(treeview),
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview),
             -1,      
             "Model",  
             renderer,
@@ -112,7 +116,7 @@ GtkWidget *create_block_devices_treeview(int hide_internal) {
             NULL);
 
     renderer = gtk_cell_renderer_text_new();
-    gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW(treeview),
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview),
             -1,      
             "Size",  
             renderer,
@@ -143,8 +147,7 @@ GtkWidget *create_target_interface(app_objects *globals) {
     GtkWidget *image;
     GtkWidget *entry;
 
-    cb_data *udata = malloc(sizeof(cb_data*));
-    udata->buttons = malloc(3*sizeof(GtkWidget*));
+    globals->os_buttons = malloc(3*sizeof(GtkWidget*));
     
     char *format = "icons/%s_200px.svg";
     char *os_names[] = {"Linux", "Windows", "Apple"};
@@ -171,7 +174,7 @@ GtkWidget *create_target_interface(app_objects *globals) {
         gtk_widget_set_tooltip_text(button, os_names[i]);
 
         gtk_container_add(GTK_CONTAINER(box), button);
-        udata->buttons[i] = button;
+        globals->os_buttons[i] = button;
     }
 
     gtk_box_pack_start(GTK_BOX(app_box), box, TRUE, TRUE, 0);
@@ -183,7 +186,7 @@ GtkWidget *create_target_interface(app_objects *globals) {
 
     entry = gtk_entry_new();
     gtk_box_pack_start(GTK_BOX(box), entry, TRUE, TRUE, 0);
-    udata->entry = entry;
+    globals->filename_entry = entry;
 
     gtk_box_pack_start(GTK_BOX(app_box), box, FALSE, FALSE, 0);
 
@@ -194,16 +197,16 @@ GtkWidget *create_target_interface(app_objects *globals) {
 
     button = gtk_button_new_with_label("Previous");
     gtk_container_add(GTK_CONTAINER(box), button);
-    g_signal_connect(button, "clicked", G_CALLBACK(notebook_previous_page), NULL);
+    g_signal_connect(button, "clicked", G_CALLBACK(notebook_previous_page), globals);
     
     button = gtk_button_new_with_label("Next");
     gtk_widget_set_size_request(button, -1, 50);
-    g_signal_connect(button, "clicked", G_CALLBACK(get_target_info_and_next), udata);
+    g_signal_connect(button, "clicked", G_CALLBACK(get_target_info_and_next), globals);
     gtk_container_add(GTK_CONTAINER(box), button);
     
     button = gtk_button_new_with_label("Quit");
     g_signal_connect_swapped(button, "clicked", 
-            G_CALLBACK(gtk_widget_destroy), window);
+            G_CALLBACK(gtk_widget_destroy), globals->window);
     gtk_container_add(GTK_CONTAINER(box), button);
 
     gtk_box_pack_end(GTK_BOX(app_box), box, FALSE, FALSE, 0);

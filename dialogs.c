@@ -8,7 +8,7 @@ GtkWidget *create_no_device_dialog(GtkWidget *window, char *type) {
     GtkWidget *dialog_area;
 
     char *msg_format = "A %s device must be selected";
-    char *msg = malloc((strlen(msg_format) + strlen(type) +1)*sizeof(char));
+    char *msg = malloc((strlen(msg_format)+strlen(type)+1)*sizeof(char));
     sprintf(msg, msg_format, type);
 
     GtkDialogFlags flags = GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT;
@@ -29,7 +29,7 @@ GtkWidget *create_confirm_target_device_dialog(GtkWidget *window, char *target) 
 
     char *msg_format = ("All data on /dev/%s will be lost, are you "
             "sure you wish to continue?");
-    char *msg = malloc((strlen(msg_format) + strlen(target))*sizeof(char));
+    char *msg = malloc((strlen(msg_format)+strlen(target)+1)*sizeof(char));
     sprintf(msg, msg_format, target);
 
     GtkDialogFlags flags = GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT;

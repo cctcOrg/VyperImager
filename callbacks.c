@@ -1,3 +1,5 @@
+#include<stdlib.h>
+#include<string.h>
 #include "callbacks.h"
 #include "appdefs.h"
 #include "dialogs.h"
@@ -5,7 +7,6 @@
 void notebook_previous_page(GtkWidget *button, gpointer udata) {
     app_objects *globals = udata;
     GtkWidget *nb = globals->notebook;
-    GtkWidget *hdr = globals->header;
     
     int current_page;
     GtkWidget *current_child;
@@ -15,13 +16,12 @@ void notebook_previous_page(GtkWidget *button, gpointer udata) {
     current_page = gtk_notebook_get_current_page(GTK_NOTEBOOK(nb));
     current_child = gtk_notebook_get_nth_page(GTK_NOTEBOOK(nb), current_page);
     tab_label = gtk_notebook_get_tab_label_text(GTK_NOTEBOOK(nb), current_child);
-    gtk_header_bar_set_title(GTK_HEADER_BAR(header), tab_label);
+    gtk_header_bar_set_title(GTK_HEADER_BAR(globals->header), tab_label);
 }
 
 void check_tv_and_next(GtkWidget *w, gpointer udata) {
     app_objects *globals = udata;
     GtkWidget *window = globals->window;
-    /*GtkWidget *hdr = globals->header;*/
     ImageInfo *info = globals->user_info;
     
 
@@ -31,7 +31,6 @@ void check_tv_and_next(GtkWidget *w, gpointer udata) {
     GtkWidget *diag;
     
     char *name;
-    /*cb_data *data = udata;*/
 
     /* Get evidence device name */
     sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(globals->etv));
@@ -48,7 +47,7 @@ void check_tv_and_next(GtkWidget *w, gpointer udata) {
     }
 
     /* Get target device name */
-    sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(data->ttv));
+    sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(globals->ttv));
     if (gtk_tree_selection_get_selected(sel, &model, &iter)) {
         name = malloc(4*sizeof(char));
         gtk_tree_model_get(model, &iter, COL_DEV, &name, -1);
@@ -83,16 +82,15 @@ void get_target_info_and_next(GtkWidget *w, gpointer udata) {
     GtkWidget *diag;
     GtkWidget *entry;
 
-    /*cb_data *data = udata;*/
     char buttons_state = 0;
     char *fs_choice = malloc(7*sizeof(char));
     char *entry_data;
-    char *entry_tmp;
+    const char *entry_tmp;
     
     entry = globals->filename_entry;
 
     for (int i=0; i<3; i++) {
-        if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->buttons[i])))
+        if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->os_buttons[i])))
             buttons_state |= 1<<i;
     }
     

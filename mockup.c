@@ -5,8 +5,7 @@
 #include "pages.h"
 
 static void activate(GtkApplication *app, gpointer user_data);
-void set_box_margins(GtkWidget *w);
-void notebook_append_with_title(GtkWidget *nb, const char *title);
+void notebook_append_with_title(app_objects *globals, GtkWidget *nb, const char *title);
 
 int main (int argc, char **argv) {
   GtkApplication *app;
@@ -50,21 +49,16 @@ static void activate(GtkApplication *app, gpointer user_data) {
     gtk_window_fullscreen(GTK_WINDOW(window));
 
     app_box = create_welcome_box(globals);
-    notebook_append_with_title(app_box, "Evidence and Target Devices");
+    /* globals contains the notebook and header bar */
+    notebook_append_with_title(globals, app_box, "Evidence and Target Devices");
 
     app_box = create_target_interface(globals);
-    notebook_append_with_title(app_box, "Target Device Information");
+    notebook_append_with_title(globals, app_box, "Target Device Information");
 
     gtk_widget_show_all(window);
 }
 
-void set_box_margins(GtkWidget *w) {
-    gtk_widget_set_margin_start(w, 30);
-    gtk_widget_set_margin_end(w, 30);
-    gtk_widget_set_margin_bottom(w, 50);
-}
-
-void notebook_append_with_title(GtkWidget *ch, const char *title) {
+void notebook_append_with_title(app_objects *globals, GtkWidget *ch, const char *title) {
     gtk_notebook_append_page(GTK_NOTEBOOK(globals->notebook), ch, gtk_label_new(title));
     gtk_header_bar_set_title(GTK_HEADER_BAR(globals->header), title);
 }

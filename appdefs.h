@@ -1,3 +1,6 @@
+#ifndef APPDEFS_H
+#define APPDEFS_H
+
 typedef struct Case {
     char *casenum;
     char *itemnum;
@@ -25,11 +28,6 @@ enum {
     NUM_COLS
 };
 
-//typedef struct cb_data {
-    //GtkWidget *ttv;
-    //GtkWidget *etv;
-//} cb_data; 
-
 typedef struct app_objects {
     GtkWidget *window;
     GtkWidget *notebook;
@@ -41,3 +39,5 @@ typedef struct app_objects {
 
     ImageInfo *user_info;
 } app_objects;
+
+#endif /* APPDEFS_H */
