@@ -25,3 +25,19 @@ enum {
     NUM_COLS
 };
 
+//typedef struct cb_data {
+    //GtkWidget *ttv;
+    //GtkWidget *etv;
+//} cb_data; 
+
+typedef struct app_objects {
+    GtkWidget *window;
+    GtkWidget *notebook;
+    GtkWidget *header;
+    GtkWidget *etv;
+    GtkWidget *ttv;
+    GtkWidget **os_buttons;
+    GtkWidget *filename_entry;
+
+    ImageInfo *user_info;
+} app_objects;
