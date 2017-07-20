@@ -1,4 +1,5 @@
 #include<gtk/gtk.h>
+#include<stdlib.h>
 #include "devinfo.h"
 #include "appdefs.h"
 #include "dialogs.h"

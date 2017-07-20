@@ -1,3 +1,8 @@
+#include<stdio.h>
+#include<string.h>
+#include<dirent.h>
+#include<stdlib.h>
+
 #include "pages.h"
 #include "callbacks.h"
 #include "devinfo.h"
@@ -9,37 +14,43 @@ static void set_box_margins(GtkWidget *w) {
     gtk_widget_set_margin_bottom(w, 50);
 }
 
-static GtkTreeModel *create_block_devices_liststore(int hide_internal) {
+static GtkTreeModel *create_block_devices_liststore(int hide_internal, GtkTreePath **path) {
     GtkListStore  *store;
     GtkTreeIter    iter;
 
     int num_blockdevs;
     Device **blockdev_info;
+    Device *dev;
 
     /* Device, model, size */
     store = gtk_list_store_new(NUM_COLS, G_TYPE_STRING, 
-            G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+            G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
     blockdev_info = get_blockdev_info(&num_blockdevs);
 
     for (int i=0; i<num_blockdevs; i++) {
+        dev = blockdev_info[i];
+
         if (hide_internal)
-            if (!blockdev_info[i]->removable)
+            if (!dev->removable)
                 continue;
 
         gtk_list_store_append(store, &iter);
         gtk_list_store_set(store, &iter,
-                COL_DEV, blockdev_info[i]->name,
-                COL_MODEL, blockdev_info[i]->model,
-                COL_SIZE, blockdev_info[i]->size,
-                COL_REMOVABLE, (blockdev_info[i]->removable) ? "Yes" : "No",
+                COL_DEV, dev->name, COL_MODEL, dev->model, COL_SIZE, dev->size,
+                COL_REMOVABLE, (dev->removable) ? "Yes" : "No",
+                COL_ISTARGET, dev->is_target,
                 -1);
+        if (dev->is_target)
+            *path = gtk_tree_model_get_path(GTK_TREE_MODEL(store), &iter);
     }
     return GTK_TREE_MODEL(store);
-}
+} 
 
 static GtkWidget *create_block_devices_treeview(int hide_internal) {
+    GtkTreeSelection    *selection;
     GtkCellRenderer     *renderer;
     GtkTreeModel        *model;
+    GtkTreePath         *evid_path = NULL;
     GtkWidget           *treeview;
     
     treeview = gtk_tree_view_new();
@@ -70,7 +81,7 @@ static GtkWidget *create_block_devices_treeview(int hide_internal) {
 
     if (!hide_internal) {
         renderer = gtk_cell_renderer_text_new();
-        gtk_tree_view_insert_column_with_attributes (GTK_TREE_VIEW(treeview),
+        gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview),
                 -1,      
                 "Removable",  
                 renderer,
@@ -78,8 +89,14 @@ static GtkWidget *create_block_devices_treeview(int hide_internal) {
                 NULL);
     }
 
-    model = create_block_devices_liststore(hide_internal);
+    model = create_block_devices_liststore(hide_internal, &evid_path);
     gtk_tree_view_set_model(GTK_TREE_VIEW(treeview), model);
+
+    if (evid_path && hide_internal) {
+        selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
+        gtk_tree_selection_select_path(selection, evid_path);
+    }
+
     g_object_unref(model);
 
     return treeview;

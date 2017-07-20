@@ -3,6 +3,21 @@
 #include<stdio.h>
 #include<string.h>
 
+GtkWidget *create_alert_dialog(char *msg) {
+    GtkWidget *dialog;
+    GtkWidget *dialog_area;
+
+    GtkDialogFlags flags = GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT;
+    dialog = gtk_dialog_new_with_buttons("Info", NULL, flags,
+                                          "OK", GTK_RESPONSE_ACCEPT, NULL);
+
+    dialog_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    gtk_container_add(GTK_CONTAINER(dialog_area), gtk_label_new(msg));
+    
+    gtk_widget_show_all(dialog);
+    return dialog;
+}
+
 GtkWidget *create_no_device_dialog(GtkWidget *window, char *type) {
     GtkWidget *dialog;
     GtkWidget *dialog_area;
@@ -78,3 +93,4 @@ GtkWidget *create_please_choose_system_dialog(GtkWidget *window) {
     gtk_widget_show_all(dialog);
     return dialog;
 }
+

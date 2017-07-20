@@ -1,18 +1,59 @@
+#include<stdio.h>
+#include<string.h>
+#include<dirent.h>
+#include<stdlib.h>
+#include<sys/stat.h>
 #include "devinfo.h"
 
-Device **get_blockdev_info(int *num_blockdevs) {
-    Device **device_info = malloc(5*sizeof(Device*));
+#define BAD_STAT -1
+#define NUM_BLOCKDEVS 5
+#define MAX_BLOCKLEN 15
+#define INODE_OFFSET 5
 
+static int get_inode(char *filename) {
+    struct stat file_stat;  
+    int ret;  
+
+    ret = stat(filename, &file_stat);  
+    if (ret < 0) { 
+        printf("find_label: cannot stat %s\n", filename);
+        return BAD_STAT;
+    } 
+
+    return file_stat.st_ino;
+}
+
+Device **get_blockdev_info(int *num_blockdevs) {
     DIR *dir;
     struct dirent *ent;
     int i = 0;
+    char *fn;
+    char test_path[MAX_BLOCKLEN];
+    int target_inode;
+    int inode;
+
+    Device *dev;
+    Device **device_info = malloc(NUM_BLOCKDEVS*sizeof(Device*));
+
+    target_inode = get_inode("/dev/disk/by-label/EVID_TARGET");
 
     /* Find the block devices */
     if ((dir = opendir("/sys/block")) != NULL) {
         /* print all the files and directories within directory */
         while ((ent = readdir(dir)) != NULL) {
-            if (ent->d_name[0] != '.') {
-                device_info[i] = get_blockdev_struct(ent->d_name); 
+            fn = ent->d_name;
+            if (fn[0] != '.') {
+                dev = get_blockdev_struct(fn);
+                dev->is_target = 0;
+
+                sprintf(test_path, "/dev/%s", fn);
+                inode = get_inode(test_path);
+                /* If this is our dear evidence device, the data partition's
+                 * inode will have a small offset from the block device's */ 
+                if (abs(inode-target_inode) < INODE_OFFSET)
+                    dev->is_target = 1;
+
+                device_info[i] = dev;
                 i++;
             }
         }
@@ -76,3 +117,4 @@ Device *get_blockdev_struct(char *name) {
 
     return devinfo;
 }
+

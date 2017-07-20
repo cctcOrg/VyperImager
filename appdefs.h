@@ -25,6 +25,7 @@ enum {
     COL_MODEL,
     COL_SIZE,
     COL_REMOVABLE,
+    COL_ISTARGET,
     NUM_COLS
 };
 
