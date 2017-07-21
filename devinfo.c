@@ -9,6 +9,10 @@
 #define NUM_BLOCKDEVS 5
 #define MAX_BLOCKLEN 15
 #define INODE_OFFSET 5
+#define SIZE_SIZE 15
+#define PATH_SIZE 40
+#define MODEL_SIZE 60
+#define REM_SIZE 10
 
 static int get_inode(char *filename) {
     struct stat file_stat;  
@@ -68,44 +72,60 @@ Device **get_blockdev_info(int *num_blockdevs) {
 
 Device *get_blockdev_struct(char *name) {
     FILE *info_file;
-    char info_path[40];
+    char info_path[PATH_SIZE];
     
     /* strlen doesn't count the null character, need to do that */
     char *devname = malloc((strlen(name)+1)*sizeof(char));
-    char *model = malloc(60*sizeof(char));
+    char *model = malloc(MODEL_SIZE*sizeof(char));
 
-    char *size = malloc(15*sizeof(char));
-    char size_raw[15];
+    char *size = malloc(SIZE_SIZE*sizeof(char));
+    char size_raw[SIZE_SIZE];
     float size_value;
     char *sz_end;
 
-    char rem[10]; 
+    char rem[REM_SIZE]; 
 
     Device *devinfo = malloc(sizeof(Device));
 
     strcpy(devname, name);
 
     sprintf(info_path, "/sys/block/%s/device/model", name);
+    
+    /* Model */
     info_file = fopen(info_path, "r");
-    fgets(model, 60, info_file);
-    /* Remove trailing \n */
-    model[strlen(model)-1] = 0;
-    fclose(info_file);
+    if (info_file == NULL) {
+        printf("Note: no model: %s\n", name);
+        strcpy(model, "SD Card");
+    } 
+    else {
+        fgets(model, MODEL_SIZE, info_file);
+        /* Remove trailing \n */
+        model[strlen(model)-1] = 0;
+        fclose(info_file);
+    }
 
+    /* Size */
     sprintf(info_path, "/sys/block/%s/size", name);
-    info_file = fopen(info_path, "r");
-    fgets(size_raw, 15, info_file);
-    fclose(info_file);
 
+    info_file = fopen(info_path, "r");
+    if (info_file == NULL) {
+        printf("No such file or directory: %s\n", info_path);
+        return devinfo;
+    }
+
+    fgets(size_raw, SIZE_SIZE, info_file);
+    fclose(info_file);
+    
     size_raw[strlen(size_raw)-1] = 0;
-    size_value = (float) strtol(size_raw, &sz_end, 10);
+    size_value = (float) strtol(size_raw, &sz_end, SIZE_SIZE);
     size_value /= 1000000;
     sprintf(size, "%.2f", size_value);
     strcat(size, " G");
 
+    /* Removable */
     sprintf(info_path, "/sys/block/%s/removable", name);
     info_file = fopen(info_path, "r");
-    fgets(rem, 10, info_file);
+    fgets(rem, REM_SIZE, info_file);
     fclose(info_file);
 
     devinfo->name = devname;
