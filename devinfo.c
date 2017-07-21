@@ -15,10 +15,8 @@ static int get_inode(char *filename) {
     int ret;  
 
     ret = stat(filename, &file_stat);  
-    if (ret < 0) { 
-        printf("find_label: cannot stat %s\n", filename);
+    if (ret < 0)
         return BAD_STAT;
-    } 
 
     return file_stat.st_ino;
 }

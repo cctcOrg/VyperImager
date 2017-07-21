@@ -46,7 +46,7 @@ static GtkTreeModel *create_block_devices_liststore(int hide_internal, GtkTreePa
     return GTK_TREE_MODEL(store);
 } 
 
-static GtkWidget *create_block_devices_treeview(int hide_internal) {
+static GtkWidget *create_block_devices_treeview(int hide_internal, app_objects *globals) {
     GtkTreeSelection    *selection;
     GtkCellRenderer     *renderer;
     GtkTreeModel        *model;
@@ -95,6 +95,7 @@ static GtkWidget *create_block_devices_treeview(int hide_internal) {
     if (evid_path && hide_internal) {
         selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));
         gtk_tree_selection_select_path(selection, evid_path);
+        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(globals->format_dev), FALSE);
     }
 
     g_object_unref(model);
@@ -125,19 +126,32 @@ GtkWidget *create_welcome_box(app_objects *globals) {
             gtk_label_new("Please choose the device to image"),
                 TRUE, TRUE, 10);
 
-    evid_device_tv = create_block_devices_treeview(SHOW_INT);
+    /* This needs to be defined before the treeviews because the treeviews
+     * depend on this button because they'll activate it if EVID_TARGET
+     * is not found 
+     */
+    button = gtk_check_button_new_with_label("Format?");
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
+    globals->format_dev = button;
+
+    /* Treeviews */
+    evid_device_tv = create_block_devices_treeview(SHOW_INT, globals);
     gtk_box_pack_start(GTK_BOX(app_box), evid_device_tv, TRUE, TRUE, 10);
 
     gtk_box_pack_start(GTK_BOX(app_box), 
             gtk_label_new("Please choose the target device"),
                 TRUE, TRUE, 20);
 
-    targ_device_tv = create_block_devices_treeview(HIDE_INT);
+    targ_device_tv = create_block_devices_treeview(HIDE_INT, globals);
     gtk_box_pack_start(GTK_BOX(app_box), targ_device_tv, TRUE, TRUE, 10);
 
     globals->etv = evid_device_tv;
     globals->ttv = targ_device_tv;
 
+    /* Format button */
+    gtk_box_pack_start(GTK_BOX(app_box), button, TRUE, TRUE, 20);
+
+    /* Button box */
     button = gtk_button_new_with_label("Utilities");
     gtk_container_add(GTK_CONTAINER(button_box), button);
     
@@ -151,7 +165,7 @@ GtkWidget *create_welcome_box(app_objects *globals) {
             G_CALLBACK(gtk_widget_destroy), globals->window);
     gtk_container_add(GTK_CONTAINER(button_box), button);
 
-    gtk_container_add(GTK_CONTAINER(app_box), button_box);
+    gtk_box_pack_end(GTK_BOX(app_box), button_box, FALSE, FALSE, 0);
     set_box_margins(app_box);
 
     return app_box;

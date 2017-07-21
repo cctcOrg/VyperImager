@@ -35,6 +35,7 @@ typedef struct app_objects {
     GtkWidget *header;
     GtkWidget *etv;
     GtkWidget *ttv;
+    GtkWidget *format_dev;
     GtkWidget **os_buttons;
     GtkWidget *filename_entry;
 
