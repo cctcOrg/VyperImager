@@ -117,8 +117,12 @@ Device *get_blockdev_struct(char *name) {
     fclose(info_file);
     
     size_raw[strlen(size_raw)-1] = 0;
-    size_value = (float) strtol(size_raw, &sz_end, SIZE_SIZE);
-    size_value /= 1000000;
+    size_value = (float) strtol(size_raw, &sz_end, 10);
+    /* File gives value in 512-byte sectors, need it in bytes */
+    size_value *= 512;
+    /* Convert to GB */
+    size_value /= 1000000000;
+
     sprintf(size, "%.2f", size_value);
     strcat(size, " G");
 
