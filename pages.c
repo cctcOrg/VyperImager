@@ -356,3 +356,7 @@ GtkWidget *create_case_metadata_interface(app_objects *globals) {
 
     return app_box;
 }
+
+GtkWidget *create_image_metadata_interface(app_objects *globals) {
+    ;
+}
