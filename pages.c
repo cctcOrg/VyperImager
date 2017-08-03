@@ -304,6 +304,7 @@ GtkWidget *create_case_metadata_interface(app_objects *globals) {
 
     entry = gtk_entry_new();
     gtk_grid_attach(GTK_GRID(grid), entry, 1, 0, 1, 1);
+    globals->casenum_entry = entry;
 
     /* Item Number */
     gtk_grid_attach(GTK_GRID(grid), gtk_label_new("Item number: "),
@@ -311,6 +312,7 @@ GtkWidget *create_case_metadata_interface(app_objects *globals) {
 
     entry = gtk_entry_new();
     gtk_grid_attach(GTK_GRID(grid), entry, 1, 1, 1, 1);
+    globals->itemnum_entry = entry;
 
     /* Examiner */
     gtk_grid_attach(GTK_GRID(grid), gtk_label_new("Examiner: "),
@@ -318,6 +320,7 @@ GtkWidget *create_case_metadata_interface(app_objects *globals) {
 
     entry = gtk_entry_new();
     gtk_grid_attach(GTK_GRID(grid), entry, 1, 2, 1, 1);
+    globals->examiner_entry = entry;
 
     /* Description */
     gtk_grid_attach(GTK_GRID(grid), gtk_label_new("Description: "),
@@ -331,6 +334,7 @@ GtkWidget *create_case_metadata_interface(app_objects *globals) {
     gtk_container_set_border_width(GTK_CONTAINER(scrolled_window), 3);
 
     entry = gtk_text_view_new();
+    globals->desc_entry = entry;
     gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(entry), GTK_WRAP_WORD);
     gtk_container_add(GTK_CONTAINER(scrolled_window), entry);
     gtk_container_add(GTK_CONTAINER(frame), scrolled_window);
@@ -342,6 +346,7 @@ GtkWidget *create_case_metadata_interface(app_objects *globals) {
             0, 4, 1, 1);
 
     entry = gtk_entry_new();
+    globals->notes_entry = entry;
     gtk_grid_attach(GTK_GRID(grid), entry, 1, 4, 1, 1);
 
     gtk_box_pack_start(GTK_BOX(app_box), grid, TRUE, TRUE, 0);

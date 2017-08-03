@@ -49,6 +49,12 @@ typedef struct app_objects {
     GtkWidget *filename_entry;
     GtkWidget *directory_entry;
 
+    GtkWidget *casenum_entry;
+    GtkWidget *itemnum_entry;
+    GtkWidget *examiner_entry;
+    GtkWidget *desc_entry;
+    GtkWidget *notes_entry;
+
     ImageInfo *user_info;
 } app_objects;
 

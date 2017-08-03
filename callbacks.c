@@ -184,8 +184,40 @@ NEW_CALLBACK(get_target_info_cb) {
     set_next_hb_title(globals);
 }
 
-/*NEW_CALLBACK(get_target_info_cb) {*/
-    /*(void) w;*/
-    /*app_objects *globals = udata;*/
+NEW_CALLBACK(case_info_cb) {
+    (void) w;
+    app_objects *g = udata;
+    Case *c = g->user_info->case_info;
     
-    /*GtkWidget *choice;*/
+    GtkTextIter start, end;
+    GtkWidget *entry;
+    const char *entry_tmp;
+    char *entry_data;
+
+    GtkWidget *entries[] = {g->casenum_entry, g->itemnum_entry, 
+        g->examiner_entry, g->notes_entry};
+
+    char *info[] = {c->casenum, c->itemnum, c->examiner, c->notes};
+
+    for (int i=0; i<4; i++) {
+        entry = entries[i];
+
+        entry_tmp = gtk_entry_get_text(GTK_ENTRY(entry));
+        entry_data = malloc((strlen(entry_tmp)+1)*sizeof(char));
+        strcpy(entry_data, entry_tmp);
+        info[i] = entry_data;
+    }
+
+    GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(g->desc_entry));
+
+    gtk_text_buffer_get_bounds(buffer, &start, &end);
+    entry_tmp = gtk_text_buffer_get_text (buffer, &start, &end, FALSE);
+    entry_data = malloc((strlen(entry_tmp)+1)*sizeof(char));
+    strcpy(entry_data, entry_tmp);
+    c->desc = entry_data;
+    
+    /*gtk_notebook_next_page(g->notebook);*/
+    /*push_stack(g->pages, 3);*/
+    /*set_next_hb_title(g);*/
+}
+
