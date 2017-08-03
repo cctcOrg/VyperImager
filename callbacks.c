@@ -4,6 +4,18 @@
 #include "appdefs.h"
 #include "dialogs.h"
 
+static void set_next_hb_title(app_objects *g) {
+    int current_page;
+    GtkWidget *current_child;
+    const char *tab_label;
+    GtkWidget *nb = g->notebook;
+
+    current_page = gtk_notebook_get_current_page(GTK_NOTEBOOK(nb));
+    current_child = gtk_notebook_get_nth_page(GTK_NOTEBOOK(nb), current_page);
+    tab_label = gtk_notebook_get_tab_label_text(GTK_NOTEBOOK(nb), current_child);
+    gtk_header_bar_set_title(GTK_HEADER_BAR(g->header), tab_label);
+}
+
 NEW_CALLBACK(notebook_previous_page) {
     (void) w;
     app_objects *globals = udata;
@@ -13,7 +25,7 @@ NEW_CALLBACK(notebook_previous_page) {
     GtkWidget *current_child;
     const char *tab_label;
     
-    gtk_notebook_prev_page(GTK_NOTEBOOK(nb));
+    gtk_notebook_set_current_page(GTK_NOTEBOOK(nb), globals->prev_page);
     current_page = gtk_notebook_get_current_page(GTK_NOTEBOOK(nb));
     current_child = gtk_notebook_get_nth_page(GTK_NOTEBOOK(nb), current_page);
     tab_label = gtk_notebook_get_tab_label_text(GTK_NOTEBOOK(nb), current_child);
@@ -76,15 +88,15 @@ NEW_CALLBACK(check_tv_cb) {
         return;
     }
 
-    if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->format_dev))) {
-        diag = create_confirm_target_device_dialog(window, info->target_device);
-        int result = gtk_dialog_run(GTK_DIALOG(diag));
-        gtk_widget_destroy(diag);
-        if (result != GTK_RESPONSE_ACCEPT)
-            return;
-    }
+    globals->prev_page = 0;
+    if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->format_dev)))
+        gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
+    /* If you don't need to format skip to page 2 */
+    else
+        gtk_notebook_set_current_page(GTK_NOTEBOOK(globals->notebook), 2);
 
-    gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
+    set_next_hb_title(globals);
+
 }
 
 NEW_CALLBACK(format_device_cb) {
@@ -92,6 +104,9 @@ NEW_CALLBACK(format_device_cb) {
     GtkWidget *diag;
 
     app_objects *globals = udata;
+    GtkWidget *window = globals->window;
+    ImageInfo *info = globals->user_info;
+
     char buttons_state = 0;
     char *fs_choice = malloc(7*sizeof(char));
 
@@ -129,6 +144,16 @@ NEW_CALLBACK(format_device_cb) {
 
     globals->user_info->target_filesystem = fs_choice; 
     printf("User has requested filesystem %s\n", fs_choice);
+
+    diag = create_confirm_target_device_dialog(window, info->target_device);
+    int result = gtk_dialog_run(GTK_DIALOG(diag));
+    gtk_widget_destroy(diag);
+    if (result != GTK_RESPONSE_ACCEPT)
+        return;
+
+    gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
+
+    set_next_hb_title(globals);
 }
 
 NEW_CALLBACK(get_target_info_cb) {

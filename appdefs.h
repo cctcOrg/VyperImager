@@ -30,6 +30,8 @@ enum {
 };
 
 typedef struct app_objects {
+    int prev_page;
+
     GtkWidget *window;
     GtkWidget *notebook;
     GtkWidget *header;

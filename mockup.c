@@ -51,26 +51,33 @@ static void activate(GtkApplication* app, gpointer user_data) {
     gtk_window_set_title(GTK_WINDOW(window), "CCTC Imaging ToolKit");
     gtk_window_fullscreen(GTK_WINDOW(window));
 
+    char *title = "Evidence and Target Devices";
     app_box = create_welcome_box(globals);
     /* globals contains the notebook and header bar */
-    notebook_append_with_title(globals, app_box, "Evidence and Target Devices");
+    notebook_append_with_title(globals, app_box, title);
+    /* Set header bar title to the first page's title
+     * (callbacks subsequently handle this) */
+    gtk_header_bar_set_title(GTK_HEADER_BAR(header_bar), title);
 
     app_box = create_format_selector(globals);
     notebook_append_with_title(globals, app_box, "Target Device Format");
 
-    /*app_box = create_target_interface(globals);*/
-    /*notebook_append_with_title(globals, app_box, "Target Image Location Information");*/
+    app_box = create_target_interface(globals);
+    notebook_append_with_title(globals, app_box, "Target Image Location Information");
 
     gtk_widget_show_all(window);
 
     /* Make sure the toggle button and the OS box are in sync */
-    if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->format_dev)))
-        gtk_widget_set_visible(globals->os_button_box, FALSE); 
+    /* No longer needed since I skip pages instead */
+    /*if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->format_dev))) {*/
+        /*printf("Hiding OS box\n");*/
+        /*gtk_widget_set_visible(globals->os_button_box, FALSE); */
+    /*}*/
 
 }
 
 static void notebook_append_with_title(app_objects *globals, GtkWidget *ch, const char *title) {
     gtk_notebook_append_page(GTK_NOTEBOOK(globals->notebook), ch, gtk_label_new(title));
-    gtk_header_bar_set_title(GTK_HEADER_BAR(globals->header), title);
+    /*gtk_header_bar_set_title(GTK_HEADER_BAR(globals->header), title);*/
 }
 

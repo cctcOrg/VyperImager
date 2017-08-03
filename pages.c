@@ -235,9 +235,10 @@ GtkWidget *create_format_selector(app_objects *globals) {
     }
 
     gtk_box_pack_start(GTK_BOX(obox), box, TRUE, TRUE, 0);
-    g_signal_connect(globals->format_dev, "toggled", 
-            G_CALLBACK(toggle_os_buttons), obox);
+    /*g_signal_connect(globals->format_dev, "toggled", */
+            /*G_CALLBACK(toggle_os_buttons), obox);*/
     globals->os_button_box = obox;
+    gtk_box_pack_start(GTK_BOX(app_box), obox, FALSE, FALSE, 0);
     
     create_navigation_button_box(app_box, format_device_cb, globals);
 
