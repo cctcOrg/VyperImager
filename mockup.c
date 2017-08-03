@@ -71,6 +71,5 @@ static void activate(GtkApplication* app, gpointer user_data) {
 
 static void notebook_append_with_title(app_objects *globals, GtkWidget *ch, const char *title) {
     gtk_notebook_append_page(GTK_NOTEBOOK(globals->notebook), ch, gtk_label_new(title));
-    /*gtk_header_bar_set_title(GTK_HEADER_BAR(globals->header), title);*/
 }
 
