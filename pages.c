@@ -12,6 +12,7 @@ static void set_box_margins(GtkWidget *w) {
     gtk_widget_set_margin_start(w, 30);
     gtk_widget_set_margin_end(w, 30);
     gtk_widget_set_margin_bottom(w, 50);
+    gtk_widget_set_margin_top(w, 20);
 }
 
 static void create_navigation_button_box(GtkWidget *ab, 
@@ -143,7 +144,6 @@ GtkWidget *create_welcome_box(app_objects *globals) {
     button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
     gtk_button_box_set_layout(GTK_BUTTON_BOX(button_box), GTK_BUTTONBOX_EDGE);
 
-    gtk_widget_set_margin_bottom(button_box, 50);
     gtk_widget_set_size_request(button_box, -1, 100);
 
     gtk_box_pack_start(GTK_BOX(app_box), 
@@ -160,7 +160,6 @@ GtkWidget *create_welcome_box(app_objects *globals) {
      */
     button = gtk_check_button_new_with_label("Format?");
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
-    /*g_signal_connect(button, "toggled", G_CALLBACK(toggle_os_buttons), globals);*/
     globals->format_dev = button;
 
     /* Treeviews */
@@ -212,6 +211,7 @@ GtkWidget *create_format_selector(app_objects *globals) {
     char *filename = malloc(strlen(format)+15);
 
     obox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+
     gtk_box_pack_start(GTK_BOX(obox), 
             gtk_label_new(("Please select which types of systems "
                     "you would like to read this drive from "
@@ -235,37 +235,75 @@ GtkWidget *create_format_selector(app_objects *globals) {
     }
 
     gtk_box_pack_start(GTK_BOX(obox), box, TRUE, TRUE, 0);
-    /*g_signal_connect(globals->format_dev, "toggled", */
-            /*G_CALLBACK(toggle_os_buttons), obox);*/
     globals->os_button_box = obox;
     gtk_box_pack_start(GTK_BOX(app_box), obox, FALSE, FALSE, 0);
     
     create_navigation_button_box(app_box, format_device_cb, globals);
+    set_box_margins(app_box);
 
     return app_box;
 }
 
 GtkWidget *create_target_interface(app_objects *globals) {
     GtkWidget *app_box;
-    GtkWidget *box;
-    GtkWidget *obox;
+    GtkWidget *grid;
     GtkWidget *button;
-    GtkWidget *image;
     GtkWidget *entry;
 
     app_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     
-    /* Filename box */
-    box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
-    gtk_box_pack_start(GTK_BOX(box), gtk_label_new("Filename: "), 
-            FALSE, FALSE, 10);
+    grid = gtk_grid_new();
+    gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
+
+    /* Filename widgets */
+    gtk_grid_attach(GTK_GRID(grid), gtk_label_new("Filename (no extension): "),
+            0, 0, 1, 1);
 
     entry = gtk_entry_new();
-    gtk_box_pack_start(GTK_BOX(box), entry, TRUE, TRUE, 0);
+    gtk_grid_attach(GTK_GRID(grid), entry, 1, 0, 1, 1);
     globals->filename_entry = entry;
 
-    gtk_box_pack_start(GTK_BOX(app_box), box, FALSE, FALSE, 0);
+    /* Directory box */
+    gtk_grid_attach(GTK_GRID(grid), gtk_label_new("Directory: "), 0, 1, 1, 1);
 
+    button = gtk_file_chooser_button_new("Select a folder to save the the image in",
+            GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER);
+    globals->directory_entry = button;
+    gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(button), "/media/EVID_TARGET");
+    gtk_grid_attach(GTK_GRID(grid), button, 1, 1, 1, 1);
+
+    gtk_box_pack_start(GTK_BOX(app_box), grid, TRUE, TRUE, 0);
+
+
+    create_navigation_button_box(app_box, get_target_info_cb, globals);
+
+    set_box_margins(app_box);
+
+    return app_box;
+}
+
+GtkWidget *create_case_metadata_interface(app_objects *globals) {
+    GtkWidget *app_box;
+    GtkWidget *grid;
+    /*GtkWidget *button;*/
+    GtkWidget *entry;
+
+    app_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+    
+    grid = gtk_grid_new();
+    gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
+
+    /* Case Number */
+    gtk_grid_attach(GTK_GRID(grid), gtk_label_new("Case number: "),
+            0, 0, 1, 1);
+
+    entry = gtk_entry_new();
+    gtk_grid_attach(GTK_GRID(grid), entry, 1, 0, 1, 1);
+
+
+    /*globals->filename_entry = entry;*/
     create_navigation_button_box(app_box, get_target_info_cb, globals);
 
     set_box_margins(app_box);

@@ -65,6 +65,9 @@ static void activate(GtkApplication* app, gpointer user_data) {
     app_box = create_target_interface(globals);
     notebook_append_with_title(globals, app_box, "Target Image Location Information");
 
+    app_box = create_case_metadata_interface(globals);
+    notebook_append_with_title(globals, app_box, "Case Metadata");
+
     gtk_widget_show_all(window);
 
 }

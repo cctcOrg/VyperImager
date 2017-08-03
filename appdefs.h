@@ -14,6 +14,7 @@ typedef struct ImageInfo {
     char *target_device;
     char *target_filesystem;
     char *target_filename;
+    char *target_directory;
     int device_type;
     int hash_type;
     int compression_type;
@@ -44,6 +45,7 @@ typedef struct app_objects {
     GtkWidget **os_buttons;
 
     GtkWidget *filename_entry;
+    GtkWidget *directory_entry;
 
     ImageInfo *user_info;
 } app_objects;

@@ -20,6 +20,7 @@ NEW_CALLBACK(notebook_previous_page) {
     (void) w;
     app_objects *globals = udata;
     GtkWidget *nb = globals->notebook;
+    int *prev = &globals->prev_page;
     
     int current_page;
     GtkWidget *current_child;
@@ -30,6 +31,8 @@ NEW_CALLBACK(notebook_previous_page) {
     current_child = gtk_notebook_get_nth_page(GTK_NOTEBOOK(nb), current_page);
     tab_label = gtk_notebook_get_tab_label_text(GTK_NOTEBOOK(nb), current_child);
     gtk_header_bar_set_title(GTK_HEADER_BAR(globals->header), tab_label);
+
+    *prev = (*prev < 1) ? 0 : *prev-1;
 }
 
 NEW_CALLBACK(check_tv_cb) {
@@ -77,6 +80,7 @@ NEW_CALLBACK(check_tv_cb) {
     if (strcmp(info->evidence_device, info->target_device) == 0) {
         diag = create_same_device_dialog(window);
         gtk_dialog_run(GTK_DIALOG(diag));
+        gtk_widget_destroy(diag);
         return;
     }
 
@@ -145,6 +149,7 @@ NEW_CALLBACK(format_device_cb) {
 
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
 
+    globals->prev_page = 1;
     set_next_hb_title(globals);
 }
 
@@ -152,7 +157,8 @@ NEW_CALLBACK(get_target_info_cb) {
     (void) w;
     app_objects *globals = udata;
 
-    GtkWidget *diag;
+    /*GtkWidget *diag;*/
+    ImageInfo *info = globals->user_info;
     GtkWidget *entry;
 
     char *entry_data;
@@ -163,10 +169,22 @@ NEW_CALLBACK(get_target_info_cb) {
     entry_tmp = gtk_entry_get_text(GTK_ENTRY(globals->filename_entry));
     entry_data = malloc((strlen(entry_tmp)+1)*sizeof(char));
     strcpy(entry_data, entry_tmp);
-    printf("%s\n", entry_data);
+    info->target_filename = entry_data;
 
-    free(entry_data);
+    entry = globals->directory_entry;
+    entry_tmp = g_file_get_path(
+            gtk_file_chooser_get_current_folder_file(GTK_FILE_CHOOSER(entry)));
+    entry_data = malloc((strlen(entry_tmp)+1)*sizeof(char));
+    strcpy(entry_data, entry_tmp);
+    info->target_filename = entry_data;
 
-    /*gtk_notebook_next_page(GTK_NOTEBOOK(g_OBJS.notebook));*/
+    gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
+    globals->prev_page = 2;
+    set_next_hb_title(globals);
 }
 
+/*NEW_CALLBACK(get_target_info_cb) {*/
+    /*(void) w;*/
+    /*app_objects *globals = udata;*/
+    
+    /*GtkWidget *choice;*/
