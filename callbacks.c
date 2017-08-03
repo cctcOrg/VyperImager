@@ -3,6 +3,7 @@
 #include "callbacks.h"
 #include "appdefs.h"
 #include "dialogs.h"
+#include "stack.h"
 
 static void set_next_hb_title(app_objects *g) {
     int current_page;
@@ -20,19 +21,18 @@ NEW_CALLBACK(notebook_previous_page) {
     (void) w;
     app_objects *globals = udata;
     GtkWidget *nb = globals->notebook;
-    int *prev = &globals->prev_page;
+    page_stack *pages = globals->pages; 
     
     int current_page;
     GtkWidget *current_child;
     const char *tab_label;
-    
-    gtk_notebook_set_current_page(GTK_NOTEBOOK(nb), globals->prev_page);
+    int prev_page = pop_stack(pages);
+
+    gtk_notebook_set_current_page(GTK_NOTEBOOK(nb), prev_page);
     current_page = gtk_notebook_get_current_page(GTK_NOTEBOOK(nb));
     current_child = gtk_notebook_get_nth_page(GTK_NOTEBOOK(nb), current_page);
     tab_label = gtk_notebook_get_tab_label_text(GTK_NOTEBOOK(nb), current_child);
     gtk_header_bar_set_title(GTK_HEADER_BAR(globals->header), tab_label);
-
-    *prev = (*prev < 1) ? 0 : *prev-1;
 }
 
 NEW_CALLBACK(check_tv_cb) {
@@ -84,7 +84,8 @@ NEW_CALLBACK(check_tv_cb) {
         return;
     }
 
-    globals->prev_page = 0;
+    push_stack(globals->pages, 0);
+
     if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->format_dev)))
         gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
     /* If you don't need to format skip to page 2 */
@@ -149,7 +150,7 @@ NEW_CALLBACK(format_device_cb) {
 
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
 
-    globals->prev_page = 1;
+    push_stack(globals->pages, 1);
     set_next_hb_title(globals);
 }
 
@@ -179,7 +180,7 @@ NEW_CALLBACK(get_target_info_cb) {
     info->target_filename = entry_data;
 
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
-    globals->prev_page = 2;
+    push_stack(globals->pages, 2);
     set_next_hb_title(globals);
 }
 

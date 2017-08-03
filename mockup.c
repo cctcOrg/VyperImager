@@ -4,6 +4,7 @@
 #include "appdefs.h"
 #include "dialogs.h"
 #include "pages.h"
+#include "stack.h"
 
 static void activate(GtkApplication *app, gpointer user_data);
 static void notebook_append_with_title(app_objects *globals, GtkWidget *nb, const char *title);
@@ -29,8 +30,12 @@ static void activate(GtkApplication* app, gpointer user_data) {
     GtkWidget *header_bar;
 
     app_objects *globals = malloc(sizeof(app_objects));
+    
     ImageInfo *info = malloc(sizeof(ImageInfo));
     globals->user_info = info;
+
+    page_stack *p = new_stack();
+    globals->pages = p;
 
     window = gtk_application_window_new(app);
     globals->window = window;

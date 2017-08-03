@@ -1,6 +1,8 @@
 #ifndef APPDEFS_H
 #define APPDEFS_H
 
+#include "stack.h"
+
 typedef struct Case {
     char *casenum;
     char *itemnum;
@@ -31,7 +33,7 @@ enum {
 };
 
 typedef struct app_objects {
-    int prev_page;
+    page_stack *pages;
 
     GtkWidget *window;
     GtkWidget *notebook;
