@@ -32,14 +32,6 @@ NEW_CALLBACK(notebook_previous_page) {
     gtk_header_bar_set_title(GTK_HEADER_BAR(globals->header), tab_label);
 }
 
-NEW_CALLBACK(toggle_os_buttons) {
-    (void) w;
-    /*app_objects *g = udata;*/
-    GtkWidget *b = udata; 
-    gtk_widget_set_visible(b, !gtk_widget_get_visible(b));
-}
-
-
 NEW_CALLBACK(check_tv_cb) {
     (void) w;
     app_objects *globals = udata;

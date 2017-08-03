@@ -67,13 +67,6 @@ static void activate(GtkApplication* app, gpointer user_data) {
 
     gtk_widget_show_all(window);
 
-    /* Make sure the toggle button and the OS box are in sync */
-    /* No longer needed since I skip pages instead */
-    /*if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->format_dev))) {*/
-        /*printf("Hiding OS box\n");*/
-        /*gtk_widget_set_visible(globals->os_button_box, FALSE); */
-    /*}*/
-
 }
 
 static void notebook_append_with_title(app_objects *globals, GtkWidget *ch, const char *title) {

@@ -6,7 +6,6 @@
 #define NEW_CALLBACK(name) void name(GtkWidget *w, gpointer udata)
 
 NEW_CALLBACK(notebook_previous_page);
-NEW_CALLBACK(toggle_os_buttons);
 
 NEW_CALLBACK(check_tv_cb);
 NEW_CALLBACK(format_device_cb);
