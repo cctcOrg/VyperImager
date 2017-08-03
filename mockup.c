@@ -55,10 +55,18 @@ static void activate(GtkApplication* app, gpointer user_data) {
     /* globals contains the notebook and header bar */
     notebook_append_with_title(globals, app_box, "Evidence and Target Devices");
 
-    app_box = create_target_interface(globals);
-    notebook_append_with_title(globals, app_box, "Target Device Information");
+    app_box = create_format_selector(globals);
+    notebook_append_with_title(globals, app_box, "Target Device Format");
+
+    /*app_box = create_target_interface(globals);*/
+    /*notebook_append_with_title(globals, app_box, "Target Image Location Information");*/
 
     gtk_widget_show_all(window);
+
+    /* Make sure the toggle button and the OS box are in sync */
+    if (!gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->format_dev)))
+        gtk_widget_set_visible(globals->os_button_box, FALSE); 
+
 }
 
 static void notebook_append_with_title(app_objects *globals, GtkWidget *ch, const char *title) {

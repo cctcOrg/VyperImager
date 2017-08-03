@@ -14,6 +14,34 @@ static void set_box_margins(GtkWidget *w) {
     gtk_widget_set_margin_bottom(w, 50);
 }
 
+static void create_navigation_button_box(GtkWidget *ab, 
+        void (*cb)(GtkWidget *, gpointer), app_objects *globals) {
+
+    GtkWidget *box;
+    GtkWidget *button;
+
+    /* Control button box */
+    box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
+    gtk_button_box_set_layout(GTK_BUTTON_BOX(box), GTK_BUTTONBOX_EDGE);
+    gtk_widget_set_size_request(box, -1, 100);
+
+    button = gtk_button_new_with_label("Previous");
+    gtk_container_add(GTK_CONTAINER(box), button);
+    g_signal_connect(button, "clicked", G_CALLBACK(notebook_previous_page), globals);
+    
+    button = gtk_button_new_with_label("Next");
+    gtk_widget_set_size_request(button, -1, 50);
+    g_signal_connect(button, "clicked", G_CALLBACK(cb), globals);
+    gtk_container_add(GTK_CONTAINER(box), button);
+    
+    button = gtk_button_new_with_label("Quit");
+    g_signal_connect_swapped(button, "clicked", 
+            G_CALLBACK(gtk_widget_destroy), globals->window);
+    gtk_container_add(GTK_CONTAINER(box), button);
+
+    gtk_box_pack_end(GTK_BOX(ab), box, FALSE, FALSE, 0);
+}
+
 static GtkTreeModel *create_block_devices_liststore(int hide_internal, GtkTreePath **path) {
     GtkListStore  *store;
     GtkTreeIter    iter;
@@ -132,6 +160,7 @@ GtkWidget *create_welcome_box(app_objects *globals) {
      */
     button = gtk_check_button_new_with_label("Format?");
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
+    /*g_signal_connect(button, "toggled", G_CALLBACK(toggle_os_buttons), globals);*/
     globals->format_dev = button;
 
     /* Treeviews */
@@ -157,7 +186,7 @@ GtkWidget *create_welcome_box(app_objects *globals) {
     
     button = gtk_button_new_with_label("Next");
     gtk_widget_set_size_request(button, -1, 50);
-    g_signal_connect(button, "clicked", G_CALLBACK(check_tv_and_next), globals);
+    g_signal_connect(button, "clicked", G_CALLBACK(check_tv_cb), globals);
     gtk_container_add(GTK_CONTAINER(button_box), button);
     
     button = gtk_button_new_with_label("Quit");
@@ -171,12 +200,10 @@ GtkWidget *create_welcome_box(app_objects *globals) {
     return app_box;
 }
 
-GtkWidget *create_target_interface(app_objects *globals) {
-    GtkWidget *app_box;
-    GtkWidget *box;
-    GtkWidget *button;
-    GtkWidget *image;
-    GtkWidget *entry;
+GtkWidget *create_format_selector(app_objects *globals) {
+    GtkWidget *app_box, *box, *obox, *button, *image;
+
+    app_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
 
     globals->os_buttons = malloc(3*sizeof(GtkWidget*));
     
@@ -184,9 +211,8 @@ GtkWidget *create_target_interface(app_objects *globals) {
     char *os_names[] = {"Linux", "Windows", "Apple"};
     char *filename = malloc(strlen(format)+15);
 
-    app_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
-    
-    gtk_box_pack_start(GTK_BOX(app_box), 
+    obox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+    gtk_box_pack_start(GTK_BOX(obox), 
             gtk_label_new(("Please select which types of systems "
                     "you would like to read this drive from "
                     "(Linux/Windows/Apple)")),
@@ -208,8 +234,26 @@ GtkWidget *create_target_interface(app_objects *globals) {
         globals->os_buttons[i] = button;
     }
 
-    gtk_box_pack_start(GTK_BOX(app_box), box, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(obox), box, TRUE, TRUE, 0);
+    g_signal_connect(globals->format_dev, "toggled", 
+            G_CALLBACK(toggle_os_buttons), obox);
+    globals->os_button_box = obox;
+    
+    create_navigation_button_box(app_box, format_device_cb, globals);
 
+    return app_box;
+}
+
+GtkWidget *create_target_interface(app_objects *globals) {
+    GtkWidget *app_box;
+    GtkWidget *box;
+    GtkWidget *obox;
+    GtkWidget *button;
+    GtkWidget *image;
+    GtkWidget *entry;
+
+    app_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+    
     /* Filename box */
     box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 10);
     gtk_box_pack_start(GTK_BOX(box), gtk_label_new("Filename: "), 
@@ -221,28 +265,7 @@ GtkWidget *create_target_interface(app_objects *globals) {
 
     gtk_box_pack_start(GTK_BOX(app_box), box, FALSE, FALSE, 0);
 
-    /* Control button box */
-    box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
-    gtk_button_box_set_layout(GTK_BUTTON_BOX(box), GTK_BUTTONBOX_EDGE);
-    gtk_widget_set_size_request(box, -1, 100);
-
-    button = gtk_button_new_with_label("Previous");
-    gtk_container_add(GTK_CONTAINER(box), button);
-    g_signal_connect(button, "clicked", G_CALLBACK(notebook_previous_page), globals);
-    
-    button = gtk_button_new_with_label("Next");
-    gtk_widget_set_size_request(button, -1, 50);
-    g_signal_connect(button, "clicked", G_CALLBACK(get_target_info_and_next), globals);
-    gtk_container_add(GTK_CONTAINER(box), button);
-    
-    button = gtk_button_new_with_label("Quit");
-    g_signal_connect_swapped(button, "clicked", 
-            G_CALLBACK(gtk_widget_destroy), globals->window);
-    gtk_container_add(GTK_CONTAINER(box), button);
-
-    gtk_box_pack_end(GTK_BOX(app_box), box, FALSE, FALSE, 0);
-
-    free(filename);
+    create_navigation_button_box(app_box, get_target_info_cb, globals);
 
     set_box_margins(app_box);
 

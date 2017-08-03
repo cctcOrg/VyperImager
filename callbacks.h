@@ -3,8 +3,13 @@
 
 #include<gtk/gtk.h>
 
-void notebook_previous_page(GtkWidget *w, gpointer udata);
-void check_tv_and_next(GtkWidget *w, gpointer udata);
-void get_target_info_and_next(GtkWidget *w, gpointer udata);
+#define NEW_CALLBACK(name) void name(GtkWidget *w, gpointer udata)
+
+NEW_CALLBACK(notebook_previous_page);
+NEW_CALLBACK(toggle_os_buttons);
+
+NEW_CALLBACK(check_tv_cb);
+NEW_CALLBACK(format_device_cb);
+NEW_CALLBACK(get_target_info_cb);
 
 #endif /* CALLBACKS_H */

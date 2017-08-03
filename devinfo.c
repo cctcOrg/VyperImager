@@ -44,7 +44,7 @@ Device **get_blockdev_info(int *num_blockdevs) {
         /* print all the files and directories within directory */
         while ((ent = readdir(dir)) != NULL) {
             fn = ent->d_name;
-            if (fn[0] != '.') {
+            if (fn[0] != '.' && fn[0] != 'l') {
                 dev = get_blockdev_struct(fn);
                 dev->is_target = 0;
 

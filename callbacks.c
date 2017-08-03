@@ -4,8 +4,8 @@
 #include "appdefs.h"
 #include "dialogs.h"
 
-void notebook_previous_page(GtkWidget *button, gpointer udata) {
-    (void) button;
+NEW_CALLBACK(notebook_previous_page) {
+    (void) w;
     app_objects *globals = udata;
     GtkWidget *nb = globals->notebook;
     
@@ -20,7 +20,15 @@ void notebook_previous_page(GtkWidget *button, gpointer udata) {
     gtk_header_bar_set_title(GTK_HEADER_BAR(globals->header), tab_label);
 }
 
-void check_tv_and_next(GtkWidget *w, gpointer udata) {
+NEW_CALLBACK(toggle_os_buttons) {
+    (void) w;
+    /*app_objects *g = udata;*/
+    GtkWidget *b = udata; 
+    gtk_widget_set_visible(b, !gtk_widget_get_visible(b));
+}
+
+
+NEW_CALLBACK(check_tv_cb) {
     (void) w;
     app_objects *globals = udata;
     GtkWidget *window = globals->window;
@@ -68,29 +76,24 @@ void check_tv_and_next(GtkWidget *w, gpointer udata) {
         return;
     }
 
-    diag = create_confirm_target_device_dialog(window, info->target_device);
-    int result = gtk_dialog_run(GTK_DIALOG(diag));
-    gtk_widget_destroy(diag);
-
-    if (result != GTK_RESPONSE_ACCEPT)
-        return;
+    if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->format_dev))) {
+        diag = create_confirm_target_device_dialog(window, info->target_device);
+        int result = gtk_dialog_run(GTK_DIALOG(diag));
+        gtk_widget_destroy(diag);
+        if (result != GTK_RESPONSE_ACCEPT)
+            return;
+    }
 
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
 }
 
-void get_target_info_and_next(GtkWidget *w, gpointer udata) {
+NEW_CALLBACK(format_device_cb) {
     (void) w;
-    app_objects *globals = udata;
-
     GtkWidget *diag;
-    GtkWidget *entry;
 
+    app_objects *globals = udata;
     char buttons_state = 0;
     char *fs_choice = malloc(7*sizeof(char));
-    char *entry_data;
-    const char *entry_tmp;
-    
-    entry = globals->filename_entry;
 
     for (int i=0; i<3; i++) {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->os_buttons[i])))
@@ -124,12 +127,29 @@ void get_target_info_and_next(GtkWidget *w, gpointer udata) {
             return;
     }
 
+    globals->user_info->target_filesystem = fs_choice; 
+    printf("User has requested filesystem %s\n", fs_choice);
+}
+
+NEW_CALLBACK(get_target_info_cb) {
+    (void) w;
+    app_objects *globals = udata;
+
+    GtkWidget *diag;
+    GtkWidget *entry;
+
+    char *entry_data;
+    const char *entry_tmp;
+    
+    entry = globals->filename_entry;
+
     entry_tmp = gtk_entry_get_text(GTK_ENTRY(globals->filename_entry));
     entry_data = malloc((strlen(entry_tmp)+1)*sizeof(char));
     strcpy(entry_data, entry_tmp);
     printf("%s\n", entry_data);
 
-    globals->user_info->target_filesystem = fs_choice; 
+    free(entry_data);
 
     /*gtk_notebook_next_page(GTK_NOTEBOOK(g_OBJS.notebook));*/
 }
+
