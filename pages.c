@@ -288,12 +288,15 @@ GtkWidget *create_case_metadata_interface(app_objects *globals) {
     GtkWidget *grid;
     /*GtkWidget *button;*/
     GtkWidget *entry;
+    GtkWidget *frame;
+    GtkWidget *scrolled_window;
 
     app_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     
     grid = gtk_grid_new();
     gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
+    gtk_widget_set_size_request(grid, 600, 600);
 
     /* Case Number */
     gtk_grid_attach(GTK_GRID(grid), gtk_label_new("Case number: "),
@@ -302,8 +305,46 @@ GtkWidget *create_case_metadata_interface(app_objects *globals) {
     entry = gtk_entry_new();
     gtk_grid_attach(GTK_GRID(grid), entry, 1, 0, 1, 1);
 
+    /* Item Number */
+    gtk_grid_attach(GTK_GRID(grid), gtk_label_new("Item number: "),
+            0, 1, 1, 1);
 
-    /*globals->filename_entry = entry;*/
+    entry = gtk_entry_new();
+    gtk_grid_attach(GTK_GRID(grid), entry, 1, 1, 1, 1);
+
+    /* Examiner */
+    gtk_grid_attach(GTK_GRID(grid), gtk_label_new("Examiner: "),
+            0, 2, 1, 1);
+
+    entry = gtk_entry_new();
+    gtk_grid_attach(GTK_GRID(grid), entry, 1, 2, 1, 1);
+
+    /* Description */
+    gtk_grid_attach(GTK_GRID(grid), gtk_label_new("Description: "),
+            0, 3, 1, 1);
+
+    frame = gtk_frame_new(NULL);
+    gtk_widget_set_size_request(frame, 200, 200);
+
+    scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+    gtk_widget_set_hexpand(scrolled_window, TRUE);
+    gtk_container_set_border_width(GTK_CONTAINER(scrolled_window), 3);
+
+    entry = gtk_text_view_new();
+    gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(entry), GTK_WRAP_WORD);
+    gtk_container_add(GTK_CONTAINER(scrolled_window), entry);
+    gtk_container_add(GTK_CONTAINER(frame), scrolled_window);
+
+    gtk_grid_attach(GTK_GRID(grid), frame, 1, 3, 1, 1);
+
+    /* Notes */
+    gtk_grid_attach(GTK_GRID(grid), gtk_label_new("Notes: "),
+            0, 4, 1, 1);
+
+    entry = gtk_entry_new();
+    gtk_grid_attach(GTK_GRID(grid), entry, 1, 4, 1, 1);
+
+    gtk_box_pack_start(GTK_BOX(app_box), grid, TRUE, TRUE, 0);
     create_navigation_button_box(app_box, get_target_info_cb, globals);
 
     set_box_margins(app_box);
