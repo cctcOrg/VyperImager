@@ -7,10 +7,10 @@ CC := clang
 SOURCES := $(wildcard *.c)
 .PHONY: all $(PROGRAM_NAME) clean test 
 
+all: $(PROGRAM_NAME)
+
 debug: 
 	$(CC) $(CFLAGS) -DDEBUG $(SOURCES) -o $(PROGRAM_NAME)-debug $(LDFLAGS)
-
-all: $(PROGRAM_NAME)
 
 $(PROGRAM_NAME):
 	$(CC) $(CFLAGS) -O2 $(SOURCES) -o $(PROGRAM_NAME) -O2 $(LDFLAGS)
