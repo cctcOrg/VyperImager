@@ -204,7 +204,7 @@ NEW_CALLBACK(case_info_cb) {
 
         entry_tmp = gtk_entry_get_text(GTK_ENTRY(entry));
         entry_data = malloc((strlen(entry_tmp)+1)*sizeof(char));
-        printf("%p\n", entry_data);
+        /*printf("%p\n", entry_data);*/
         strcpy(entry_data, entry_tmp);
         *info[i] = entry_data;
     }
