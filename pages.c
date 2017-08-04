@@ -442,11 +442,90 @@ GtkWidget *create_summary_interface(app_objects *globals) {
 
     app_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     
+    /* Target grid */
     grid = gtk_grid_new();
     gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
     gtk_grid_set_row_spacing(GTK_GRID(grid), 20);
     gtk_grid_set_column_spacing(GTK_GRID(grid), 20);
+
+    label = gtk_label_new("Device to image:");
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1);
+
+    label = gtk_label_new("Target device:");
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 1, 1, 1);
+
+    label = gtk_label_new("Target filesystem:");
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 2, 1, 1);
+
+    label = gtk_label_new("Target directory:");
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 3, 1, 1);
+
+    label = gtk_label_new("Target filename:");
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 4, 1, 1);
+
+    /*label = gtk_label_new("Target filename:");*/
+    /*gtk_label_set_xalign(GTK_LABEL(label), 0.0f);*/
+    /*gtk_grid_attach(GTK_GRID(grid), label, 0, 5, 1, 1);*/
+
+    gtk_box_pack_start(GTK_BOX(app_box), grid, TRUE, TRUE, 0);
+
+    /* Case grid */
+    grid = gtk_grid_new();
+    gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 20);
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 20);
+
+    label = gtk_label_new("Case number:");
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1);
+
+    label = gtk_label_new("Item number:");
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 1, 1, 1);
+
+    label = gtk_label_new("Examiner:");
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 2, 1, 1);
+
+    label = gtk_label_new("Description:");
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 3, 1, 1);
+
+    label = gtk_label_new("Notes:");
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 4, 1, 1);
+    gtk_box_pack_start(GTK_BOX(app_box), grid, TRUE, TRUE, 0);
+
+    /* Image grid */
+    grid = gtk_grid_new();
+    gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 20);
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 20);
+
+    label = gtk_label_new("Device type:");
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1);
+
+    label = gtk_label_new("Hash type:");
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 1, 1, 1);
+
+    label = gtk_label_new("Compression type:");
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 2, 1, 1);
+
+    gtk_box_pack_start(GTK_BOX(app_box), grid, TRUE, TRUE, 0);
+
+    create_navigation_button_box(app_box, image_info_cb, globals);
+    set_box_margins(app_box);
 
     return app_box;
 }

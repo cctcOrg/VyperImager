@@ -79,6 +79,9 @@ static void activate(GtkApplication* app, gpointer user_data) {
     app_box = create_image_metadata_interface(globals);
     notebook_append_with_title(globals, app_box, "Image Metadata");
 
+    app_box = create_summary_interface(globals);
+    notebook_append_with_title(globals, app_box, "Summary");
+
     gtk_widget_show_all(window);
 
 }
