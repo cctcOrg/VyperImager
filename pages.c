@@ -359,6 +359,7 @@ GtkWidget *create_case_metadata_interface(app_objects *globals) {
 
 GtkWidget *create_image_metadata_interface(app_objects *globals) {
     GtkWidget *combobox;
+    GtkWidget *label;
     GtkWidget *app_box;
     GtkWidget *grid;
 
@@ -367,23 +368,67 @@ GtkWidget *create_image_metadata_interface(app_objects *globals) {
     grid = gtk_grid_new();
     gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
     gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
-    gtk_widget_set_size_request(grid, 600, 600);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 20);
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 20);
+    /*gtk_widget_set_size_request(grid, 600, 600);*/
 
+
+    const char *overview = "Please select from one of the following:\n" 
+            "- Fixed: internal drives\n"
+            "- Removable: Flash drives/SD cards/External hard drives\n"
+            "- Optical: CD/DVD, any kind of disc\n"
+            "- Memory: RAM";
+    label = gtk_label_new(overview);
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1);
 
     combobox = gtk_combo_box_text_new();
-    gtk_combo_box_text_append_text(GKT_COMBO_BOX_TEXT(combobox), "Fixed");
-    gtk_combo_box_text_append_text(GKT_COMBO_BOX_TEXT(combobox), "Removable");
-    gtk_combo_box_text_append_text(GKT_COMBO_BOX_TEXT(combobox), "Optical");
-    gtk_combo_box_text_append_text(GKT_COMBO_BOX_TEXT(combobox), "Memory");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox), "Fixed");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox), "Removable");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox), "Optical");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox), "Memory");
+
+    gtk_combo_box_set_active(GTK_COMBO_BOX(combobox), 0);
+    gtk_grid_attach(GTK_GRID(grid), combobox, 1, 0, 1, 1);
+    globals->devtype_combobox = combobox; 
+    
+    const char * verification= "Please select a verification hash:\n"
+        "- SHA1: Fastest, but will not give complete confidence \n"
+        "- SHA256: Use this for a real case";
+    label = gtk_label_new(verification);
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 1, 1, 1);
 
     combobox = gtk_combo_box_text_new();
-    gtk_combo_box_text_append_text(GKT_COMBO_BOX_TEXT(combobox), "None");
-    gtk_combo_box_text_append_text(GKT_COMBO_BOX_TEXT(combobox), "Best");
-    gtk_combo_box_text_append_text(GKT_COMBO_BOX_TEXT(combobox), "Fast");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox), "SHA1");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox), "SHA256");
+
+    gtk_combo_box_set_active(GTK_COMBO_BOX(combobox), 0);
+    gtk_grid_attach(GTK_GRID(grid), combobox, 1, 1, 1, 1);
+    globals->hashtype_combobox = combobox; 
+
+
+    const char *compression = "Please select a compression type:\n"
+        "- None: Fastest, image will be the size of the drive\n"
+        "- Fast: Middle ground for speed and size\n"
+        "- Best: Will make image as small as possible, "
+            "may take significantly longer on older hardware"; 
+    label = gtk_label_new(compression);
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 0, 2, 1, 1);
+
+    combobox = gtk_combo_box_text_new();
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox), "None");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox), "Best");
+    gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(combobox), "Fast");
+
+    gtk_combo_box_set_active(GTK_COMBO_BOX(combobox), 0);
+    gtk_grid_attach(GTK_GRID(grid), combobox, 1, 2, 1, 1);
+    globals->comptype_combobox = combobox; 
 
 
     gtk_box_pack_start(GTK_BOX(app_box), grid, TRUE, TRUE, 0);
-    create_navigation_button_box(app_box, get_target_info_cb, globals);
+    create_navigation_button_box(app_box, image_info_cb, globals);
 
     set_box_margins(app_box);
 

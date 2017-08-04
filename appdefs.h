@@ -17,9 +17,9 @@ typedef struct ImageInfo {
     char *target_filesystem;
     char *target_filename;
     char *target_directory;
-    int device_type;
-    int hash_type;
-    int compression_type;
+    char *device_type;
+    char *hash_type;
+    char *compression_type;
     Case *case_info;
 } ImageInfo;
 
@@ -55,6 +55,10 @@ typedef struct app_objects {
     GtkWidget *desc_entry;
     GtkWidget *notes_entry;
 
+    GtkWidget *devtype_combobox;
+    GtkWidget *hashtype_combobox;
+    GtkWidget *comptype_combobox;
+    
     ImageInfo *user_info;
 } app_objects;
 

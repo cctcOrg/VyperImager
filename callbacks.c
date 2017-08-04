@@ -221,3 +221,19 @@ NEW_CALLBACK(case_info_cb) {
     /*set_next_hb_title(g);*/
 }
 
+NEW_CALLBACK(image_info_cb) {
+    (void) w;
+
+    app_objects *globals = udata;
+
+    globals->user_info->device_type = gtk_combo_box_text_get_active_text(
+            GTK_COMBO_BOX_TEXT(globals->devtype_combobox));
+
+    globals->user_info->hash_type = gtk_combo_box_text_get_active_text(
+            GTK_COMBO_BOX_TEXT(globals->hashtype_combobox));
+
+    globals->user_info->compression_type = gtk_combo_box_text_get_active_text(
+            GTK_COMBO_BOX_TEXT(globals->comptype_combobox));
+
+    printf("%s\n", globals->user_info->device_type);
+}

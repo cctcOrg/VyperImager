@@ -11,5 +11,6 @@ NEW_CALLBACK(check_tv_cb);
 NEW_CALLBACK(format_device_cb);
 NEW_CALLBACK(get_target_info_cb);
 NEW_CALLBACK(case_info_cb);
+NEW_CALLBACK(image_info_cb);
 
 #endif /* CALLBACKS_H */
