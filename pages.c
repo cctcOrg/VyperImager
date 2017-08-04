@@ -350,7 +350,7 @@ GtkWidget *create_case_metadata_interface(app_objects *globals) {
     gtk_grid_attach(GTK_GRID(grid), entry, 1, 4, 1, 1);
 
     gtk_box_pack_start(GTK_BOX(app_box), grid, TRUE, TRUE, 0);
-    create_navigation_button_box(app_box, get_target_info_cb, globals);
+    create_navigation_button_box(app_box, case_info_cb, globals);
 
     set_box_margins(app_box);
 
