@@ -434,3 +434,19 @@ GtkWidget *create_image_metadata_interface(app_objects *globals) {
 
     return app_box;
 }
+
+GtkWidget *create_summary_interface(app_objects *globals) {
+    GtkWidget *label;
+    GtkWidget *app_box;
+    GtkWidget *grid;
+
+    app_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+    
+    grid = gtk_grid_new();
+    gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 20);
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 20);
+
+    return app_box;
+}

@@ -9,5 +9,6 @@ GtkWidget *create_format_selector(app_objects *globals);
 GtkWidget *create_target_interface(app_objects *globals);
 GtkWidget *create_case_metadata_interface(app_objects *globals);
 GtkWidget *create_image_metadata_interface(app_objects *globals);
+GtkWidget *create_summary_interface(app_objects *globals);
 
 #endif /* PAGES_H */
