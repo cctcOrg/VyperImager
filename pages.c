@@ -358,5 +358,34 @@ GtkWidget *create_case_metadata_interface(app_objects *globals) {
 }
 
 GtkWidget *create_image_metadata_interface(app_objects *globals) {
-    ;
+    GtkWidget *combobox;
+    GtkWidget *app_box;
+    GtkWidget *grid;
+
+    app_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+    
+    grid = gtk_grid_new();
+    gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
+    gtk_widget_set_size_request(grid, 600, 600);
+
+
+    combobox = gtk_combo_box_text_new();
+    gtk_combo_box_text_append_text(GKT_COMBO_BOX_TEXT(combobox), "Fixed");
+    gtk_combo_box_text_append_text(GKT_COMBO_BOX_TEXT(combobox), "Removable");
+    gtk_combo_box_text_append_text(GKT_COMBO_BOX_TEXT(combobox), "Optical");
+    gtk_combo_box_text_append_text(GKT_COMBO_BOX_TEXT(combobox), "Memory");
+
+    combobox = gtk_combo_box_text_new();
+    gtk_combo_box_text_append_text(GKT_COMBO_BOX_TEXT(combobox), "None");
+    gtk_combo_box_text_append_text(GKT_COMBO_BOX_TEXT(combobox), "Best");
+    gtk_combo_box_text_append_text(GKT_COMBO_BOX_TEXT(combobox), "Fast");
+
+
+    gtk_box_pack_start(GTK_BOX(app_box), grid, TRUE, TRUE, 0);
+    create_navigation_button_box(app_box, get_target_info_cb, globals);
+
+    set_box_margins(app_box);
+
+    return app_box;
 }
