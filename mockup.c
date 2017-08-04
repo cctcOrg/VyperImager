@@ -34,6 +34,9 @@ static void activate(GtkApplication* app, gpointer user_data) {
     ImageInfo *info = malloc(sizeof(ImageInfo));
     globals->user_info = info;
 
+    Case *case_info = malloc(sizeof(Case));
+    globals->user_info->case_info = case_info;
+
     page_stack *p = new_stack();
     globals->pages = p;
 

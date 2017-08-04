@@ -197,15 +197,16 @@ NEW_CALLBACK(case_info_cb) {
     GtkWidget *entries[] = {g->casenum_entry, g->itemnum_entry, 
         g->examiner_entry, g->notes_entry};
 
-    char *info[] = {c->casenum, c->itemnum, c->examiner, c->notes};
+    char **info[] = {&c->casenum, &c->itemnum, &c->examiner, &c->notes};
 
     for (int i=0; i<4; i++) {
         entry = entries[i];
 
         entry_tmp = gtk_entry_get_text(GTK_ENTRY(entry));
         entry_data = malloc((strlen(entry_tmp)+1)*sizeof(char));
+        printf("%p\n", entry_data);
         strcpy(entry_data, entry_tmp);
-        info[i] = entry_data;
+        *info[i] = entry_data;
     }
 
     GtkTextBuffer *buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(g->desc_entry));
@@ -216,9 +217,9 @@ NEW_CALLBACK(case_info_cb) {
     strcpy(entry_data, entry_tmp);
     c->desc = entry_data;
     
-    /*gtk_notebook_next_page(g->notebook);*/
-    /*push_stack(g->pages, 3);*/
-    /*set_next_hb_title(g);*/
+    gtk_notebook_next_page(GTK_NOTEBOOK(g->notebook));
+    push_stack(g->pages, 3);
+    set_next_hb_title(g);
 }
 
 NEW_CALLBACK(image_info_cb) {
@@ -235,5 +236,7 @@ NEW_CALLBACK(image_info_cb) {
     globals->user_info->compression_type = gtk_combo_box_text_get_active_text(
             GTK_COMBO_BOX_TEXT(globals->comptype_combobox));
 
-    printf("%s\n", globals->user_info->device_type);
+    gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
+    push_stack(globals->pages, 4);
+    set_next_hb_title(globals);
 }
