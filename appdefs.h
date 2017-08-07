@@ -1,6 +1,7 @@
 #ifndef APPDEFS_H
 #define APPDEFS_H
 
+#include<gtk/gtk.h>
 #include "stack.h"
 
 typedef struct SummaryLabels {

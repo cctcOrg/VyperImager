@@ -5,8 +5,9 @@
 
 #include "binary_interface.h"
 
+/* Note: Need to create a partition table with a partiton */
 int format_target_device(char *blockdev, char *format) {
-    char *cmd_format = "mkfs -t %s /dev/%s";
+    char *cmd_format = "mkfs -t %s /dev/%s1";
     char *cmd_string = malloc( 
             (strlen(cmd_format) + strlen(blockdev) + strlen(format) + 1)
             * sizeof(char));
@@ -28,7 +29,7 @@ int mount_target_device(char *blockdev) {
         mkdir(mountpoint, ACCESSPERMS);
 
 
-    char *cmd_format = "mount /dev/%s /media/EVID_TARGET";
+    char *cmd_format = "mount /dev/%s1 /media/EVID_TARGET";
     char *cmd_string = malloc( 
             (strlen(cmd_format) + strlen(blockdev) + 1) * sizeof(char));
 
@@ -39,5 +40,5 @@ int mount_target_device(char *blockdev) {
 }
 
 int create_forensic_image(app_objects *globals) {
-    ;
+    return 0;
 }

@@ -4,6 +4,9 @@
 #include "appdefs.h"
 #include "dialogs.h"
 #include "stack.h"
+#include "binary_interface.h"
+
+#define MAX_DEV_SIZE 10
 
 static void set_next_hb_title(app_objects *g) {
     int current_page;
@@ -52,7 +55,7 @@ NEW_CALLBACK(check_tv_cb) {
     /* Get evidence device name */
     sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(globals->etv));
     if (gtk_tree_selection_get_selected(sel, &model, &iter)) {
-        name = malloc(4*sizeof(char));
+        name = malloc(MAX_DEV_SIZE*sizeof(char));
         gtk_tree_model_get(model, &iter, COL_DEV, &name, -1);
         info->evidence_device = name;
     } 
@@ -66,7 +69,7 @@ NEW_CALLBACK(check_tv_cb) {
     /* Get target device name */
     sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(globals->ttv));
     if (gtk_tree_selection_get_selected(sel, &model, &iter)) {
-        name = malloc(4*sizeof(char));
+        name = malloc(MAX_DEV_SIZE*sizeof(char));
         gtk_tree_model_get(model, &iter, COL_DEV, &name, -1);
         info->target_device = name;
     } 
@@ -90,8 +93,9 @@ NEW_CALLBACK(check_tv_cb) {
         gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
     /* If you don't need to format skip to page 2 */
     else {
-        gtk_notebook_set_current_page(GTK_NOTEBOOK(globals->notebook), 2);
+        mount_target_device(info->target_device);
         globals->user_info->target_filesystem = "N/A";
+        gtk_notebook_set_current_page(GTK_NOTEBOOK(globals->notebook), 2);
     }
 
     set_next_hb_title(globals);
