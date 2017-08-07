@@ -142,7 +142,6 @@ NEW_CALLBACK(format_device_cb) {
     }
 
     globals->user_info->target_filesystem = fs_choice; 
-    printf("User has requested filesystem %s\n", fs_choice);
 
     diag = create_confirm_target_device_dialog(window, info->target_device);
     int result = gtk_dialog_run(GTK_DIALOG(diag));
@@ -231,6 +230,8 @@ NEW_CALLBACK(image_info_cb) {
     app_objects *globals = udata;
     GtkWidget *label;
     ImageInfo *info = globals->user_info;
+    SummaryLabels *labels = globals->labels;
+    Case *case_info = info->case_info;
 
     globals->user_info->device_type = gtk_combo_box_text_get_active_text(
             GTK_COMBO_BOX_TEXT(globals->devtype_combobox));
@@ -242,27 +243,52 @@ NEW_CALLBACK(image_info_cb) {
             GTK_COMBO_BOX_TEXT(globals->comptype_combobox));
 
 
+    /* Device info */
     sprintf(str, "/dev/%s", info->evidence_device); 
-    label = globals->labels->evidence_device;
+    label = labels->evidence_device;
     gtk_label_set_text(GTK_LABEL(label), str);
 
     sprintf(str, "/dev/%s", info->target_device); 
-    label = globals->labels->target_device;
+    label = labels->target_device;
     gtk_label_set_text(GTK_LABEL(label), str);
 
-    label = globals->labels->target_filesystem;
+    label = labels->target_filesystem;
     gtk_label_set_text(GTK_LABEL(label), info->target_filesystem);
 
-    label = globals->labels->target_filename;
+    label = labels->target_filename;
     gtk_label_set_text(GTK_LABEL(label), info->target_filename);
     
-    label = globals->labels->target_directory;
+    label = labels->target_directory;
     gtk_label_set_text(GTK_LABEL(label), info->target_directory);
+
+    /* Case info */
+    label = labels->casenum;
+    gtk_label_set_text(GTK_LABEL(label), case_info->casenum);
+
+    label = labels->itemnum;
+    gtk_label_set_text(GTK_LABEL(label), case_info->itemnum);
+
+    label = labels->examiner;
+    gtk_label_set_text(GTK_LABEL(label), case_info->examiner);
+
+    label = labels->desc;
+    gtk_label_set_text(GTK_LABEL(label), case_info->desc);
+
+    label = labels->notes;
+    gtk_label_set_text(GTK_LABEL(label), case_info->notes);
+
+    /* Image metadata */
+    label = labels->device_type;
+    gtk_label_set_text(GTK_LABEL(label), info->device_type);
+
+    label = labels->compression_type;
+    gtk_label_set_text(GTK_LABEL(label), info->compression_type);
+
+    label = labels->hash_type;
+    gtk_label_set_text(GTK_LABEL(label), info->hash_type);
 
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
     push_stack(globals->pages, 4);
     set_next_hb_title(globals);
-
-
 
 }

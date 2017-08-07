@@ -8,6 +8,8 @@
 #include "devinfo.h"
 #include "dialogs.h"
 
+#define GRID_LEFT_MARGIN 200
+
 static void set_box_margins(GtkWidget *w) {
     gtk_widget_set_margin_start(w, 30);
     gtk_widget_set_margin_end(w, 30);
@@ -440,14 +442,12 @@ GtkWidget *create_summary_interface(app_objects *globals) {
     GtkWidget *app_box;
     GtkWidget *grid;
 
-    ImageInfo *info = globals->user_info;
-
     app_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     
     /* Target grid */
     grid = gtk_grid_new();
-    gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
+    gtk_widget_set_margin_start(grid, GRID_LEFT_MARGIN);
+    gtk_widget_set_margin_end(grid, GRID_LEFT_MARGIN);
     gtk_grid_set_row_spacing(GTK_GRID(grid), 20);
     gtk_grid_set_column_spacing(GTK_GRID(grid), 20);
 
@@ -505,8 +505,8 @@ GtkWidget *create_summary_interface(app_objects *globals) {
 
     /* Case grid */
     grid = gtk_grid_new();
-    gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
+    gtk_widget_set_margin_start(grid, GRID_LEFT_MARGIN);
+    gtk_widget_set_margin_end(grid, GRID_LEFT_MARGIN);
     gtk_grid_set_row_spacing(GTK_GRID(grid), 20);
     gtk_grid_set_column_spacing(GTK_GRID(grid), 20);
 
@@ -514,27 +514,53 @@ GtkWidget *create_summary_interface(app_objects *globals) {
     gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
     gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1);
 
+    label = gtk_label_new(NULL);
+    globals->labels->casenum = label;
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 1, 0, 1, 1);
+
     label = gtk_label_new("Item number:");
     gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
     gtk_grid_attach(GTK_GRID(grid), label, 0, 1, 1, 1);
+
+    label = gtk_label_new(NULL);
+    globals->labels->itemnum = label;
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 1, 1, 1, 1);
 
     label = gtk_label_new("Examiner:");
     gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
     gtk_grid_attach(GTK_GRID(grid), label, 0, 2, 1, 1);
 
+    label = gtk_label_new(NULL);
+    globals->labels->examiner = label;
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 1, 2, 1, 1);
+
     label = gtk_label_new("Description:");
     gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
     gtk_grid_attach(GTK_GRID(grid), label, 0, 3, 1, 1);
 
+    label = gtk_label_new(NULL);
+    globals->labels->desc = label;
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 1, 3, 1, 1);
+
     label = gtk_label_new("Notes:");
     gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
     gtk_grid_attach(GTK_GRID(grid), label, 0, 4, 1, 1);
+
+    label = gtk_label_new(NULL);
+    globals->labels->notes = label;
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 1, 4, 1, 1);
+
     gtk_box_pack_start(GTK_BOX(app_box), grid, TRUE, TRUE, 0);
 
     /* Image grid */
     grid = gtk_grid_new();
-    gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
-    gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
+    gtk_widget_set_margin_start(grid, GRID_LEFT_MARGIN);
+    gtk_widget_set_margin_end(grid, GRID_LEFT_MARGIN);
     gtk_grid_set_row_spacing(GTK_GRID(grid), 20);
     gtk_grid_set_column_spacing(GTK_GRID(grid), 20);
 
@@ -542,13 +568,28 @@ GtkWidget *create_summary_interface(app_objects *globals) {
     gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
     gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1);
 
+    label = gtk_label_new(NULL);
+    globals->labels->device_type = label;
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 1, 0, 1, 1);
+
     label = gtk_label_new("Hash type:");
     gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
     gtk_grid_attach(GTK_GRID(grid), label, 0, 1, 1, 1);
 
+    label = gtk_label_new(NULL);
+    globals->labels->hash_type = label;
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 1, 1, 1, 1);
+
     label = gtk_label_new("Compression type:");
     gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
     gtk_grid_attach(GTK_GRID(grid), label, 0, 2, 1, 1);
+
+    label = gtk_label_new(NULL);
+    globals->labels->compression_type = label;
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 1, 2, 1, 1);
 
     gtk_box_pack_start(GTK_BOX(app_box), grid, TRUE, TRUE, 0);
 
