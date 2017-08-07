@@ -3,6 +3,22 @@
 
 #include "stack.h"
 
+typedef struct SummaryLabels {
+    GtkWidget *evidence_device;
+    GtkWidget *target_device;
+    GtkWidget *target_filesystem;
+    GtkWidget *target_filename;
+    GtkWidget *target_directory;
+    GtkWidget *device_type;
+    GtkWidget *hash_type;
+    GtkWidget *compression_type;
+    GtkWidget *casenum;
+    GtkWidget *itemnum;
+    GtkWidget *examiner;
+    GtkWidget *desc;
+    GtkWidget *notes;
+} SummaryLabels;
+
 typedef struct Case {
     char *casenum;
     char *itemnum;
@@ -43,7 +59,6 @@ typedef struct app_objects {
     GtkWidget *ttv;
     GtkWidget *format_dev;
 
-    GtkWidget *os_button_box;
     GtkWidget **os_buttons;
 
     GtkWidget *filename_entry;
@@ -60,6 +75,7 @@ typedef struct app_objects {
     GtkWidget *comptype_combobox;
     
     ImageInfo *user_info;
+    SummaryLabels *labels;
 } app_objects;
 
 #endif /* APPDEFS_H */

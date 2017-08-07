@@ -5,6 +5,14 @@
 #include "dialogs.h"
 #include "stack.h"
 
+static void set_label_or_null(GtkWidget *label, char *str) {
+    if (str == NULL)
+        printf("String is null, sorry!\n");
+    else
+        /*printf("%s\n", str);*/
+        gtk_label_set_text(GTK_LABEL(label), str);
+}
+
 static void set_next_hb_title(app_objects *g) {
     int current_page;
     GtkWidget *current_child;
@@ -89,8 +97,10 @@ NEW_CALLBACK(check_tv_cb) {
     if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->format_dev)))
         gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
     /* If you don't need to format skip to page 2 */
-    else
+    else {
         gtk_notebook_set_current_page(GTK_NOTEBOOK(globals->notebook), 2);
+        globals->user_info->target_filesystem = "N/A";
+    }
 
     set_next_hb_title(globals);
 
@@ -177,7 +187,7 @@ NEW_CALLBACK(get_target_info_cb) {
             gtk_file_chooser_get_current_folder_file(GTK_FILE_CHOOSER(entry)));
     entry_data = malloc((strlen(entry_tmp)+1)*sizeof(char));
     strcpy(entry_data, entry_tmp);
-    info->target_filename = entry_data;
+    info->target_directory = entry_data;
 
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
     push_stack(globals->pages, 2);
@@ -224,8 +234,11 @@ NEW_CALLBACK(case_info_cb) {
 
 NEW_CALLBACK(image_info_cb) {
     (void) w;
+    char str[50];
 
     app_objects *globals = udata;
+    GtkWidget *label;
+    ImageInfo *info = globals->user_info;
 
     globals->user_info->device_type = gtk_combo_box_text_get_active_text(
             GTK_COMBO_BOX_TEXT(globals->devtype_combobox));
@@ -236,7 +249,33 @@ NEW_CALLBACK(image_info_cb) {
     globals->user_info->compression_type = gtk_combo_box_text_get_active_text(
             GTK_COMBO_BOX_TEXT(globals->comptype_combobox));
 
+
+    /* DEBUG */
+    printf("T FN: %p\n", info->target_filename);
+    printf("T DI: %p\n", info->target_directory);
+    
+
+    sprintf(str, "/dev/%s", info->evidence_device); 
+    label = globals->labels->evidence_device;
+    set_label_or_null(label, str);
+
+    sprintf(str, "/dev/%s", info->target_device); 
+    label = globals->labels->target_device;
+    set_label_or_null(label, str);
+
+    label = globals->labels->target_filesystem;
+    set_label_or_null(label, info->target_filesystem);
+
+    label = globals->labels->target_filename;
+    set_label_or_null(label, info->target_filename);
+    
+    label = globals->labels->target_directory;
+    set_label_or_null(label, info->target_directory);
+
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
     push_stack(globals->pages, 4);
     set_next_hb_title(globals);
+
+
+
 }

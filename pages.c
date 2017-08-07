@@ -235,7 +235,6 @@ GtkWidget *create_format_selector(app_objects *globals) {
     }
 
     gtk_box_pack_start(GTK_BOX(obox), box, TRUE, TRUE, 0);
-    globals->os_button_box = obox;
     gtk_box_pack_start(GTK_BOX(app_box), obox, FALSE, FALSE, 0);
     
     create_navigation_button_box(app_box, format_device_cb, globals);
@@ -439,7 +438,6 @@ GtkWidget *create_summary_interface(app_objects *globals) {
     GtkWidget *label;
     GtkWidget *app_box;
     GtkWidget *grid;
-    char str[50];
 
     ImageInfo *info = globals->user_info;
 
@@ -452,51 +450,55 @@ GtkWidget *create_summary_interface(app_objects *globals) {
     gtk_grid_set_row_spacing(GTK_GRID(grid), 20);
     gtk_grid_set_column_spacing(GTK_GRID(grid), 20);
 
+    /* Evidence Device */
     label = gtk_label_new("Evidence device:");
     gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
     gtk_grid_attach(GTK_GRID(grid), label, 0, 0, 1, 1);
 
+    label = gtk_label_new(NULL);
+    globals->labels->evidence_device = label;
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 1, 0, 1, 1);
+
+    /* Target Device */
     label = gtk_label_new("Target device:");
     gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
     gtk_grid_attach(GTK_GRID(grid), label, 0, 1, 1, 1);
 
+    label = gtk_label_new(NULL);
+    globals->labels->target_device = label;
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 1, 1, 1, 1);
+    
+    /* Target Filesystem */
     label = gtk_label_new("Target filesystem:");
     gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
     gtk_grid_attach(GTK_GRID(grid), label, 0, 2, 1, 1);
 
+    label = gtk_label_new(NULL);
+    globals->labels->target_filesystem = label;
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 1, 2, 1, 1);
+
+    /* Target Directory */
     label = gtk_label_new("Target directory:");
     gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
     gtk_grid_attach(GTK_GRID(grid), label, 0, 3, 1, 1);
 
+    label = gtk_label_new(NULL);
+    globals->labels->target_directory = label;
+    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
+    gtk_grid_attach(GTK_GRID(grid), label, 1, 3, 1, 1);
+
+    /* Target Filename */
     label = gtk_label_new("Target filename:");
     gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
     gtk_grid_attach(GTK_GRID(grid), label, 0, 4, 1, 1);
 
-    sprintf(str, "/dev/%s", info->evidence_device);
-    label = gtk_label_new(str);
-    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
-    gtk_grid_attach(GTK_GRID(grid), label, 1, 0, 1, 1);
-
-    sprintf(str, "/dev/%s", info->target_device);
-    label = gtk_label_new(str);
-    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
-    gtk_grid_attach(GTK_GRID(grid), label, 1, 1, 1, 1);
-
-    label = gtk_label_new(info->target_filesystem);
-    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
-    gtk_grid_attach(GTK_GRID(grid), label, 1, 2, 1, 1);
-    
-    label = gtk_label_new(info->target_filesystem);
-    gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
-    gtk_grid_attach(GTK_GRID(grid), label, 1, 3, 1, 1);
-
-    label = gtk_label_new(info->target_filesystem);
+    label = gtk_label_new(NULL);
+    globals->labels->target_filename = label;
     gtk_label_set_xalign(GTK_LABEL(label), 0.0f);
     gtk_grid_attach(GTK_GRID(grid), label, 1, 4, 1, 1);
-
-    /*label = gtk_label_new("Target filename:");*/
-    /*gtk_label_set_xalign(GTK_LABEL(label), 0.0f);*/
-    /*gtk_grid_attach(GTK_GRID(grid), label, 0, 5, 1, 1);*/
 
     gtk_box_pack_start(GTK_BOX(app_box), grid, TRUE, TRUE, 0);
 
