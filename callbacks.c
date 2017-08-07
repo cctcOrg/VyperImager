@@ -5,14 +5,6 @@
 #include "dialogs.h"
 #include "stack.h"
 
-static void set_label_or_null(GtkWidget *label, char *str) {
-    if (str == NULL)
-        printf("String is null, sorry!\n");
-    else
-        /*printf("%s\n", str);*/
-        gtk_label_set_text(GTK_LABEL(label), str);
-}
-
 static void set_next_hb_title(app_objects *g) {
     int current_page;
     GtkWidget *current_child;
@@ -250,27 +242,22 @@ NEW_CALLBACK(image_info_cb) {
             GTK_COMBO_BOX_TEXT(globals->comptype_combobox));
 
 
-    /* DEBUG */
-    printf("T FN: %p\n", info->target_filename);
-    printf("T DI: %p\n", info->target_directory);
-    
-
     sprintf(str, "/dev/%s", info->evidence_device); 
     label = globals->labels->evidence_device;
-    set_label_or_null(label, str);
+    gtk_label_set_text(GTK_LABEL(label), str);
 
     sprintf(str, "/dev/%s", info->target_device); 
     label = globals->labels->target_device;
-    set_label_or_null(label, str);
+    gtk_label_set_text(GTK_LABEL(label), str);
 
     label = globals->labels->target_filesystem;
-    set_label_or_null(label, info->target_filesystem);
+    gtk_label_set_text(GTK_LABEL(label), info->target_filesystem);
 
     label = globals->labels->target_filename;
-    set_label_or_null(label, info->target_filename);
+    gtk_label_set_text(GTK_LABEL(label), info->target_filename);
     
     label = globals->labels->target_directory;
-    set_label_or_null(label, info->target_directory);
+    gtk_label_set_text(GTK_LABEL(label), info->target_directory);
 
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
     push_stack(globals->pages, 4);
