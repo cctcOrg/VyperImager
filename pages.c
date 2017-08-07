@@ -211,12 +211,13 @@ GtkWidget *create_format_selector(app_objects *globals) {
     char *filename = malloc(strlen(format)+15);
 
     obox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+    gtk_widget_set_valign(obox, GTK_ALIGN_CENTER);
 
     gtk_box_pack_start(GTK_BOX(obox), 
             gtk_label_new(("Please select which types of systems "
                     "you would like to read this drive from "
                     "(Linux/Windows/Apple)")),
-            TRUE, TRUE, 0); 
+            TRUE, TRUE, 20); 
 
     /* OS Button box */
     box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
@@ -235,7 +236,7 @@ GtkWidget *create_format_selector(app_objects *globals) {
     }
 
     gtk_box_pack_start(GTK_BOX(obox), box, TRUE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(app_box), obox, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(app_box), obox, TRUE, TRUE, 0);
     
     create_navigation_button_box(app_box, format_device_cb, globals);
     set_box_margins(app_box);
