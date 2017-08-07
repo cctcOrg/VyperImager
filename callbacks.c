@@ -119,16 +119,13 @@ NEW_CALLBACK(format_device_cb) {
         case 0b011:
         case 0b111:
         case 0b110:
-            strcpy(fs_choice, "vfat");
+        case 0b010:
+            strcpy(fs_choice, "ntfs");
             break;
         /* Mac, Linux */
         case 0b100:
         case 0b101:
             strcpy(fs_choice, "hfsplus");
-            break;
-        /* Windows */
-        case 0b010:
-            strcpy(fs_choice, "ntfs");
             break;
         /* Linux */
         case 0b001:
