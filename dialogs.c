@@ -3,6 +3,8 @@
 #include<stdio.h>
 #include<string.h>
 
+#include "dialogs.h"
+
 GtkWidget *create_alert_dialog(char *msg) {
     GtkWidget *dialog;
     GtkWidget *dialog_area;
