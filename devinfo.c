@@ -14,15 +14,24 @@
 #define MODEL_SIZE 60
 #define REM_SIZE 10
 
-static int get_inode(char *filename) {
-    struct stat file_stat;  
-    int ret;  
+static char *get_target_dev(char *filename) {
+    char *actualpath;
+    char *token;
+    
+    actualpath = realpath(filename, NULL);
+    if (actualpath) {
+        token = strtok(actualpath, "/"); // Should be "dev"
+        token = strtok(NULL, "/"); // should be block device
+    
+        /* Chop the partition number off so we just have the device */
+        token[strlen(token)-1] = 0;
+        /* Since token points to data in actualpath, which is dynamically 
+         * allocated, this should work */
+        return token;
+    }
 
-    ret = stat(filename, &file_stat);  
-    if (ret < 0)
-        return BAD_STAT;
-
-    return file_stat.st_ino;
+    else
+        return NULL;
 }
 
 Device **get_blockdev_info(int *num_blockdevs) {
@@ -30,31 +39,22 @@ Device **get_blockdev_info(int *num_blockdevs) {
     struct dirent *ent;
     int i = 0;
     char *fn;
-    char test_path[MAX_BLOCKLEN];
-    int target_inode;
-    int inode;
+    char *target_device;
 
     Device *dev;
     Device **device_info = malloc(NUM_BLOCKDEVS*sizeof(Device*));
 
-    target_inode = get_inode("/dev/disk/by-label/EVID_TARGET");
+    target_device = get_target_dev("/dev/disk/by-label/EVID_TARGET");
 
     /* Find the block devices */
     if ((dir = opendir("/sys/block")) != NULL) {
         /* print all the files and directories within directory */
         while ((ent = readdir(dir)) != NULL) {
             fn = ent->d_name;
+            /* Don't include "." entries or loop devices */
             if (fn[0] != '.' && fn[0] != 'l') {
                 dev = get_blockdev_struct(fn);
-                dev->is_target = 0;
-
-                sprintf(test_path, "/dev/%s", fn);
-                inode = get_inode(test_path);
-                /* If this is our dear evidence device, the data partition's
-                 * inode will have a small offset from the block device's */ 
-                if (abs(inode-target_inode) < INODE_OFFSET)
-                    dev->is_target = 1;
-
+                dev->is_target = (strcmp(target_device, fn) == 0) ? 1: 0;
                 device_info[i] = dev;
                 i++;
             }

@@ -149,6 +149,9 @@ NEW_CALLBACK(format_device_cb) {
     gtk_widget_destroy(diag);
     if (result != GTK_RESPONSE_ACCEPT)
         return;
+    
+    format_target_device(info->target_device, fs_choice);
+    /*mount_target_device(info->target_device);*/
 
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
 
