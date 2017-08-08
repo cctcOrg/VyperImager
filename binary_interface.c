@@ -25,21 +25,20 @@ static int target_is_mounted() {
 
 /* Note: Need to create a partition table with a partiton */
 int format_target_device(char *blockdev, char *format) {
-    char *label_flag = "-L EVID_TARGET";
-    char *hfsp_label_flag = "-v EVID_TARGET";
+    char *label_flag = "-L \"EVID_TARGET\" -F";
+    char *hfsp_label_flag = "-v \"EVID_TARGET\"";
 
-    char *cmd_format = "mkfs -t %s /dev/%s1 %s";
+    char *cmd_format = "mkfs -t %s %s /dev/%s1";
     char *cmd_string = malloc( 
             (strlen(cmd_format) + strlen(blockdev) + strlen(format) 
              + strlen(label_flag) + 1) * sizeof(char));
 
-    sprintf(cmd_string, cmd_format, format, blockdev, 
-            (format[0] == 'h') ? hfsp_label_flag : label_flag);
+    sprintf(cmd_string, cmd_format, format, 
+            (format[0] == 'h') ? hfsp_label_flag : label_flag, blockdev);
     
-    printf("Format command: %s\n", cmd_string);
-    /*int result = system(cmd_string);*/
-    /*free(cmd_string);*/
-    return 0 /*result*/;
+    int result = system(cmd_string);
+    free(cmd_string);
+    return result;
 }
 
 /* Returns 0 on success, failure otherwise */

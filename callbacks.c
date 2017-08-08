@@ -151,7 +151,7 @@ NEW_CALLBACK(format_device_cb) {
         return;
     
     format_target_device(info->target_device, fs_choice);
-    /*mount_target_device(info->target_device);*/
+    mount_target_device(info->target_device);
 
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
 
