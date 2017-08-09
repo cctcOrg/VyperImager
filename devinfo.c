@@ -54,7 +54,8 @@ Device **get_blockdev_info(int *num_blockdevs) {
             /* Don't include "." entries or loop devices */
             if (fn[0] != '.' && fn[0] != 'l') {
                 dev = get_blockdev_struct(fn);
-                dev->is_target = (strcmp(target_device, fn) == 0) ? 1: 0;
+                if (target_device != NULL)
+                    dev->is_target = (strcmp(target_device, fn) == 0) ? 1: 0;
                 device_info[i] = dev;
                 i++;
             }
