@@ -6,9 +6,6 @@
 #include<sys/ioctl.h>
 #include<linux/fs.h>
 
-#include<parted/device.h>
-#include<parted/disk.h>
-
 #include "binary_interface.h"
 
 #define MAX_MOUNT_LINE 255
