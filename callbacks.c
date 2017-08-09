@@ -105,6 +105,7 @@ NEW_CALLBACK(check_tv_cb) {
 NEW_CALLBACK(format_device_cb) {
     (void) w;
     GtkWidget *diag;
+    GtkWidget *box;
 
     app_objects *globals = udata;
     GtkWidget *window = globals->window;
@@ -112,6 +113,7 @@ NEW_CALLBACK(format_device_cb) {
 
     char buttons_state = 0;
     char *fs_choice = malloc(7*sizeof(char));
+    int result;
 
     for (int i=0; i<3; i++) {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->os_buttons[i])))
@@ -145,13 +147,28 @@ NEW_CALLBACK(format_device_cb) {
     globals->user_info->target_filesystem = fs_choice; 
 
     diag = create_confirm_target_device_dialog(window, info->target_device);
-    int result = gtk_dialog_run(GTK_DIALOG(diag));
+    result = gtk_dialog_run(GTK_DIALOG(diag));
     gtk_widget_destroy(diag);
     if (result != GTK_RESPONSE_ACCEPT)
         return;
     
+    diag = create_progress_spinner_dialog(window, &box); 
+    /*gtk_widget_set_can_focus(diag, TRUE);*/
+    /*gtk_window_set_modal(GTK_WINDOW(diag), TRUE);*/
+    /*gtk_window_set_transient_for(GTK_WINDOW(diag), GTK_WINDOW(window));*/
+    /*gtk_widget_show_all(diag);*/
+    printf("Dialog is%s visible\n", gtk_widget_is_visible(diag) ? "" : " not");
+    printf("Dialog is%s active\n", gtk_window_is_active(GTK_WINDOW(diag)) ? "" : " not");
+    /*gtk_dialog_run(GTK_DIALOG(diag));*/
+    /*gtk_dialog_response(GTK_DIALOG(diag), GTK_RESPONSE_ACCEPT);*/
+    
+    gtk_box_pack_start(GTK_BOX(box), gtk_label_new("Formatting..."), TRUE, TRUE, 0);
     format_target_device(info->target_device, fs_choice);
+    gtk_box_pack_start(GTK_BOX(box), gtk_label_new("Mounting..."), TRUE, TRUE, 0);
     mount_target_device(info->target_device);
+    gtk_box_pack_start(GTK_BOX(box), gtk_label_new("Done!"), TRUE, TRUE, 20);
+
+    gtk_widget_destroy(diag);
 
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
 
