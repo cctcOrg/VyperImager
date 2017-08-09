@@ -108,10 +108,11 @@ GtkWidget *create_progress_spinner_dialog(GtkWidget *window, GtkWidget **box) {
     GtkDialogFlags flags = GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT;
     dialog = gtk_dialog_new_with_buttons("Loading", GTK_WINDOW(window), flags,
                                           "OK", GTK_RESPONSE_ACCEPT, NULL);
+    gtk_widget_set_size_request(dialog, 200, 200);
 
     dialog_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
     gtk_box_pack_start(GTK_BOX(dialog_area), gtk_label_new(msg), TRUE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(dialog_area), spinner, TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(dialog_area), spinner, TRUE, TRUE, 50);
 
     gtk_widget_set_margin_start(dialog_area, 30); 
     gtk_widget_set_margin_end(dialog_area, 30); 

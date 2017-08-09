@@ -88,6 +88,9 @@ NEW_CALLBACK(check_tv_cb) {
     }
 
     push_stack(globals->pages, 0);
+    printf("Writeblocking...\n");
+    int result = writeblock_evidence_device(info->evidence_device);
+    printf("Result: %d\n", result);
 
     if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->format_dev)))
         gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
@@ -156,19 +159,24 @@ NEW_CALLBACK(format_device_cb) {
     /*gtk_widget_set_can_focus(diag, TRUE);*/
     /*gtk_window_set_modal(GTK_WINDOW(diag), TRUE);*/
     /*gtk_window_set_transient_for(GTK_WINDOW(diag), GTK_WINDOW(window));*/
-    /*gtk_widget_show_all(diag);*/
-    printf("Dialog is%s visible\n", gtk_widget_is_visible(diag) ? "" : " not");
-    printf("Dialog is%s active\n", gtk_window_is_active(GTK_WINDOW(diag)) ? "" : " not");
+    gtk_widget_show_all(diag);
     /*gtk_dialog_run(GTK_DIALOG(diag));*/
     /*gtk_dialog_response(GTK_DIALOG(diag), GTK_RESPONSE_ACCEPT);*/
     
-    gtk_box_pack_start(GTK_BOX(box), gtk_label_new("Formatting..."), TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(box), gtk_label_new("Formatting..."), TRUE, TRUE, 10);
+    gtk_widget_show_all(diag);
     format_target_device(info->target_device, fs_choice);
-    gtk_box_pack_start(GTK_BOX(box), gtk_label_new("Mounting..."), TRUE, TRUE, 0);
-    mount_target_device(info->target_device);
-    gtk_box_pack_start(GTK_BOX(box), gtk_label_new("Done!"), TRUE, TRUE, 20);
 
-    gtk_widget_destroy(diag);
+    gtk_box_pack_start(GTK_BOX(box), gtk_label_new("Mounting..."), TRUE, TRUE, 10);
+    gtk_widget_show_all(diag);
+    mount_target_device(info->target_device);
+
+    gtk_box_pack_start(GTK_BOX(box), gtk_label_new("Done!"), TRUE, TRUE, 20);
+    gtk_widget_show_all(diag);
+
+    result = gtk_dialog_run(GTK_DIALOG(diag));
+    if (result == GTK_RESPONSE_ACCEPT)
+        gtk_widget_destroy(diag);
 
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
 

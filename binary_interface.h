@@ -6,5 +6,6 @@
 int format_target_device(char *blockdev, char *format);
 int mount_target_device(char *blockdev);
 int create_forensic_image(app_objects *globals);
+int writeblock_evidence_device(char *dev);
 
 #endif /* BINARY_INTERFACE_H */

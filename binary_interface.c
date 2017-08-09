@@ -1,7 +1,11 @@
 #include<stdlib.h>
 #include<string.h>
 #include<dirent.h>
+
 #include<sys/stat.h>
+#include<sys/ioctl.h>
+#include<linux/fs.h>
+
 #include<parted/device.h>
 #include<parted/disk.h>
 
@@ -21,6 +25,25 @@ static int target_is_mounted() {
             return 1;
 
     return 0;
+}
+
+int writeblock_evidence_device(char *dev) {
+    FILE *blockdev;
+    int something = 0;
+    char path[20];
+
+    sprintf(path, "/dev/%s", dev);
+    printf("Writeblocking %s\n", path);
+
+    blockdev = fopen(path, "r");
+    if (!blockdev) {
+        printf("%s: no such block device\n", dev);
+        return 1;
+    }
+
+    int result = ioctl(fileno(blockdev), BLKROSET, &something);
+    fclose(blockdev);
+    return result;
 }
 
 /* Note: Need to create a partition table with a partiton */
@@ -49,8 +72,14 @@ int mount_target_device(char *blockdev) {
 
     char *mountpoint = "/media/EVID_TARGET";
 
+    DIR *dir = opendir("/media");
+    if (dir)
+        closedir(dir);
+    else
+        mkdir("/media", ACCESSPERMS);
+
     /* See if mountpoint exists, create it if not */
-    DIR *dir = opendir("/media/EVID_TARGET");
+    dir = opendir(mountpoint);
     if (dir)
         closedir(dir);
     else
