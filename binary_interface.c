@@ -28,22 +28,13 @@ static int target_is_mounted() {
 }
 
 int writeblock_evidence_device(char *dev) {
-    FILE *blockdev;
-    int something = 0;
     char path[20];
+    char *command_format = "blockdev --setro %s";
+    char command[40];
 
     sprintf(path, "/dev/%s", dev);
-    printf("Writeblocking %s\n", path);
-
-    blockdev = fopen(path, "r");
-    if (!blockdev) {
-        printf("%s: no such block device\n", dev);
-        return 1;
-    }
-
-    int result = ioctl(fileno(blockdev), BLKROSET, &something);
-    fclose(blockdev);
-    return result;
+    sprintf(command, command_format, path);
+    return system(command);
 }
 
 /* Note: Need to create a partition table with a partiton */
@@ -51,7 +42,7 @@ int format_target_device(char *blockdev, char *format) {
     char *label_flag = "-L \"EVID_TARGET\" -F";
     char *hfsp_label_flag = "-v \"EVID_TARGET\"";
 
-    char *cmd_format = "mkfs -t %s %s /dev/%s1";
+    char *cmd_format = "mkfs -t %s %s /dev/%s";
     char *cmd_string = malloc( 
             (strlen(cmd_format) + strlen(blockdev) + strlen(format) 
              + strlen(label_flag) + 1) * sizeof(char));
@@ -86,7 +77,7 @@ int mount_target_device(char *blockdev) {
         mkdir(mountpoint, ACCESSPERMS);
 
 
-    char *cmd_format = "mount /dev/%s1 /media/EVID_TARGET";
+    char *cmd_format = "mount /dev/%s /media/EVID_TARGET";
     char *cmd_string = malloc( 
             (strlen(cmd_format) + strlen(blockdev) + 1) * sizeof(char));
 
