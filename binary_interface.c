@@ -9,6 +9,7 @@
 #include "binary_interface.h"
 
 #define MAX_MOUNT_LINE 255
+#define FORMAT_CMD_ARGC 8
 
 /* Thanks to ewg on ##c for this! */
 static int target_is_mounted() {
@@ -35,7 +36,8 @@ int writeblock_evidence_device(char *dev) {
 }
 
 /* Note: Need to create a partition table with a partiton */
-int format_target_device(char *blockdev, char *format) {
+char **format_target_device(char *blockdev, char *format) {
+    char **cmd_array;
     char *label_flag = "-L \"EVID_TARGET\" -F";
     char *hfsp_label_flag = "-v \"EVID_TARGET\"";
 
@@ -46,14 +48,14 @@ int format_target_device(char *blockdev, char *format) {
 
     sprintf(cmd_string, cmd_format, format, 
             (format[0] == 'h') ? hfsp_label_flag : label_flag, blockdev);
-    
-    int result = system(cmd_string);
+
+    g_shell_parse_argv(cmd_string, NULL, &cmd_array, NULL);
+
     free(cmd_string);
-    return result;
+    return cmd_array;
 }
 
-/* Returns 0 on success, failure otherwise */
-int mount_target_device(char *blockdev) {
+char **mount_target_device(char *blockdev) {
     /* Wow look, my work might already be done! */
     if (target_is_mounted() == 1)
         return 0;
@@ -73,15 +75,15 @@ int mount_target_device(char *blockdev) {
     else
         mkdir(mountpoint, ACCESSPERMS);
 
-
+    char **cmd_array;
     char *cmd_format = "mount /dev/%s /media/EVID_TARGET";
     char *cmd_string = malloc( 
             (strlen(cmd_format) + strlen(blockdev) + 1) * sizeof(char));
 
     sprintf(cmd_string, cmd_format, blockdev);
-    int result = system(cmd_string);
+    g_shell_parse_argv(cmd_string, NULL, &cmd_array, NULL);
     free(cmd_string);
-    return result; 
+    return cmd_array; 
 }
 
 int create_forensic_image(app_objects *globals) {

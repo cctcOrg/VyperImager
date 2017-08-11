@@ -74,6 +74,9 @@ typedef struct app_objects {
     GtkWidget *devtype_combobox;
     GtkWidget *hashtype_combobox;
     GtkWidget *comptype_combobox;
+
+    GtkWidget *dialog;
+    GtkWidget *dialog_box;
     
     ImageInfo *user_info;
     SummaryLabels *labels;

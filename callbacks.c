@@ -8,23 +8,6 @@
 
 #define MAX_DEV_SIZE 10
 
-typedef struct {
-    char *target_device;
-    char *fs_choice;
-} thread_data;
-
-static gboolean mkfs_thread(gpointer data) {
-    thread_data *tdata = data; 
-    format_target_device(tdata->target_device, tdata->fs_choice);
-    return TRUE;
-}
-
-static gboolean mount_thread(gpointer data) {
-    char *target_device = data;
-    mount_target_device(target_device);
-    return TRUE;
-}
-
 static void set_next_hb_title(app_objects *g) {
     int current_page;
     GtkWidget *current_child;
@@ -68,6 +51,8 @@ NEW_CALLBACK(check_tv_cb) {
     GtkWidget *diag;
     
     char *name;
+    GSubprocess *subp;
+    char **cmd;
 
     /* Get evidence device name */
     sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(globals->etv));
@@ -113,7 +98,11 @@ NEW_CALLBACK(check_tv_cb) {
         gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
     /* If you don't need to format skip to page 2 */
     else {
-        mount_target_device(info->target_device);
+        cmd = mount_target_device(info->target_device);
+        subp = g_subprocess_newv(cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
+        g_subprocess_wait(subp, NULL, NULL);
+        g_strfreev(cmd);
+
         globals->user_info->target_filesystem = "N/A";
         gtk_notebook_set_current_page(GTK_NOTEBOOK(globals->notebook), 2);
     }
@@ -122,20 +111,43 @@ NEW_CALLBACK(check_tv_cb) {
 
 }
 
+static void on_mkfs_finished(GObject *source_object, GAsyncResult *res, gpointer user_data) {
+    GSubprocess *subp;
+    char **cmd;
+    app_objects *globals = user_data;
+
+    gtk_box_pack_start(GTK_BOX(globals->dialog_box), 
+            gtk_label_new("Mounting..."), TRUE, TRUE, 10);
+    gtk_widget_show_all(globals->dialog);
+
+    cmd = mount_target_device(globals->user_info->target_device);
+    /* mount_target_device may return NULL, but if it does we still want the 
+     * final callback to execute -- so just do nothing */
+    if (!cmd) {
+        cmd = malloc(2*sizeof(char*));
+        cmd[0] = malloc(5*sizeof(char*));
+        strcpy(cmd[0], "true"); 
+        cmd[1] = NULL;
+    }
+    subp = g_subprocess_newv(cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
+    g_subprocess_wait_async(subp, NULL, on_mkfs_finished, globals);
+    g_strfreev(cmd);
+}
+
+static void on_mount_finished(GObject *source_object, GAsyncResult *res, gpointer user_data) {
+    app_objects *globals = user_data;
+
+    gtk_box_pack_start(GTK_BOX(globals->dialog_box), gtk_label_new("Done!"), TRUE, TRUE, 20);
+    gtk_widget_show_all(globals->dialog);
+
+    gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
+
+    push_stack(globals->pages, 1);
+    set_next_hb_title(globals);
+}
+
 NEW_CALLBACK(format_device_cb) {
     (void) w;
-
-    /***** BEGIN THREAD SETUP *****/
-    /* Secure glib */
-    /*if( ! g_thread_supported() )*/
-        /*g_thread_init( NULL );*/
-
-    /* Secure gtk */
-    /*gdk_threads_init();*/
-
-    /* Obtain gtk's global lock */
-    /*gdk_threads_enter();*/
-    /***** END THREAD SETUP *****/
 
     GtkWidget *diag;
     GtkWidget *box;
@@ -148,7 +160,8 @@ NEW_CALLBACK(format_device_cb) {
     char *fs_choice = malloc(7*sizeof(char));
     int result;
 
-    thread_data data;
+    GSubprocess *subp;
+    char **cmd;
 
     for (int i=0; i<3; i++) {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->os_buttons[i])))
@@ -188,6 +201,8 @@ NEW_CALLBACK(format_device_cb) {
         return;
     
     diag = create_progress_spinner_dialog(window, &box); 
+    globals->dialog = diag;
+    globals->dialog_box = box;
     /*gtk_widget_set_can_focus(diag, TRUE);*/
     /*gtk_window_set_modal(GTK_WINDOW(diag), TRUE);*/
     /*gtk_window_set_transient_for(GTK_WINDOW(diag), GTK_WINDOW(window));*/
@@ -198,29 +213,10 @@ NEW_CALLBACK(format_device_cb) {
     gtk_box_pack_start(GTK_BOX(box), gtk_label_new("Formatting..."), TRUE, TRUE, 10);
     gtk_widget_show_all(diag);
 
-    data.target_device = info->target_device;
-    data.fs_choice = fs_choice;
-    gdk_threads_add_idle(mkfs_thread, &data);
-    /*format_target_device(info->target_device, fs_choice);*/
-
-    gtk_box_pack_start(GTK_BOX(box), gtk_label_new("Mounting..."), TRUE, TRUE, 10);
-    gtk_widget_show_all(diag);
-
-    gdk_threads_add_idle(mount_thread, info->target_device);
-    /*mount_target_device(info->target_device);*/
-
-    gtk_box_pack_start(GTK_BOX(box), gtk_label_new("Done!"), TRUE, TRUE, 20);
-    gtk_widget_show_all(diag);
-
-    result = gtk_dialog_run(GTK_DIALOG(diag));
-    if (result == GTK_RESPONSE_ACCEPT)
-        gtk_widget_destroy(diag);
-    
-    gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
-
-    push_stack(globals->pages, 1);
-    set_next_hb_title(globals);
-
+    cmd = format_target_device(info->target_device, fs_choice);
+    subp = g_subprocess_newv(cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
+    g_subprocess_wait_async(subp, NULL, on_mkfs_finished, globals);
+    g_strfreev(cmd);
 }
 
 NEW_CALLBACK(get_target_info_cb) {
