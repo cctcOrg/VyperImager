@@ -8,6 +8,23 @@
 
 #define MAX_DEV_SIZE 10
 
+typedef struct {
+    char *target_device;
+    char *fs_choice;
+} thread_data;
+
+static gboolean mkfs_thread(gpointer data) {
+    thread_data *tdata = data; 
+    format_target_device(tdata->target_device, tdata->fs_choice);
+    return TRUE;
+}
+
+static gboolean mount_thread(gpointer data) {
+    char *target_device = data;
+    mount_target_device(target_device);
+    return TRUE;
+}
+
 static void set_next_hb_title(app_objects *g) {
     int current_page;
     GtkWidget *current_child;
@@ -107,6 +124,19 @@ NEW_CALLBACK(check_tv_cb) {
 
 NEW_CALLBACK(format_device_cb) {
     (void) w;
+
+    /***** BEGIN THREAD SETUP *****/
+    /* Secure glib */
+    /*if( ! g_thread_supported() )*/
+        /*g_thread_init( NULL );*/
+
+    /* Secure gtk */
+    /*gdk_threads_init();*/
+
+    /* Obtain gtk's global lock */
+    /*gdk_threads_enter();*/
+    /***** END THREAD SETUP *****/
+
     GtkWidget *diag;
     GtkWidget *box;
 
@@ -117,6 +147,8 @@ NEW_CALLBACK(format_device_cb) {
     char buttons_state = 0;
     char *fs_choice = malloc(7*sizeof(char));
     int result;
+
+    thread_data data;
 
     for (int i=0; i<3; i++) {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->os_buttons[i])))
@@ -165,11 +197,17 @@ NEW_CALLBACK(format_device_cb) {
     
     gtk_box_pack_start(GTK_BOX(box), gtk_label_new("Formatting..."), TRUE, TRUE, 10);
     gtk_widget_show_all(diag);
-    format_target_device(info->target_device, fs_choice);
+
+    data.target_device = info->target_device;
+    data.fs_choice = fs_choice;
+    gdk_threads_add_idle(mkfs_thread, &data);
+    /*format_target_device(info->target_device, fs_choice);*/
 
     gtk_box_pack_start(GTK_BOX(box), gtk_label_new("Mounting..."), TRUE, TRUE, 10);
     gtk_widget_show_all(diag);
-    mount_target_device(info->target_device);
+
+    gdk_threads_add_idle(mount_thread, info->target_device);
+    /*mount_target_device(info->target_device);*/
 
     gtk_box_pack_start(GTK_BOX(box), gtk_label_new("Done!"), TRUE, TRUE, 20);
     gtk_widget_show_all(diag);
@@ -177,11 +215,12 @@ NEW_CALLBACK(format_device_cb) {
     result = gtk_dialog_run(GTK_DIALOG(diag));
     if (result == GTK_RESPONSE_ACCEPT)
         gtk_widget_destroy(diag);
-
+    
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
 
     push_stack(globals->pages, 1);
     set_next_hb_title(globals);
+
 }
 
 NEW_CALLBACK(get_target_info_cb) {
