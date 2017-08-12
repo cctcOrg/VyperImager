@@ -96,12 +96,13 @@ GtkWidget *create_please_choose_system_dialog(GtkWidget *window) {
     return dialog;
 }
 
-GtkWidget *create_progress_spinner_dialog(GtkWidget *window, GtkWidget **box) {
+GtkWidget *create_progress_spinner_dialog(GtkWidget *window, app_objects *globals) {
     GtkWidget *dialog;
     GtkWidget *dialog_area;
     GtkWidget *spinner;
 
     spinner = gtk_spinner_new();
+    globals->spinner = spinner;
 
     char *msg = "Working..."; 
 
@@ -111,8 +112,9 @@ GtkWidget *create_progress_spinner_dialog(GtkWidget *window, GtkWidget **box) {
     gtk_widget_set_size_request(dialog, 200, 200);
 
     dialog_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    globals->dialog_box = dialog_area;
     gtk_box_pack_start(GTK_BOX(dialog_area), gtk_label_new(msg), TRUE, TRUE, 0);
-    gtk_box_pack_start(GTK_BOX(dialog_area), spinner, TRUE, TRUE, 50);
+    gtk_box_pack_start(GTK_BOX(dialog_area), spinner, TRUE, TRUE, 30);
 
     gtk_widget_set_margin_start(dialog_area, 30); 
     gtk_widget_set_margin_end(dialog_area, 30); 
@@ -123,6 +125,5 @@ GtkWidget *create_progress_spinner_dialog(GtkWidget *window, GtkWidget **box) {
     
     gtk_widget_show_all(dialog);
 
-    *box = dialog_area;
     return dialog;
 }

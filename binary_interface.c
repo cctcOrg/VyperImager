@@ -60,6 +60,7 @@ char **mount_target_device(char *blockdev) {
     if (target_is_mounted() == 1)
         return 0;
 
+    printf("Target is not mounted\n");
     char *mountpoint = "/media/EVID_TARGET";
 
     DIR *dir = opendir("/media");
@@ -81,6 +82,7 @@ char **mount_target_device(char *blockdev) {
             (strlen(cmd_format) + strlen(blockdev) + 1) * sizeof(char));
 
     sprintf(cmd_string, cmd_format, blockdev);
+    printf("This is the command that will be run: %s\n", cmd_string);
     g_shell_parse_argv(cmd_string, NULL, &cmd_array, NULL);
     free(cmd_string);
     return cmd_array; 

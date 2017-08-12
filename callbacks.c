@@ -90,9 +90,7 @@ NEW_CALLBACK(check_tv_cb) {
     }
 
     push_stack(globals->pages, 0);
-    printf("Writeblocking...\n");
-    int result = writeblock_evidence_device(info->evidence_device);
-    printf("Result: %d\n", result);
+    writeblock_evidence_device(info->evidence_device);
 
     if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->format_dev)))
         gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
@@ -111,7 +109,36 @@ NEW_CALLBACK(check_tv_cb) {
 
 }
 
+NEW_CALLBACK(target_setup_done) {
+    (void) w;
+    app_objects *globals = udata;
+    printf("%p\n", globals);
+    /*gtk_widget_destroy(globals->dialog);*/
+
+    /*gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));*/
+
+    /*push_stack(globals->pages, 1);*/
+    /*set_next_hb_title(globals);*/
+
+}
+
+static void on_mount_finished(GObject *source_object, GAsyncResult *res, gpointer user_data) {
+    (void) source_object;
+    (void) res;
+
+    app_objects *globals = user_data;
+    GtkWidget *diag = globals->dialog;
+
+    gtk_box_pack_start(GTK_BOX(globals->dialog_box), gtk_label_new("Done!"), TRUE, TRUE, 20);
+    gtk_spinner_stop(GTK_SPINNER(globals->spinner));
+    gtk_widget_show_all(diag);
+    g_signal_connect(diag, "response", G_CALLBACK(target_setup_done), globals); 
+}
+
 static void on_mkfs_finished(GObject *source_object, GAsyncResult *res, gpointer user_data) {
+    (void) source_object;
+    (void) res;
+
     GSubprocess *subp;
     char **cmd;
     app_objects *globals = user_data;
@@ -129,28 +156,16 @@ static void on_mkfs_finished(GObject *source_object, GAsyncResult *res, gpointer
         strcpy(cmd[0], "true"); 
         cmd[1] = NULL;
     }
+
     subp = g_subprocess_newv(cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
-    g_subprocess_wait_async(subp, NULL, on_mkfs_finished, globals);
+    g_subprocess_wait_async(subp, NULL, on_mount_finished, globals);
     g_strfreev(cmd);
-}
-
-static void on_mount_finished(GObject *source_object, GAsyncResult *res, gpointer user_data) {
-    app_objects *globals = user_data;
-
-    gtk_box_pack_start(GTK_BOX(globals->dialog_box), gtk_label_new("Done!"), TRUE, TRUE, 20);
-    gtk_widget_show_all(globals->dialog);
-
-    gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
-
-    push_stack(globals->pages, 1);
-    set_next_hb_title(globals);
 }
 
 NEW_CALLBACK(format_device_cb) {
     (void) w;
 
     GtkWidget *diag;
-    GtkWidget *box;
 
     app_objects *globals = udata;
     GtkWidget *window = globals->window;
@@ -200,17 +215,10 @@ NEW_CALLBACK(format_device_cb) {
     if (result != GTK_RESPONSE_ACCEPT)
         return;
     
-    diag = create_progress_spinner_dialog(window, &box); 
+    diag = create_progress_spinner_dialog(window, globals); 
     globals->dialog = diag;
-    globals->dialog_box = box;
-    /*gtk_widget_set_can_focus(diag, TRUE);*/
-    /*gtk_window_set_modal(GTK_WINDOW(diag), TRUE);*/
-    /*gtk_window_set_transient_for(GTK_WINDOW(diag), GTK_WINDOW(window));*/
-    gtk_widget_show_all(diag);
-    /*gtk_dialog_run(GTK_DIALOG(diag));*/
-    /*gtk_dialog_response(GTK_DIALOG(diag), GTK_RESPONSE_ACCEPT);*/
     
-    gtk_box_pack_start(GTK_BOX(box), gtk_label_new("Formatting..."), TRUE, TRUE, 10);
+    gtk_box_pack_start(GTK_BOX(globals->dialog_box), gtk_label_new("Formatting..."), TRUE, TRUE, 10);
     gtk_widget_show_all(diag);
 
     cmd = format_target_device(info->target_device, fs_choice);
