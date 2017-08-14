@@ -3,7 +3,7 @@
 
 #include "appdefs.h"
 
-static int target_is_mounted();
+int target_is_mounted();
 char **format_target_device(char *blockdev, char *format);
 char **mount_target_device(char *blockdev);
 int create_forensic_image(app_objects *globals);
