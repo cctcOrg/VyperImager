@@ -3,6 +3,7 @@
 #include "devinfo.h"
 #include "appdefs.h"
 #include "dialogs.h"
+#include "callbacks.h"
 #include "pages.h"
 #include "stack.h"
 
@@ -85,6 +86,7 @@ static void activate(GtkApplication* app, gpointer user_data) {
     app_box = create_summary_interface(globals);
     notebook_append_with_title(globals, app_box, "Summary");
 
+    g_signal_connect(window, "delete-event", G_CALLBACK(quit_app), NULL);
     gtk_widget_show_all(window);
 
 }

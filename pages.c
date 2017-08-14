@@ -38,8 +38,7 @@ static void create_navigation_button_box(GtkWidget *ab,
     gtk_container_add(GTK_CONTAINER(box), button);
     
     button = gtk_button_new_with_label("Quit");
-    g_signal_connect_swapped(button, "clicked", 
-            G_CALLBACK(gtk_widget_destroy), globals->window);
+    g_signal_connect(button, "clicked", G_CALLBACK(quit_app), NULL);
     gtk_container_add(GTK_CONTAINER(box), button);
 
     gtk_box_pack_end(GTK_BOX(ab), box, FALSE, FALSE, 0);
@@ -191,8 +190,7 @@ GtkWidget *create_welcome_box(app_objects *globals) {
     gtk_container_add(GTK_CONTAINER(button_box), button);
     
     button = gtk_button_new_with_label("Quit");
-    g_signal_connect_swapped(button, "clicked", 
-            G_CALLBACK(gtk_widget_destroy), globals->window);
+    g_signal_connect(button, "clicked", G_CALLBACK(quit_app), NULL);
     gtk_container_add(GTK_CONTAINER(button_box), button);
 
     gtk_box_pack_end(GTK_BOX(app_box), button_box, FALSE, FALSE, 0);

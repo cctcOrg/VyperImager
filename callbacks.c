@@ -38,6 +38,18 @@ NEW_CALLBACK(notebook_previous_page) {
     gtk_header_bar_set_title(GTK_HEADER_BAR(globals->header), tab_label);
 }
 
+NEW_CALLBACK(quit_app) {
+    app_objects *globals;
+    char unwriteblock[30];
+
+    system("umount /media/EVID_TARGET");
+    sprintf(unwriteblock, "blockdev --setrw /dev/%s", 
+            globals->user_info->evidence_device);
+    system(unwriteblock);
+
+    gtk_main_quit();
+}
+
 NEW_CALLBACK(check_tv_cb) {
     (void) w;
     app_objects *globals = udata;
