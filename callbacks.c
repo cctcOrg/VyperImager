@@ -39,15 +39,21 @@ NEW_CALLBACK(notebook_previous_page) {
 }
 
 NEW_CALLBACK(quit_app) {
-    app_objects *globals;
+    app_objects *globals = udata;
+    char *evid_dev;
     char unwriteblock[30];
 
-    system("umount /media/EVID_TARGET");
-    sprintf(unwriteblock, "blockdev --setrw /dev/%s", 
-            globals->user_info->evidence_device);
-    system(unwriteblock);
+    if (target_is_mounted())
+        system("umount /media/EVID_TARGET");
 
-    gtk_main_quit();
+    evid_dev = globals->user_info->evidence_device;
+    if (*evid_dev != NULL) {
+        sprintf(unwriteblock, "blockdev --setrw /dev/%s", 
+                globals->user_info->evidence_device);
+        system(unwriteblock);
+    }
+
+    g_application_quit(globals->app);
 }
 
 NEW_CALLBACK(check_tv_cb) {
@@ -121,16 +127,17 @@ NEW_CALLBACK(check_tv_cb) {
 
 }
 
-NEW_CALLBACK(target_setup_done) {
-    (void) w;
+static void target_setup_done(GtkDialog *d, gint i, gpointer udata) {
+    (void) d;
+    (void) i;
     app_objects *globals = udata;
-    printf("%p\n", globals);
-    /*gtk_widget_destroy(globals->dialog);*/
 
-    /*gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));*/
+    gtk_widget_destroy(globals->dialog);
 
-    /*push_stack(globals->pages, 1);*/
-    /*set_next_hb_title(globals);*/
+    gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
+
+    push_stack(globals->pages, 1);
+    set_next_hb_title(globals);
 
 }
 

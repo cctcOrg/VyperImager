@@ -22,15 +22,16 @@ int main (int argc, char **argv) {
   return status;
 }
 
-static void activate(GtkApplication* app, gpointer user_data) {
-    (void) app;
+static void activate(GtkApplication *app, gpointer user_data) {
     (void) user_data;
+
     GtkWidget *window;
     GtkWidget *notebook;
     GtkWidget *app_box;
     GtkWidget *header_bar;
 
     app_objects *globals = malloc(sizeof(app_objects));
+    globals->app = app;
     
     ImageInfo *info = malloc(sizeof(ImageInfo));
     globals->user_info = info;
@@ -86,7 +87,7 @@ static void activate(GtkApplication* app, gpointer user_data) {
     app_box = create_summary_interface(globals);
     notebook_append_with_title(globals, app_box, "Summary");
 
-    g_signal_connect(window, "delete-event", G_CALLBACK(quit_app), NULL);
+    g_signal_connect(window, "delete-event", G_CALLBACK(quit_app), globals);
     gtk_widget_show_all(window);
 
 }
