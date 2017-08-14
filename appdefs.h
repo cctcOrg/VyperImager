@@ -52,6 +52,8 @@ enum {
 typedef struct app_objects {
     page_stack *pages;
 
+    GtkApplication *app;
+
     GtkWidget *window;
     GtkWidget *notebook;
     GtkWidget *header;
