@@ -45,12 +45,14 @@ static void create_navigation_button_box(GtkWidget *ab,
  }
 
 static GtkTreeModel *create_block_devices_liststore(
-        int hide_internal, GtkTreePath **path)
+        int hide_internal, GtkTreePath **path, char *evid)
 {
     GtkListStore  *store;
     GtkTreeIter    iter;
 
     int num_blockdevs;
+    int is_eviddev;
+
     Device **blockdev_info;
     Device *dev;
 
@@ -61,8 +63,13 @@ static GtkTreeModel *create_block_devices_liststore(
 
     for (int i=0; i<num_blockdevs; i++) {
         dev = blockdev_info[i];
+ 
+        is_eviddev = ( evid != NULL  &&  (strcmp(evid, dev->name) == 0) ); 
 
-        if (hide_internal && !dev->removable)
+        /* If we've been asked to hide the internal devices, then this is the
+         * target selection interface. In that case we should skip any device
+         * that isn't removable, but also we want to skip the evidence device */
+        if (hide_internal && (!dev->removable || is_eviddev))
             continue;
 
         gtk_list_store_append(store, &iter);
@@ -77,11 +84,11 @@ static GtkTreeModel *create_block_devices_liststore(
     return GTK_TREE_MODEL(store);
 } 
 
-static GtkWidget *create_block_devices_treeview(int hide_internal, app_objects *globals) {
+static GtkWidget *create_block_devices_treeview() {
     GtkTreeSelection    *selection;
     GtkCellRenderer     *renderer;
-    GtkTreeModel        *model;
-    GtkTreePath         *evid_path = NULL;
+    /*GtkTreeModel        *model;*/
+    /*GtkTreePath         *evid_path = NULL;*/
     GtkWidget           *treeview;
     
     treeview = gtk_tree_view_new();
@@ -120,6 +127,26 @@ static GtkWidget *create_block_devices_treeview(int hide_internal, app_objects *
                 NULL);
     }
 
+    /*model = create_block_devices_liststore(hide_internal, &evid_path);*/
+    /*gtk_tree_view_set_model(GTK_TREE_VIEW(treeview), model);*/
+
+    /*if (evid_path && hide_internal) {*/
+        /*selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));*/
+        /*gtk_tree_selection_select_path(selection, evid_path);*/
+        /*gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(globals->format_dev), FALSE);*/
+    /*}*/
+
+    /*g_object_unref(model);*/
+
+    return treeview;
+}
+
+void set_treeview_model(GtkWidget *treeview, int hide_internal, app_objects *globals) {
+    GtkTreeSelection    *selection;
+    GtkTreeModel        *model;
+    GtkTreePath         *evid_path = NULL;
+    char                *e = globals->user_info->evidence_device;
+
     model = create_block_devices_liststore(hide_internal, &evid_path);
     gtk_tree_view_set_model(GTK_TREE_VIEW(treeview), model);
 
@@ -130,8 +157,6 @@ static GtkWidget *create_block_devices_treeview(int hide_internal, app_objects *
     }
 
     g_object_unref(model);
-
-    return treeview;
 }
 
 GtkWidget *create_welcome_box(app_objects *globals) {

@@ -72,6 +72,7 @@ NEW_CALLBACK(welcome_page_cb) {
     (void) w;
     app_objects *globals = udata;
 
+    set_treeview_model(globals->etv, FALSE, globals);
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
     push_stack(globals->pages, WELCOME_PAGE);
     set_next_hb_title(globals);
@@ -150,6 +151,7 @@ NEW_CALLBACK(evidence_device_cb) {
 
     writeblock_evidence_device(info->evidence_device);
 
+    set_treeview_model(globals->ttv, TRUE, globals);
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
     push_stack(globals->pages, EVID_PAGE);
     set_next_hb_title(globals);

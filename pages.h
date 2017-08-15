@@ -4,6 +4,7 @@
 #include<gtk/gtk.h>
 #include "appdefs.h"
 
+void set_treeview_model(GtkWidget *treeview, int hide_internal, app_objects *globals);
 GtkWidget *create_welcome_box(app_objects *globals);
 GtkWidget *create_target_selector(app_objects *globals);
 GtkWidget *create_evidence_selector(app_objects *globals);
