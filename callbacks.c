@@ -8,6 +8,17 @@
 
 #define MAX_DEV_SIZE 10
 
+enum {
+    WELCOME_PAGE = 0,
+    EVID_PAGE,
+    TGT_PAGE,
+    TGTF_PAGE,
+    LOC_PAGE,
+    CASE_PAGE,
+    IMGI_PAGE,
+    SUMM_PAGE
+};
+
 static void set_next_hb_title(app_objects *g) {
     int current_page;
     GtkWidget *current_child;
@@ -62,7 +73,7 @@ NEW_CALLBACK(welcome_page_cb) {
     app_objects *globals = udata;
 
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
-    push_stack(globals->pages, 0);
+    push_stack(globals->pages, WELCOME_PAGE);
     set_next_hb_title(globals);
 }
 
@@ -97,7 +108,7 @@ NEW_CALLBACK(target_device_cb) {
 
     if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->format_dev)))
         gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
-    /* If you don't need to format skip to page 2 */
+    /* If you don't need to format skip to the location page */
     else {
         cmd = mount_target_device(info->target_device);
         subp = g_subprocess_newv(cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
@@ -105,9 +116,9 @@ NEW_CALLBACK(target_device_cb) {
         g_strfreev(cmd);
 
         globals->user_info->target_filesystem = "N/A";
-        gtk_notebook_set_current_page(GTK_NOTEBOOK(globals->notebook), 3);
+        gtk_notebook_set_current_page(GTK_NOTEBOOK(globals->notebook), LOC_PAGE);
     }
-    push_stack(globals->pages, 1);
+    push_stack(globals->pages, TGT_PAGE);
     set_next_hb_title(globals);
 }
 
@@ -140,7 +151,7 @@ NEW_CALLBACK(evidence_device_cb) {
     writeblock_evidence_device(info->evidence_device);
 
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
-    push_stack(globals->pages, 3);
+    push_stack(globals->pages, EVID_PAGE);
     set_next_hb_title(globals);
 }
 
@@ -153,7 +164,7 @@ static void target_setup_done(GtkDialog *d, gint i, gpointer udata) {
 
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
 
-    push_stack(globals->pages, 2);
+    push_stack(globals->pages, TGTF_PAGE);
     set_next_hb_title(globals);
 
 }
@@ -289,7 +300,7 @@ NEW_CALLBACK(get_target_info_cb) {
     info->target_directory = entry_data;
 
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
-    push_stack(globals->pages, 2);
+    push_stack(globals->pages, LOC_PAGE);
     set_next_hb_title(globals);
 }
 
@@ -327,7 +338,7 @@ NEW_CALLBACK(case_info_cb) {
     c->desc = entry_data;
     
     gtk_notebook_next_page(GTK_NOTEBOOK(g->notebook));
-    push_stack(g->pages, 3);
+    push_stack(g->pages, CASE_PAGE);
     set_next_hb_title(g);
 }
 
@@ -396,7 +407,6 @@ NEW_CALLBACK(image_info_cb) {
     gtk_label_set_text(GTK_LABEL(label), info->hash_type);
 
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
-    push_stack(globals->pages, 4);
+    push_stack(globals->pages, IMGI_PAGE);
     set_next_hb_title(globals);
-
 }
