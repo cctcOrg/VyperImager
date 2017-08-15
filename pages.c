@@ -84,7 +84,7 @@ static GtkTreeModel *create_block_devices_liststore(
     return GTK_TREE_MODEL(store);
 } 
 
-static GtkWidget *create_block_devices_treeview() {
+static GtkWidget *create_block_devices_treeview(int hide_internal) {
     GtkTreeSelection    *selection;
     GtkCellRenderer     *renderer;
     /*GtkTreeModel        *model;*/
@@ -147,7 +147,7 @@ void set_treeview_model(GtkWidget *treeview, int hide_internal, app_objects *glo
     GtkTreePath         *evid_path = NULL;
     char                *e = globals->user_info->evidence_device;
 
-    model = create_block_devices_liststore(hide_internal, &evid_path);
+    model = create_block_devices_liststore(hide_internal, &evid_path, e);
     gtk_tree_view_set_model(GTK_TREE_VIEW(treeview), model);
 
     if (evid_path && hide_internal) {
@@ -214,7 +214,7 @@ GtkWidget *create_target_selector(app_objects *globals) {
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
     globals->format_dev = button;
 
-    targ_device_tv = create_block_devices_treeview(HIDE_INT, globals);
+    targ_device_tv = create_block_devices_treeview(HIDE_INT);
     gtk_box_pack_start(GTK_BOX(app_box), targ_device_tv, TRUE, TRUE, 10);
     globals->ttv = targ_device_tv;
 
@@ -238,7 +238,7 @@ GtkWidget *create_evidence_selector(app_objects *globals) {
             gtk_label_new("Please choose the evidence device"), TRUE, TRUE, 10);
 
     /* Treeviews */
-    evid_device_tv = create_block_devices_treeview(SHOW_INT, globals);
+    evid_device_tv = create_block_devices_treeview(SHOW_INT);
     gtk_box_pack_start(GTK_BOX(app_box), evid_device_tv, TRUE, TRUE, 10);
 
     globals->etv = evid_device_tv;
