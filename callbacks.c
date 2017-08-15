@@ -39,6 +39,7 @@ NEW_CALLBACK(notebook_previous_page) {
 }
 
 NEW_CALLBACK(quit_app) {
+    (void) w;
     app_objects *globals = udata;
     char *evid_dev;
     char unwriteblock[30];
@@ -56,21 +57,71 @@ NEW_CALLBACK(quit_app) {
     g_application_quit(globals->app);
 }
 
-NEW_CALLBACK(check_tv_cb) {
+NEW_CALLBACK(welcome_page_cb) {
+    (void) w;
+    app_objects *globals = udata;
+
+    gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
+    push_stack(globals->pages, 0);
+    set_next_hb_title(globals);
+}
+
+NEW_CALLBACK(target_device_cb) {
     (void) w;
     app_objects *globals = udata;
     GtkWidget *window = globals->window;
     ImageInfo *info = globals->user_info;
-    
 
     GtkTreeSelection *sel;
     GtkTreeModel *model;
     GtkTreeIter iter;
     GtkWidget *diag;
-    
+
     char *name;
     GSubprocess *subp;
     char **cmd;
+
+    /* Get target device name */
+    sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(globals->ttv));
+    if (gtk_tree_selection_get_selected(sel, &model, &iter)) {
+        name = malloc(MAX_DEV_SIZE*sizeof(char));
+        gtk_tree_model_get(model, &iter, COL_DEV, &name, -1);
+        info->target_device = name;
+    } 
+    else {
+        diag = create_no_device_dialog(window, "target");
+        gtk_dialog_run(GTK_DIALOG(diag));
+        gtk_widget_destroy(diag);
+        return;
+    }
+
+    if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->format_dev)))
+        gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
+    /* If you don't need to format skip to page 2 */
+    else {
+        cmd = mount_target_device(info->target_device);
+        subp = g_subprocess_newv(cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
+        g_subprocess_wait(subp, NULL, NULL);
+        g_strfreev(cmd);
+
+        globals->user_info->target_filesystem = "N/A";
+        gtk_notebook_set_current_page(GTK_NOTEBOOK(globals->notebook), 3);
+    }
+    push_stack(globals->pages, 1);
+    set_next_hb_title(globals);
+}
+
+NEW_CALLBACK(evidence_device_cb) {
+    (void) w;
+    app_objects *globals = udata;
+    GtkWidget *window = globals->window;
+    ImageInfo *info = globals->user_info;
+
+    GtkTreeSelection *sel;
+    GtkTreeModel *model;
+    GtkTreeIter iter;
+    GtkWidget *diag;
+    char *name;
 
     /* Get evidence device name */
     sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(globals->etv));
@@ -86,45 +137,11 @@ NEW_CALLBACK(check_tv_cb) {
         return;
     }
 
-    /* Get target device name */
-    sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(globals->ttv));
-    if (gtk_tree_selection_get_selected(sel, &model, &iter)) {
-        name = malloc(MAX_DEV_SIZE*sizeof(char));
-        gtk_tree_model_get(model, &iter, COL_DEV, &name, -1);
-        info->target_device = name;
-    } 
-    else {
-        diag = create_no_device_dialog(window, "target");
-        gtk_dialog_run(GTK_DIALOG(diag));
-        gtk_widget_destroy(diag);
-        return;
-    }
-    
-    if (strcmp(info->evidence_device, info->target_device) == 0) {
-        diag = create_same_device_dialog(window);
-        gtk_dialog_run(GTK_DIALOG(diag));
-        gtk_widget_destroy(diag);
-        return;
-    }
-
-    push_stack(globals->pages, 0);
     writeblock_evidence_device(info->evidence_device);
 
-    if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->format_dev)))
-        gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
-    /* If you don't need to format skip to page 2 */
-    else {
-        cmd = mount_target_device(info->target_device);
-        subp = g_subprocess_newv(cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
-        g_subprocess_wait(subp, NULL, NULL);
-        g_strfreev(cmd);
-
-        globals->user_info->target_filesystem = "N/A";
-        gtk_notebook_set_current_page(GTK_NOTEBOOK(globals->notebook), 2);
-    }
-
+    gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
+    push_stack(globals->pages, 3);
     set_next_hb_title(globals);
-
 }
 
 static void target_setup_done(GtkDialog *d, gint i, gpointer udata) {
@@ -136,7 +153,7 @@ static void target_setup_done(GtkDialog *d, gint i, gpointer udata) {
 
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
 
-    push_stack(globals->pages, 1);
+    push_stack(globals->pages, 2);
     set_next_hb_title(globals);
 
 }
