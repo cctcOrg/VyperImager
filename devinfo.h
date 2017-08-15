@@ -4,10 +4,15 @@
 #define HIDE_INT 1
 #define SHOW_INT 0
 
+#include<parted/device.h>
+
 typedef struct Device {
+    PedDevice *dev;
     char *name;
     char *model;
     char *size;
+    char **labels;
+    int  numparts;
     int  removable;
     int  is_target;
 } Device;

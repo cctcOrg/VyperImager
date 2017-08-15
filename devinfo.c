@@ -3,6 +3,10 @@
 #include<dirent.h>
 #include<stdlib.h>
 #include<sys/stat.h>
+
+#include<parted/device.h>
+#include<blkid/blkid.h>
+
 #include "devinfo.h"
 
 #define BAD_STAT -1
@@ -71,13 +75,29 @@ Device **get_blockdev_info(int *num_blockdevs) {
     return device_info;
 }
 
-Device *get_blockdev_struct(char *name) {
+Device *get_blockdev_struct(PedDevice *dev) {
+    blkid_probe prober;
+    char *tmp;
+    char **labels;
+    int numparts;
+
+    blkid_new_probe_from_filename(dev->path);
+    numparts = blkid_partlist_numof_partitions(blkid_probe_get_partitions(probe));
+    labels = malloc(numparts*sizof(char*));
+
     FILE *info_file;
     char info_path[PATH_SIZE];
+    char *dev_tmp;
     
     /* strlen doesn't count the null character, need to do that */
+    char *dev_path = malloc((strlen(dev->path)+1)*sizeof(char));
+    strcpy(dev_path, dev->path);
+    strtok(dev_path, "/"); // "dev"
+    dev_tmp = strtok(NULL, "/"); // <name>
+
     char *devname = malloc((strlen(name)+1)*sizeof(char));
-    char *model = malloc(MODEL_SIZE*sizeof(char));
+    strcpy(devname, dev_tmp);
+    /*char *model = malloc(MODEL_SIZE*sizeof(char));*/
 
     char *size = malloc(SIZE_SIZE*sizeof(char));
     char size_raw[SIZE_SIZE];
@@ -88,22 +108,20 @@ Device *get_blockdev_struct(char *name) {
 
     Device *devinfo = malloc(sizeof(Device));
 
-    strcpy(devname, name);
-
-    sprintf(info_path, "/sys/block/%s/device/model", name);
+    /*sprintf(info_path, "/sys/block/%s/device/model", name);*/
     
     /* Model */
-    info_file = fopen(info_path, "r");
-    if (info_file == NULL) {
-        printf("Note: no model: %s\n", name);
-        strcpy(model, "SD Card");
-    } 
-    else {
-        fgets(model, MODEL_SIZE, info_file);
-        /* Remove trailing \n */
-        model[strlen(model)-1] = 0;
-        fclose(info_file);
-    }
+    /*info_file = fopen(info_path, "r");*/
+    /*if (info_file == NULL) {*/
+        /*printf("Note: no model: %s\n", name);*/
+        /*strcpy(model, "SD Card");*/
+    /*} */
+    /*else {*/
+        /*fgets(model, MODEL_SIZE, info_file);*/
+        /*[> Remove trailing \n <]*/
+        /*model[strlen(model)-1] = 0;*/
+        /*fclose(info_file);*/
+    /*}*/
 
     /* Size */
     sprintf(info_path, "/sys/block/%s/size", name);
@@ -132,10 +150,12 @@ Device *get_blockdev_struct(char *name) {
     info_file = fopen(info_path, "r");
     fgets(rem, REM_SIZE, info_file);
     fclose(info_file);
-
+    
+    devinfo->dev = dev;
     devinfo->name = devname;
     devinfo->model = model;
     devinfo->size = size;
+    devinfo->numparts = numparts;
     devinfo->removable = (rem[0] == '0') ? 0 : 1;
 
     return devinfo;
