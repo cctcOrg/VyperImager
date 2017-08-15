@@ -5,6 +5,8 @@
 #include "appdefs.h"
 
 GtkWidget *create_welcome_box(app_objects *globals);
+GtkWidget *create_target_selector(app_objects *globals);
+GtkWidget *create_evidence_selector(app_objects *globals);
 GtkWidget *create_format_selector(app_objects *globals);
 GtkWidget *create_target_interface(app_objects *globals);
 GtkWidget *create_case_metadata_interface(app_objects *globals);

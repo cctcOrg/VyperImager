@@ -137,8 +137,6 @@ GtkWidget *create_welcome_box(app_objects *globals) {
     GtkWidget *app_box;
     GtkWidget *button_box;
     GtkWidget *button;
-    GtkWidget *evid_device_tv;
-    GtkWidget *targ_device_tv;
 
     app_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
 
@@ -148,11 +146,36 @@ GtkWidget *create_welcome_box(app_objects *globals) {
     gtk_widget_set_size_request(button_box, -1, 100);
 
     gtk_box_pack_start(GTK_BOX(app_box), 
-            gtk_label_new("Welcome to the CCTC Imaging Toolkit!"),
+            gtk_label_new("Welcome to the First Responder Imaging Toolkit!"),
                 TRUE, TRUE, 30);
 
+    /* Button box */
+    button = gtk_button_new_with_label("Utilities");
+    gtk_container_add(GTK_CONTAINER(button_box), button);
+    
+    button = gtk_button_new_with_label("Next");
+    gtk_widget_set_size_request(button, -1, 50);
+    g_signal_connect(button, "clicked", G_CALLBACK(welcome_page_cb), globals);
+    gtk_container_add(GTK_CONTAINER(button_box), button);
+    
+    button = gtk_button_new_with_label("Quit");
+    g_signal_connect(button, "clicked", G_CALLBACK(quit_app), globals);
+    gtk_container_add(GTK_CONTAINER(button_box), button);
+
+    gtk_box_pack_end(GTK_BOX(app_box), button_box, FALSE, FALSE, 0);
+    set_box_margins(app_box);
+
+    return app_box;
+}
+
+GtkWidget *create_target_selector(app_objects *globals) {
+    GtkWidget *app_box;
+    GtkWidget *button;
+    GtkWidget *targ_device_tv;
+
     gtk_box_pack_start(GTK_BOX(app_box), 
-            gtk_label_new("Please choose the device to image"),
+            gtk_label_new("Please choose which device you'd like to save your "
+                "image on (i.e the Target Device)"),
                 TRUE, TRUE, 10);
 
     /* This needs to be defined before the treeviews because the treeviews
@@ -163,37 +186,31 @@ GtkWidget *create_welcome_box(app_objects *globals) {
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
     globals->format_dev = button;
 
-    /* Treeviews */
-    evid_device_tv = create_block_devices_treeview(SHOW_INT, globals);
-    gtk_box_pack_start(GTK_BOX(app_box), evid_device_tv, TRUE, TRUE, 10);
-
-    gtk_box_pack_start(GTK_BOX(app_box), 
-            gtk_label_new("Please choose the target device"),
-                TRUE, TRUE, 20);
-
     targ_device_tv = create_block_devices_treeview(HIDE_INT, globals);
     gtk_box_pack_start(GTK_BOX(app_box), targ_device_tv, TRUE, TRUE, 10);
-
-    globals->etv = evid_device_tv;
     globals->ttv = targ_device_tv;
 
     /* Format button */
     gtk_box_pack_start(GTK_BOX(app_box), button, TRUE, TRUE, 20);
 
-    /* Button box */
-    button = gtk_button_new_with_label("Utilities");
-    gtk_container_add(GTK_CONTAINER(button_box), button);
-    
-    button = gtk_button_new_with_label("Next");
-    gtk_widget_set_size_request(button, -1, 50);
-    g_signal_connect(button, "clicked", G_CALLBACK(check_tv_cb), globals);
-    gtk_container_add(GTK_CONTAINER(button_box), button);
-    
-    button = gtk_button_new_with_label("Quit");
-    g_signal_connect(button, "clicked", G_CALLBACK(quit_app), globals);
-    gtk_container_add(GTK_CONTAINER(button_box), button);
+    create_navigation_button_box(app_box, target_device_cb, globals);
+    set_box_margins(app_box);
 
-    gtk_box_pack_end(GTK_BOX(app_box), button_box, FALSE, FALSE, 0);
+    return app_box;
+}
+
+GtkWidget *create_evidence_selector(app_objects *globals) {
+    GtkWidget *app_box;
+    /*GtkWidget *button;*/
+    GtkWidget *evid_device_tv;
+
+    /* Treeviews */
+    evid_device_tv = create_block_devices_treeview(SHOW_INT, globals);
+    gtk_box_pack_start(GTK_BOX(app_box), evid_device_tv, TRUE, TRUE, 10);
+
+    globals->etv = evid_device_tv;
+
+    create_navigation_button_box(app_box, evidence_device_cb, globals);
     set_box_margins(app_box);
 
     return app_box;
