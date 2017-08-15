@@ -72,14 +72,14 @@ static void activate(GtkApplication *app, gpointer user_data) {
      * (callbacks subsequently handle this) */
     gtk_header_bar_set_title(GTK_HEADER_BAR(header_bar), title);
 
+    app_box = create_evidence_selector(globals);
+    notebook_append_with_title(globals, app_box, "Evidence Device Selection");
+
     app_box = create_target_selector(globals);
     notebook_append_with_title(globals, app_box, "Target Device Selection");
 
     app_box = create_format_selector(globals);
     notebook_append_with_title(globals, app_box, "Target Device Format");
-
-    app_box = create_evidence_selector(globals);
-    notebook_append_with_title(globals, app_box, "Evidence Device Selection");
 
     app_box = create_target_interface(globals);
     notebook_append_with_title(globals, app_box, "Target Image Location Information");
