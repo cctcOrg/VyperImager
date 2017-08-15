@@ -18,8 +18,8 @@ static void set_box_margins(GtkWidget *w) {
 }
 
 static void create_navigation_button_box(GtkWidget *ab, 
-        void (*cb)(GtkWidget *, gpointer), app_objects *globals) {
-
+        void (*cb)(GtkWidget *, gpointer), app_objects *globals)
+{
     GtkWidget *box;
     GtkWidget *button;
 
@@ -42,9 +42,11 @@ static void create_navigation_button_box(GtkWidget *ab,
     gtk_container_add(GTK_CONTAINER(box), button);
 
     gtk_box_pack_end(GTK_BOX(ab), box, FALSE, FALSE, 0);
-}
+ }
 
-static GtkTreeModel *create_block_devices_liststore(int hide_internal, GtkTreePath **path) {
+static GtkTreeModel *create_block_devices_liststore(
+        int hide_internal, GtkTreePath **path)
+{
     GtkListStore  *store;
     GtkTreeIter    iter;
 
@@ -60,9 +62,8 @@ static GtkTreeModel *create_block_devices_liststore(int hide_internal, GtkTreePa
     for (int i=0; i<num_blockdevs; i++) {
         dev = blockdev_info[i];
 
-        if (hide_internal)
-            if (!dev->removable)
-                continue;
+        if (hide_internal && !dev->removable)
+            continue;
 
         gtk_list_store_append(store, &iter);
         gtk_list_store_set(store, &iter,
@@ -173,6 +174,8 @@ GtkWidget *create_target_selector(app_objects *globals) {
     GtkWidget *button;
     GtkWidget *targ_device_tv;
 
+    app_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+
     gtk_box_pack_start(GTK_BOX(app_box), 
             gtk_label_new("Please choose which device you'd like to save your "
                 "image on (i.e the Target Device)"),
@@ -203,6 +206,11 @@ GtkWidget *create_evidence_selector(app_objects *globals) {
     GtkWidget *app_box;
     /*GtkWidget *button;*/
     GtkWidget *evid_device_tv;
+
+    app_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+
+    gtk_box_pack_start(GTK_BOX(app_box), 
+            gtk_label_new("Please choose the evidence device"), TRUE, TRUE, 10);
 
     /* Treeviews */
     evid_device_tv = create_block_devices_treeview(SHOW_INT, globals);
