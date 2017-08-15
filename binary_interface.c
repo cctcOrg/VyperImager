@@ -66,6 +66,7 @@ char **mount_target_device(char *blockdev) {
     else
         mkdir("/media", ACCESSPERMS);
 
+    char *mountpoint = "/media/EVID_TARGET";
     /* See if mountpoint exists, create it if not */
     dir = opendir(mountpoint);
     if (dir)
