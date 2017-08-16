@@ -39,76 +39,137 @@ static char *get_target_dev(char *filename) {
 }
 
 Device **get_blockdev_info(int *num_blockdevs) {
-    DIR *dir;
-    struct dirent *ent;
-    int i = 0;
-    char *fn;
+    PedDevice *ped = NULL;
     char *target_device;
+    int i;
+    /*DIR *dir;*/
+    /*struct dirent *ent;*/
+    /*char *fn;*/
 
     Device *dev;
     Device **device_info = malloc(NUM_BLOCKDEVS*sizeof(Device*));
 
     target_device = get_target_dev("/dev/disk/by-label/EVID_TARGET");
-
-    /* Find the block devices */
-    if ((dir = opendir("/sys/block")) != NULL) {
-        /* print all the files and directories within directory */
-        while ((ent = readdir(dir)) != NULL) {
-            fn = ent->d_name;
-            /* Don't include "." entries or loop devices */
-            if (fn[0] != '.' && fn[0] != 'l') {
-                dev = get_blockdev_struct(fn);
-                if (target_device != NULL)
-                    dev->is_target = (strcmp(target_device, fn) == 0) ? 1: 0;
-                device_info[i] = dev;
-                i++;
-            }
-        }
-        closedir(dir);
-    } 
-    else {
-        perror("");
-        return NULL;
-    }    
     
+    ped_device_probe_all();
+
+    while ( (ped = ped_device_get_next(ped)) ) {
+        dev = get_blockdev_struct(ped);
+        if (target_device != NULL)
+            dev->is_target = (strcmp(target_device, dev->name) == 0) ? 1: 0;
+        device_info[i] = dev;
+        i++;
+    }
+
     *num_blockdevs = i;
     return device_info;
+
+    /* Find the block devices */
+    /*if ((dir = opendir("/sys/block")) != NULL) {*/
+        /*[> print all the files and directories within directory <]*/
+        /*while ((ent = readdir(dir)) != NULL) {*/
+            /*fn = ent->d_name;*/
+            /*[> Don't include "." entries or loop devices <]*/
+            /*if (fn[0] != '.' && fn[0] != 'l') {*/
+                /*dev = get_blockdev_struct(fn);*/
+                /*if (target_device != NULL)*/
+                    /*dev->is_target = (strcmp(target_device, fn) == 0) ? 1: 0;*/
+                /*device_info[i] = dev;*/
+                /*i++;*/
+            /*}*/
+        /*}*/
+        /*closedir(dir);*/
+    /*} */
+    /*else {*/
+        /*perror("");*/
+        /*return NULL;*/
+    /*}    */
 }
 
 Device *get_blockdev_struct(PedDevice *dev) {
+    FILE *info_file;
     blkid_probe prober;
+    blkid_partlist ls;
+    char tmp_array[32];
+    char info_path[PATH_SIZE];
+    char rem[REM_SIZE]; 
+    char *devname;
     char *tmp;
     char **labels;
-    int numparts;
+    int has_parttable = 0;
+    int numparts = 0;
+    int i;
 
-    blkid_new_probe_from_filename(dev->path);
-    numparts = blkid_partlist_numof_partitions(blkid_probe_get_partitions(probe));
-    labels = malloc(numparts*sizof(char*));
+    char *size = malloc(SIZE_SIZE*sizeof(char));
+    float size_value;
 
-    FILE *info_file;
-    char info_path[PATH_SIZE];
-    char *dev_tmp;
-    
-    /* strlen doesn't count the null character, need to do that */
+    /* Literally just get /dev/<x> */
     char *dev_path = malloc((strlen(dev->path)+1)*sizeof(char));
     strcpy(dev_path, dev->path);
     strtok(dev_path, "/"); // "dev"
-    dev_tmp = strtok(NULL, "/"); // <name>
+    tmp = strtok(NULL, "/"); // <name>
+    devname = malloc((strlen(tmp)+1)*sizeof(char));
+    strcpy(devname, tmp);
 
-    char *devname = malloc((strlen(name)+1)*sizeof(char));
-    strcpy(devname, dev_tmp);
-    /*char *model = malloc(MODEL_SIZE*sizeof(char));*/
+    /* Find the size */
+    blkid_probe pr = blkid_new_probe_from_filename(dev->path);
+    size_value = blkid_probe_get_size(pr);
+    size_value /= 1000000000;
 
-    char *size = malloc(SIZE_SIZE*sizeof(char));
-    char size_raw[SIZE_SIZE];
-    float size_value;
-    char *sz_end;
+    sprintf(size, "%.2f", size_value);
+    strcat(size, " G");
 
-    char rem[REM_SIZE]; 
+    /* See what labels we can find */
+    ls = blkid_probe_get_partitions(pr);
+    if (ls != NULL) {
+        numparts = blkid_partlist_numof_partitions(ls);
+        labels = malloc(numparts*sizeof(char*));
 
+        for (i = 0; i < numparts; i++) {
+            sprintf(info_path, "%s%d", dev->path, (i+1));
+
+            pr = blkid_new_probe_from_filename(info_path);
+            blkid_do_probe(pr);
+            blkid_probe_lookup_value(pr, "LABEL", &tmp, NULL);
+            labels[i] = tmp;
+            blkid_free_probe(pr);
+        }
+    }
+
+    /* Removable */
+    sprintf(info_path, "/sys/block/%s/removable", devname);
+    info_file = fopen(info_path, "r");
+    fgets(rem, REM_SIZE, info_file);
+    fclose(info_file);
+    
     Device *devinfo = malloc(sizeof(Device));
 
+    devinfo->dev = dev;
+    devinfo->name = devname;
+    devinfo->model = dev->model;
+    devinfo->size = size;
+    devinfo->numparts = numparts;
+    devinfo->labels = labels;
+    devinfo->removable = (rem[0] == '0') ? 0 : 1;
+
+    return devinfo;
+
+    /* strlen doesn't count the null character, need to do that */
+
+    /*char *devname = malloc((strlen(name)+1)*sizeof(char));*/
+    /*strcpy(devname, dev_tmp);*/
+    /*char *model = malloc(MODEL_SIZE*sizeof(char));*/
+
+    /*char *size = malloc(SIZE_SIZE*sizeof(char));*/
+    /*char size_raw[SIZE_SIZE];*/
+    /*float size_value;*/
+    /*char *sz_end;*/
+
+
     /*sprintf(info_path, "/sys/block/%s/device/model", name);*/
+    
+    /*size_raw[strlen(size_raw)-1] = 0;*/
+    /*size_value = (float) strtol(size_raw, &sz_end, 10);*/
     
     /* Model */
     /*info_file = fopen(info_path, "r");*/
@@ -124,40 +185,25 @@ Device *get_blockdev_struct(PedDevice *dev) {
     /*}*/
 
     /* Size */
-    sprintf(info_path, "/sys/block/%s/size", name);
+    /*sprintf(info_path, "/sys/block/%s/size", name);*/
 
-    info_file = fopen(info_path, "r");
-    if (info_file == NULL) {
-        printf("No such file or directory: %s\n", info_path);
-        return devinfo;
-    }
+    /*info_file = fopen(info_path, "r");*/
+    /*if (info_file == NULL) {*/
+        /*printf("No such file or directory: %s\n", info_path);*/
+        /*return devinfo;*/
+    /*}*/
 
-    fgets(size_raw, SIZE_SIZE, info_file);
-    fclose(info_file);
+    /*fgets(size_raw, SIZE_SIZE, info_file);*/
+    /*fclose(info_file);*/
     
-    size_raw[strlen(size_raw)-1] = 0;
-    size_value = (float) strtol(size_raw, &sz_end, 10);
-    /* File gives value in 512-byte sectors, need it in bytes */
-    size_value *= 512;
-    /* Convert to GB */
-    size_value /= 1000000000;
+    /*size_raw[strlen(size_raw)-1] = 0;*/
+    /*size_value = (float) strtol(size_raw, &sz_end, 10);*/
+    /*[> File gives value in 512-byte sectors, need it in bytes <]*/
+    /*size_value *= 512;*/
+    /*[> Convert to GB <]*/
+    /*size_value /= 1000000000;*/
 
-    sprintf(size, "%.2f", size_value);
-    strcat(size, " G");
-
-    /* Removable */
-    sprintf(info_path, "/sys/block/%s/removable", name);
-    info_file = fopen(info_path, "r");
-    fgets(rem, REM_SIZE, info_file);
-    fclose(info_file);
-    
-    devinfo->dev = dev;
-    devinfo->name = devname;
-    devinfo->model = model;
-    devinfo->size = size;
-    devinfo->numparts = numparts;
-    devinfo->removable = (rem[0] == '0') ? 0 : 1;
-
-    return devinfo;
+    /*sprintf(size, "%.2f", size_value);*/
+    /*strcat(size, " G");*/
 }
 

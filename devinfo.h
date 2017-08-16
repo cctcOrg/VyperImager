@@ -17,7 +17,7 @@ typedef struct Device {
     int  is_target;
 } Device;
 
-Device *get_blockdev_struct(char *name);
+Device *get_blockdev_struct(PedDevice *dev);
 Device **get_blockdev_info();
 
 #endif /* DEVINFO_H */
