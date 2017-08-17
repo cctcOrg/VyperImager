@@ -4,6 +4,17 @@
 #include<gtk/gtk.h>
 #include "stack.h"
 
+enum {
+    COL_DEV = 0,
+    COL_MODEL,
+    COL_SIZE,
+    COL_NPARTS,
+    COL_LABELS,
+    COL_REMOVABLE,
+    COL_ISTARGET,
+    NUM_COLS
+};
+
 typedef struct SummaryLabels {
     GtkWidget *evidence_device;
     GtkWidget *target_device;
@@ -39,15 +50,6 @@ typedef struct ImageInfo {
     char *compression_type;
     Case *case_info;
 } ImageInfo;
-
-enum {
-    COL_DEV = 0,
-    COL_MODEL,
-    COL_SIZE,
-    COL_REMOVABLE,
-    COL_ISTARGET,
-    NUM_COLS
-};
 
 typedef struct app_objects {
     page_stack *pages;

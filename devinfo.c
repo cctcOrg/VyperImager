@@ -70,8 +70,10 @@ Device *get_blockdev_struct(PedDevice *dev) {
     char rem[REM_SIZE]; 
     char *devname;
     char **labels = NULL;
+    char *wholedev_label;
     int numparts = 0;
     int i;
+    int err;
 
     char *size = malloc(SIZE_SIZE*sizeof(char));
     float size_value;
@@ -90,24 +92,50 @@ Device *get_blockdev_struct(PedDevice *dev) {
     size_value = blkid_probe_get_size(pr);
     size_value /= 1000000000;
 
+    /* Let's see if the whole device has a label */
+    blkid_do_probe(pr);
+    err = blkid_probe_lookup_value(pr, "LABEL", &tmpc, NULL);
+
+    if (err == 0) {
+        wholedev_label = malloc(strlen(tmpc)+1);
+        strcpy(wholedev_label, tmpc);
+    }
+
     sprintf(size, "%.2f", size_value);
     strcat(size, " G");
 
     /* See what labels we can find */
     ls = blkid_probe_get_partitions(pr);
     if (ls != NULL) {
+        i = 0;
         numparts = blkid_partlist_numof_partitions(ls);
-        labels = malloc(numparts*sizeof(char*));
+
+        if (wholedev_label != NULL) {
+            labels = malloc((numparts+1)*sizeof(char*));
+            labels[i] = wholedev_label;
+            i++;
+        }
+        else {
+            labels = malloc(numparts*sizeof(char*));
+        }
 
         for (i = 0; i < numparts; i++) {
             sprintf(info_path, "%s%d", dev->path, (i+1));
 
             pr = blkid_new_probe_from_filename(info_path);
             blkid_do_probe(pr);
-            blkid_probe_lookup_value(pr, "LABEL", &tmpc, NULL);
-            tmp = malloc( (strlen(tmpc)+1) * sizeof(char) );
-            strcpy(tmp, tmpc);
-            labels[i] = tmp;
+            err = blkid_probe_lookup_value(pr, "LABEL", &tmpc, NULL);
+
+            if (err == 0) {
+                tmp = malloc(strlen(tmpc)+1);
+                strcpy(tmp, tmpc);
+                labels[i] = tmp;
+            }
+            else {
+                /*printf("%s has no valid label\n", info_path);*/
+                labels[i] = NULL;
+            }
+
             blkid_free_probe(pr);
         }
     }

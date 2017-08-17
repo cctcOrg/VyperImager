@@ -52,19 +52,46 @@ static GtkTreeModel *create_block_devices_liststore(
 
     int num_blockdevs;
     int is_eviddev;
+    
+    int is_first = 1;
+    char *label;
+    char *partlabels;
 
     Device **blockdev_info;
     Device *dev;
 
     /* Device, model, size */
     store = gtk_list_store_new(NUM_COLS, G_TYPE_STRING, 
-            G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
+            G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING,
+            G_TYPE_STRING, G_TYPE_INT);
     blockdev_info = get_blockdev_info(&num_blockdevs);
 
     for (int i=0; i<num_blockdevs; i++) {
+        partlabels = "";
         dev = blockdev_info[i];
  
         is_eviddev = ( evid != NULL  &&  (strcmp(evid, dev->name) == 0) ); 
+        
+        for (int j = 0; j < dev->numparts; j++) {
+            label = dev->labels[j];
+            if (label != NULL) {
+                if (is_first) {
+                    partlabels = malloc(strlen(label)+1);
+                    strcpy(partlabels, label);
+                    is_first = 0;
+                } 
+                else {
+                    /* Need to allocate 2 extra spaces for the ", " part and
+                     * and extra byte for the terminating null byte */
+                    partlabels = realloc(partlabels, 
+                            (strlen(partlabels) + strlen(label) + 3));
+                    strcat(partlabels, ", ");
+                    strcat(partlabels, label);
+                }
+            }
+        }
+        /* Forget to reset this */
+        is_first = 1;
 
         /* If we've been asked to hide the internal devices, then this is the
          * target selection interface. In that case we should skip any device
@@ -75,9 +102,10 @@ static GtkTreeModel *create_block_devices_liststore(
         gtk_list_store_append(store, &iter);
         gtk_list_store_set(store, &iter,
                 COL_DEV, dev->name, COL_MODEL, dev->model, COL_SIZE, dev->size,
+                COL_NPARTS, dev->numparts, COL_LABELS, partlabels,
                 COL_REMOVABLE, (dev->removable) ? "Yes" : "No",
-                COL_ISTARGET, dev->is_target,
-                -1);
+                COL_ISTARGET, dev->is_target, -1);
+
         if (dev->is_target)
             *path = gtk_tree_model_get_path(GTK_TREE_MODEL(store), &iter);
     }
@@ -117,6 +145,22 @@ static GtkWidget *create_block_devices_treeview(int hide_internal) {
             "text", COL_SIZE,
             NULL);
 
+    renderer = gtk_cell_renderer_text_new();
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview),
+            -1,      
+            "Number of Partitions",  
+            renderer,
+            "text", COL_NPARTS,
+            NULL);
+
+    renderer = gtk_cell_renderer_text_new();
+    gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview),
+            -1,      
+            "Partition Labels",  
+            renderer,
+            "text", COL_LABELS,
+            NULL);
+
     if (!hide_internal) {
         renderer = gtk_cell_renderer_text_new();
         gtk_tree_view_insert_column_with_attributes(GTK_TREE_VIEW(treeview),
@@ -126,17 +170,6 @@ static GtkWidget *create_block_devices_treeview(int hide_internal) {
                 "text", COL_REMOVABLE,
                 NULL);
     }
-
-    /*model = create_block_devices_liststore(hide_internal, &evid_path);*/
-    /*gtk_tree_view_set_model(GTK_TREE_VIEW(treeview), model);*/
-
-    /*if (evid_path && hide_internal) {*/
-        /*selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(treeview));*/
-        /*gtk_tree_selection_select_path(selection, evid_path);*/
-        /*gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(globals->format_dev), FALSE);*/
-    /*}*/
-
-    /*g_object_unref(model);*/
 
     return treeview;
 }
