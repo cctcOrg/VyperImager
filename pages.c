@@ -17,6 +17,8 @@ static void set_box_margins(GtkWidget *w) {
     gtk_widget_set_margin_top(w, 20);
 }
 
+/* Used to create the Previous/Next/Quit button box. It will automatically pack
+ * the created box into the passed ab (app box) parameter */
 static void create_navigation_button_box(GtkWidget *ab, 
         void (*cb)(GtkWidget *, gpointer), app_objects *globals)
 {

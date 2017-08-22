@@ -4,6 +4,8 @@
 #include<gtk/gtk.h>
 #include "appdefs.h"
 
+/* This simply will create and set a model for a TreeView. You can call this
+ * function again with globals->ttv and globals->etv to reload */
 void set_treeview_model(GtkWidget *treeview, int hide_internal, app_objects *globals);
 GtkWidget *create_welcome_box(app_objects *globals);
 GtkWidget *create_target_selector(app_objects *globals);
