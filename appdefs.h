@@ -4,6 +4,7 @@
 #include<gtk/gtk.h>
 #include "stack.h"
 
+/* This is for the GtkTreeModel's internal store */
 enum {
     COL_DEV = 0,
     COL_MODEL,
