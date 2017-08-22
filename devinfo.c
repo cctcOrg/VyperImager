@@ -9,15 +9,15 @@
 
 #include "devinfo.h"
 
-#define BAD_STAT -1
 #define NUM_BLOCKDEVS 5
-#define MAX_BLOCKLEN 15
-#define INODE_OFFSET 5
 #define SIZE_SIZE 15
 #define PATH_SIZE 40
 #define MODEL_SIZE 60
 #define REM_SIZE 10
 
+/* Takes a path, resolving any symbolic links, and strips away everything before
+ * and including the second '/' found -- for example /dev/mmcblk0 -> mmcblk0.
+ * Note that this function will mangle the given filename */
 static char *get_target_dev(char *filename) {
     char *actualpath;
     char *token;
@@ -45,6 +45,7 @@ Device **get_blockdev_info(int *num_blockdevs) {
 
     Device *dev;
     Device **device_info = malloc(NUM_BLOCKDEVS*sizeof(Device*));
+    Device **devinf_real;
 
     target_device = get_target_dev("/dev/disk/by-label/EVID_TARGET");
     
@@ -58,7 +59,13 @@ Device **get_blockdev_info(int *num_blockdevs) {
     }
 
     *num_blockdevs = i;
-    return device_info;
+    devinf_real = realloc(device_info, i*sizeof(Device*));
+    /* If we couldn't make it smaller for some weird reason, then we'll just 
+     * return the one that's too big */
+    if (devinf_real == NULL)
+        return device_info;
+    else
+        return devinf_real;
 }
 
 Device *get_blockdev_struct(PedDevice *dev) {
