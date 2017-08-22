@@ -5,4 +5,4 @@
 - Better ordering on the TreeView
 - Make the design a bit more consistent
 - Properly partition target device
-- Show partition labels in Treeview
+- ~Show partition labels in Treeview~
