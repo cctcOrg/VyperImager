@@ -224,6 +224,18 @@ NEW_CALLBACK(format_device_cb) {
     char *fs_choice = malloc(7*sizeof(char));
     int result;
 
+    PedDevice *tgt_device = NULL;
+    PedSector *start = NULL;
+    PedSector *end = NULL;
+
+    PedDisk *tgt = NULL;
+    PedDiskType *mbr = NULL;
+
+    PedPartition *part = NULL;
+    PedPartition *ptype = NULL;
+    PedFilesystemType *fstype = NULL;
+    PedGeometry *geom = NULL;
+
     GSubprocess *subp;
     char **cmd;
 
@@ -269,6 +281,17 @@ NEW_CALLBACK(format_device_cb) {
     
     gtk_box_pack_start(GTK_BOX(globals->dialog_box), gtk_label_new("Formatting..."), TRUE, TRUE, 10);
     gtk_widget_show_all(diag);
+
+    tgt_device = ped_device_get(info->target_device);
+
+    mbr = ped_disk_type_get("mbr");
+    tgt = ped_disk_new_fresh(target_device, mbr);
+    // TODO: Figure out what type of filesystem I need
+    fstype = ped_file_system_type_get("<FS>");
+
+    // TODO: Figure out how to get the start and end sectors of the free space
+    start = ped_device_get_start(tgt_device);
+    part = ped_partition_new(tgt, PED_PARTITION_NORMAL, fstype, start, tgt_device->length); 
 
     cmd = format_target_device(info->target_device, fs_choice);
     subp = g_subprocess_newv(cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
