@@ -291,12 +291,14 @@ NEW_CALLBACK(format_device_cb) {
     fs = (fs_choice[0] == 'h') ? "hfs": fs_choice;
 
     tgt_device = ped_device_get(info->tgt_path);
+    ped_device_open(tgt_device);
     mbr = ped_disk_type_get("msdos");
     tgt = ped_disk_new_fresh(tgt_device, mbr);
     fstype = ped_file_system_type_get(fs);
 
     /* Apparently starting at sector 2048 is a good idea */
-    part = ped_partition_new(tgt, PED_PARTITION_NORMAL, fstype, 2048, tgt_device->length); 
+    part = ped_partition_new(tgt, PED_PARTITION_NORMAL, fstype, 2048, tgt_device->length-1); 
+    ped_disk_add_partition(tgt, part, ped_constraint_exact(&part->geom));
 
     ped_disk_commit_to_dev(tgt);
     ped_disk_commit_to_os(tgt);
@@ -305,6 +307,8 @@ NEW_CALLBACK(format_device_cb) {
      * differently for the struct type */
     ped_disk_destroy(tgt);
     ped_device_close(tgt_device);
+    /*printf("Done partitioning, press enter to continue\n");*/
+    /*scanf("");*/
 
     cmd = format_target_device(info->target_device, fs_choice);
     subp = g_subprocess_newv(cmd, G_SUBPROCESS_FLAGS_NONE, NULL);

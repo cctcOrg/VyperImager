@@ -74,7 +74,7 @@ char **mount_target_device(char *blockdev) {
         mkdir(mountpoint, ACCESSPERMS);
 
     char **cmd_array;
-    char *cmd_format = "mount /dev/%s /media/EVID_TARGET";
+    char *cmd_format = "mount /dev/%s1 /media/EVID_TARGET";
     char *cmd_string = malloc( 
             (strlen(cmd_format) + strlen(blockdev) + 1) * sizeof(char));
 
