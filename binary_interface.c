@@ -26,12 +26,11 @@ int target_is_mounted() {
 }
 
 int writeblock_evidence_device(char *dev) {
-    char path[20];
-    char *command_format = "blockdev --setro %s";
     char command[40];
+    char command_tmp[40];
+    strcpy(command_tmp, "blockdev --setro /dev/%s");
+    sprintf(command, command_tmp, dev);
 
-    sprintf(path, "/dev/%s", dev);
-    sprintf(command, command_format, path);
     return system(command);
 }
 
@@ -41,7 +40,7 @@ char **format_target_device(char *blockdev, char *format) {
     char *label_flag = "-L \"EVID_TARGET\" -F";
     char *hfsp_label_flag = "-v \"EVID_TARGET\"";
 
-    char *cmd_format = "mkfs -t %s %s /dev/%s";
+    char *cmd_format = "mkfs -t %s %s /dev/%s1";
     char *cmd_string = malloc( 
             (strlen(cmd_format) + strlen(blockdev) + strlen(format) 
              + strlen(label_flag) + 1) * sizeof(char));

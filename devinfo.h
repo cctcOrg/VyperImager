@@ -11,6 +11,7 @@ typedef struct Device {
     char *name;
     char *model;
     char *size;
+    char *fspath;
     char **labels;
     int  numparts;
     int  removable;

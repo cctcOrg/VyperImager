@@ -94,6 +94,9 @@ Device *get_blockdev_struct(PedDevice *dev) {
     strcpy(devname, tmp);
     free(dev_path);
 
+    dev_path = malloc((strlen(dev->path)+1)*sizeof(char));
+    strcpy(dev_path, dev->path);
+
     /* Find the size */
     blkid_probe pr = blkid_new_probe_from_filename(dev->path);
     size_value = blkid_probe_get_size(pr);
@@ -158,6 +161,7 @@ Device *get_blockdev_struct(PedDevice *dev) {
     devinfo->dev = dev;
     devinfo->name = devname;
     devinfo->model = dev->model;
+    devinfo->fspath = dev_path;
     devinfo->size = size;
     devinfo->numparts = numparts;
     devinfo->labels = labels;

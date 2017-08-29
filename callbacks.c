@@ -1,5 +1,6 @@
 #include<stdlib.h>
 #include<string.h>
+#include<parted/parted.h>
 #include "callbacks.h"
 #include "appdefs.h"
 #include "dialogs.h"
@@ -99,6 +100,8 @@ NEW_CALLBACK(target_device_cb) {
         name = malloc(MAX_DEV_SIZE*sizeof(char));
         gtk_tree_model_get(model, &iter, COL_DEV, &name, -1);
         info->target_device = name;
+        gtk_tree_model_get(model, &iter, COL_PATH, &name, -1);
+        info->tgt_path = name;
     } 
     else {
         diag = create_no_device_dialog(window, "target");
@@ -141,6 +144,8 @@ NEW_CALLBACK(evidence_device_cb) {
         name = malloc(MAX_DEV_SIZE*sizeof(char));
         gtk_tree_model_get(model, &iter, COL_DEV, &name, -1);
         info->evidence_device = name;
+        gtk_tree_model_get(model, &iter, COL_PATH, &name, -1);
+        info->evd_path = name;
     } 
     else {
         diag = create_no_device_dialog(window, "evidence");
@@ -221,20 +226,17 @@ NEW_CALLBACK(format_device_cb) {
     ImageInfo *info = globals->user_info;
 
     char buttons_state = 0;
-    char *fs_choice = malloc(7*sizeof(char));
+    char *fs_choice = malloc(8*sizeof(char));
+    char *fs;
     int result;
 
     PedDevice *tgt_device = NULL;
-    PedSector *start = NULL;
-    PedSector *end = NULL;
 
     PedDisk *tgt = NULL;
     PedDiskType *mbr = NULL;
 
     PedPartition *part = NULL;
-    PedPartition *ptype = NULL;
-    PedFilesystemType *fstype = NULL;
-    PedGeometry *geom = NULL;
+    PedFileSystemType *fstype = NULL;
 
     GSubprocess *subp;
     char **cmd;
@@ -282,16 +284,27 @@ NEW_CALLBACK(format_device_cb) {
     gtk_box_pack_start(GTK_BOX(globals->dialog_box), gtk_label_new("Formatting..."), TRUE, TRUE, 10);
     gtk_widget_show_all(diag);
 
-    tgt_device = ped_device_get(info->target_device);
 
-    mbr = ped_disk_type_get("mbr");
-    tgt = ped_disk_new_fresh(target_device, mbr);
-    // TODO: Figure out what type of filesystem I need
-    fstype = ped_file_system_type_get("<FS>");
+    /*** PARTITION TABLE FORMATTING ***/
 
-    // TODO: Figure out how to get the start and end sectors of the free space
-    start = ped_device_get_start(tgt_device);
-    part = ped_partition_new(tgt, PED_PARTITION_NORMAL, fstype, start, tgt_device->length); 
+    // Need to give a filesystem to parted, and hfsplus isn't valid
+    fs = (fs_choice[0] == 'h') ? "hfs": fs_choice;
+
+    tgt_device = ped_device_get(info->tgt_path);
+    mbr = ped_disk_type_get("msdos");
+    tgt = ped_disk_new_fresh(tgt_device, mbr);
+    fstype = ped_file_system_type_get(fs);
+
+    /* Apparently starting at sector 2048 is a good idea */
+    part = ped_partition_new(tgt, PED_PARTITION_NORMAL, fstype, 2048, tgt_device->length); 
+
+    ped_disk_commit_to_dev(tgt);
+    ped_disk_commit_to_os(tgt);
+
+    /* Destroy and close do the same thing, just the functions are named
+     * differently for the struct type */
+    ped_disk_destroy(tgt);
+    ped_device_close(tgt_device);
 
     cmd = format_target_device(info->target_device, fs_choice);
     subp = g_subprocess_newv(cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
@@ -303,7 +316,6 @@ NEW_CALLBACK(get_target_info_cb) {
     (void) w;
     app_objects *globals = udata;
 
-    /*GtkWidget *diag;*/
     ImageInfo *info = globals->user_info;
     GtkWidget *entry;
 
@@ -369,7 +381,6 @@ NEW_CALLBACK(case_info_cb) {
 
 NEW_CALLBACK(image_info_cb) {
     (void) w;
-    char str[50];
 
     app_objects *globals = udata;
     GtkWidget *label;
@@ -388,13 +399,11 @@ NEW_CALLBACK(image_info_cb) {
 
 
     /* Device info */
-    sprintf(str, "/dev/%s", info->evidence_device); 
     label = labels->evidence_device;
-    gtk_label_set_text(GTK_LABEL(label), str);
+    gtk_label_set_text(GTK_LABEL(label), info->evd_path);
 
-    sprintf(str, "/dev/%s", info->target_device); 
     label = labels->target_device;
-    gtk_label_set_text(GTK_LABEL(label), str);
+    gtk_label_set_text(GTK_LABEL(label), info->tgt_path);
 
     label = labels->target_filesystem;
     gtk_label_set_text(GTK_LABEL(label), info->target_filesystem);

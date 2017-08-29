@@ -65,7 +65,7 @@ static GtkTreeModel *create_block_devices_liststore(
     /* Device, model, size */
     store = gtk_list_store_new(NUM_COLS, G_TYPE_STRING, 
             G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING,
-            G_TYPE_STRING, G_TYPE_INT);
+            G_TYPE_STRING, G_TYPE_INT, G_TYPE_STRING);
     blockdev_info = get_blockdev_info(&num_blockdevs);
 
     for (int i=0; i<num_blockdevs; i++) {
@@ -106,7 +106,7 @@ static GtkTreeModel *create_block_devices_liststore(
                 COL_DEV, dev->name, COL_MODEL, dev->model, COL_SIZE, dev->size,
                 COL_NPARTS, dev->numparts, COL_LABELS, partlabels,
                 COL_REMOVABLE, (dev->removable) ? "Yes" : "No",
-                COL_ISTARGET, dev->is_target, -1);
+                COL_ISTARGET, dev->is_target, COL_PATH, dev->fspath, -1);
 
         if (dev->is_target)
             *path = gtk_tree_model_get_path(GTK_TREE_MODEL(store), &iter);

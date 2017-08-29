@@ -13,6 +13,7 @@ enum {
     COL_LABELS,
     COL_REMOVABLE,
     COL_ISTARGET,
+    COL_PATH,
     NUM_COLS
 };
 
@@ -43,6 +44,8 @@ typedef struct Case {
 typedef struct ImageInfo {
     char *evidence_device;
     char *target_device;
+    char *evd_path;
+    char *tgt_path;
     char *target_filesystem;
     char *target_filename;
     char *target_directory;
