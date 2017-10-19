@@ -3,17 +3,20 @@ PROGRAM_NAME := imager
 CFLAGS := -g -Wall -Wextra `pkg-config --cflags gtk+-3.0`
 LDFLAGS := `pkg-config --libs gtk+-3.0` -lblkid -lparted
 CC := clang
+SRCDIR := src
 
-SOURCES := $(wildcard *.c)
+SOURCES := $(patsubst $(SRCDIR)/%.c,$(SRCDIR)/%.o,$(wildcard $(SRCDIR)/*.c))
+
 .PHONY: all $(PROGRAM_NAME) clean test 
 
 all: $(PROGRAM_NAME)
 
-debug: 
+debug: $(SOURCES)
 	$(CC) $(CFLAGS) -DDEBUG $(SOURCES) -o $(PROGRAM_NAME)-debug $(LDFLAGS)
 
-$(PROGRAM_NAME):
+$(PROGRAM_NAME): $(SOURCES)
 	$(CC) $(CFLAGS) -O2 $(SOURCES) -o $(PROGRAM_NAME) -O2 $(LDFLAGS)
 
 clean:
-	rm $(PROGRAM_NAME)
+	rm -f $(SRCDIR)/*.o
+	rm -f $(PROGRAM_NAME)

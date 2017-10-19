@@ -2,5 +2,9 @@
 !*.*
 !*/
 
+# Need these
 !Makefile
 !imgs
+
+# Don't need these
+*.o

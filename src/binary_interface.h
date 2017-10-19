@@ -18,11 +18,12 @@ char **format_target_device(char *blockdev, char *format);
  * null if the /media/EVID_TARGET is already mounted */
 char **mount_target_device(char *blockdev);
 
-/* To be implemented */
-int create_forensic_image(app_objects *globals);
-
 /* Take the name of a blockdev and writeblock it by executing `blockdev --setro
  * /dev/<name>` TODO: check if it's writeblocked first */
 int writeblock_evidence_device(char *dev);
+
+/* Use the results from all of the information gathered to construct a commmand
+ * array to be run as a subprocess */
+char **create_forensic_image(app_objects *globals);
 
 #endif /* BINARY_INTERFACE_H */

@@ -1,3 +1,4 @@
+#include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
 #include<dirent.h>
@@ -12,7 +13,8 @@
 #define FORMAT_CMD_ARGC 8
 
 /* Thanks to ewg on ##c for this! */
-int target_is_mounted() {
+int target_is_mounted()
+{
     FILE *f = fopen("/proc/mounts", "r");
     if (!f)
         return -1;
@@ -25,7 +27,8 @@ int target_is_mounted() {
     return 0;
 }
 
-int writeblock_evidence_device(char *dev) {
+int writeblock_evidence_device(char *dev)
+{
     char command[40];
     char command_tmp[40];
     strcpy(command_tmp, "blockdev --setro /dev/%s");
@@ -35,7 +38,8 @@ int writeblock_evidence_device(char *dev) {
 }
 
 /* Note: Need to create a partition table with a partiton */
-char **format_target_device(char *blockdev, char *format) {
+char **format_target_device(char *blockdev, char *format)
+{
     char **cmd_array;
     char *label_flag = "-L \"EVID_TARGET\" -F";
     char *hfsp_label_flag = "-v \"EVID_TARGET\"";
@@ -54,7 +58,8 @@ char **format_target_device(char *blockdev, char *format) {
     return cmd_array;
 }
 
-char **mount_target_device(char *blockdev) {
+char **mount_target_device(char *blockdev)
+{
     /* Wow look, my work might already be done! */
     if (target_is_mounted() == 1)
         return 0;
@@ -84,6 +89,19 @@ char **mount_target_device(char *blockdev) {
     return cmd_array; 
 }
 
-int create_forensic_image(app_objects *globals) {
-    return 0;
+char **create_forensic_image(app_objects *globals)
+{
+    ImageInfo *info = globals->user_info;
+    Case *cinfo = info->case_info;
+
+
+    char **cmd_array;
+    /*char *cmd_format = "mount /dev/%s1 /media/EVID_TARGET";*/
+    /*char *cmd_string = malloc( */
+            /*(strlen(cmd_format) + strlen(blockdev) + 1) * sizeof(char));*/
+
+    /*sprintf(cmd_string, cmd_format, blockdev);*/
+    /*g_shell_parse_argv(cmd_string, NULL, &cmd_array, NULL);*/
+    /*free(cmd_string);*/
+    return cmd_array; 
 }
