@@ -1,5 +1,6 @@
 #include<stdio.h>
 #include<string.h>
+#include<error.h>
 #include<dirent.h>
 #include<stdlib.h>
 #include<sys/stat.h>
@@ -99,8 +100,16 @@ Device *get_blockdev_struct(PedDevice *dev) {
 
     /* Find the size */
     blkid_probe pr = blkid_new_probe_from_filename(dev->path);
+    if (pr == NULL)
+    {
+        perror(dev->path);
+        exit(1);
+    }
+
     size_value = blkid_probe_get_size(pr);
     size_value /= 1000000000;
+
+    /*printf("%s: %f\n", dev->path, size_value);*/
 
     /* Let's see if the whole device has a label */
     blkid_do_probe(pr);

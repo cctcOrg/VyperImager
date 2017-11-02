@@ -676,7 +676,7 @@ GtkWidget *create_summary_interface(app_objects *globals) {
 
     gtk_box_pack_start(GTK_BOX(app_box), grid, TRUE, TRUE, 0);
 
-    create_navigation_button_box(app_box, image_info_cb, globals);
+    create_navigation_button_box(app_box, create_image_cb, globals);
     set_box_margins(app_box);
 
     return app_box;

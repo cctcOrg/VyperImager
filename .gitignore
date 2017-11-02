@@ -8,3 +8,5 @@
 
 # Don't need these
 *.o
+
+aquisition.log

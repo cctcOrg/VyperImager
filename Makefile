@@ -1,7 +1,7 @@
 PROGRAM_NAME := imager
 
-CFLAGS := -g -Wall -Wextra `pkg-config --cflags gtk+-3.0`
-LDFLAGS := `pkg-config --libs gtk+-3.0` -lblkid -lparted
+CFLAGS := -g -DDEBUG -Wall -Wextra `pkg-config --cflags gtk+-3.0`
+LDFLAGS := `pkg-config --libs gtk+-3.0` -lblkid -lparted -DDEBUG
 CC := clang
 SRCDIR := src
 

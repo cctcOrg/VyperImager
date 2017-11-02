@@ -92,16 +92,35 @@ char **mount_target_device(char *blockdev)
 char **create_forensic_image(app_objects *globals)
 {
     ImageInfo *info = globals->user_info;
-    Case *cinfo = info->case_info;
-
+    Case *ci = info->case_info;
 
     char **cmd_array;
-    /*char *cmd_format = "mount /dev/%s1 /media/EVID_TARGET";*/
-    /*char *cmd_string = malloc( */
-            /*(strlen(cmd_format) + strlen(blockdev) + 1) * sizeof(char));*/
+    /* Command format:
+     *  -t: target file, without extension
+     *  -C: case number
+     *  -E: evidence number
+     *  -e: examiner name
+     *  -D: description
+     *  -N: notes
+     *  -m: media type
+     *  -d: digest type (sha1/sha256)
+     *  -c: compression values (just the level)
+     *  -l: log filename
+     *  Final arg: the device to image
+     *  */
+    char *cmd_format = "ewfacquire -u -t %s/%s -C \"%s\" -E \"%s\" -e \"%s\" "
+       "-D \"%s\" -N \"%s\" -m \"%s\" -d \"%s\" -c \"%s\" "
+       "-l aquisition.log /dev/%s "; 
+    char *cmd_string = calloc((strlen(info->target_directory) + strlen(info->target_filename)
+                + strlen(ci->casenum) + strlen(ci->itemnum) + strlen(ci->examiner)
+                + strlen(ci->desc) + strlen(ci->notes) + strlen(info->device_type)
+                + strlen(info->compression_type) + strlen(info->target_device)) + 1,
+                sizeof(char));
 
-    /*sprintf(cmd_string, cmd_format, blockdev);*/
-    /*g_shell_parse_argv(cmd_string, NULL, &cmd_array, NULL);*/
+    sprintf(cmd_string, cmd_format, info->target_directory, info->target_filename,
+            ci->casenum, ci->itemnum, ci->examiner, ci->desc, ci->notes, info->device_type,
+            info->hash_type, info->compression_type, info->target_device);
+    g_shell_parse_argv(cmd_string, NULL, &cmd_array, NULL);
     /*free(cmd_string);*/
     return cmd_array; 
 }

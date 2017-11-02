@@ -1,9 +1,11 @@
 #include<stdlib.h>
 #include<string.h>
 #include<parted/parted.h>
-#include "callbacks.h"
+
 #include "appdefs.h"
+#include "callbacks.h"
 #include "dialogs.h"
+#include "pages.h"
 #include "stack.h"
 #include "binary_interface.h"
 
@@ -241,12 +243,14 @@ NEW_CALLBACK(format_device_cb) {
     GSubprocess *subp;
     char **cmd;
 
-    for (int i=0; i<3; i++) {
+    for (int i=0; i<3; i++)
+    {
         if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->os_buttons[i])))
             buttons_state |= 1<<i;
     }
     
-    switch (buttons_state) {
+    switch (buttons_state)
+    {
         /* Windows, Mac, Linux */
         case 0b011:
         case 0b111:
@@ -307,8 +311,6 @@ NEW_CALLBACK(format_device_cb) {
      * differently for the struct type */
     ped_disk_destroy(tgt);
     ped_device_close(tgt_device);
-    /*printf("Done partitioning, press enter to continue\n");*/
-    /*scanf("");*/
 
     cmd = format_target_device(info->target_device, fs_choice);
     subp = g_subprocess_newv(cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
@@ -316,7 +318,8 @@ NEW_CALLBACK(format_device_cb) {
     g_strfreev(cmd);
 }
 
-NEW_CALLBACK(get_target_info_cb) {
+NEW_CALLBACK(get_target_info_cb)
+{
     (void) w;
     app_objects *globals = udata;
 
@@ -383,7 +386,8 @@ NEW_CALLBACK(case_info_cb) {
     set_next_hb_title(g);
 }
 
-NEW_CALLBACK(image_info_cb) {
+NEW_CALLBACK(image_info_cb)
+{
     (void) w;
 
     app_objects *globals = udata;
@@ -443,8 +447,45 @@ NEW_CALLBACK(image_info_cb) {
 
     label = labels->hash_type;
     gtk_label_set_text(GTK_LABEL(label), info->hash_type);
-
+    
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
     push_stack(globals->pages, IMGI_PAGE);
     set_next_hb_title(globals);
+}
+
+static void on_imaging_finished(GObject *s, GAsyncResult *r, gpointer udata)
+{
+    (void) s;
+    (void) r;
+    app_objects *globals = udata;
+
+    gtk_widget_destroy(globals->dialog);
+
+    gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
+
+    push_stack(globals->pages, SUMM_PAGE);
+    set_next_hb_title(globals);
+}
+
+NEW_CALLBACK(create_image_cb)
+{
+    (void) w;
+    GSubprocess *subp;
+    GtkWidget *diag;
+    app_objects *globals = udata;
+    GtkWidget *window = globals->window;
+    char **cmd = create_forensic_image(globals);
+
+    diag = create_progress_spinner_dialog(window, globals); 
+    globals->dialog = diag;
+    
+    gtk_box_pack_start(GTK_BOX(globals->dialog_box), 
+            gtk_label_new("Imaging..."), TRUE, TRUE, 10);
+    gtk_widget_show_all(diag);
+
+    subp = g_subprocess_newv(cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
+    g_subprocess_wait_async(subp, NULL, on_imaging_finished, globals);
+
+    g_strfreev(cmd);
+
 }
