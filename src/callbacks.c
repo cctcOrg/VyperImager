@@ -62,13 +62,13 @@ NEW_CALLBACK(quit_app) {
         system("umount /media/EVID_TARGET");
 
     evid_dev = globals->user_info->evidence_device;
-    if (*evid_dev != NULL) {
+    if (evid_dev != NULL) {
         sprintf(unwriteblock, "blockdev --setrw /dev/%s", 
                 globals->user_info->evidence_device);
         system(unwriteblock);
     }
 
-    g_application_quit(globals->app);
+    g_application_quit(G_APPLICATION(globals->app));
 }
 
 NEW_CALLBACK(welcome_page_cb) {
@@ -117,7 +117,7 @@ NEW_CALLBACK(target_device_cb) {
     /* If you don't need to format skip to the location page */
     else {
         cmd = mount_target_device(info->target_device);
-        subp = g_subprocess_newv(cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
+        subp = g_subprocess_newv((const gchar *const *) cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
         g_subprocess_wait(subp, NULL, NULL);
         g_strfreev(cmd);
 
@@ -146,6 +146,7 @@ NEW_CALLBACK(evidence_device_cb) {
         name = malloc(MAX_DEV_SIZE*sizeof(char));
         gtk_tree_model_get(model, &iter, COL_DEV, &name, -1);
         info->evidence_device = name;
+        printf("\33[31m[DEBUG] Evidence name: %s\33[0m\n", name);
         gtk_tree_model_get(model, &iter, COL_PATH, &name, -1);
         info->evd_path = name;
     } 
@@ -188,6 +189,7 @@ static void on_mount_finished(GObject *source_object, GAsyncResult *res, gpointe
     gtk_box_pack_start(GTK_BOX(globals->dialog_box), gtk_label_new("Done!"), TRUE, TRUE, 20);
     gtk_spinner_stop(GTK_SPINNER(globals->spinner));
     gtk_widget_show_all(diag);
+    gtk_widget_set_sensitive(globals->dialog_button, TRUE);
     g_signal_connect(diag, "response", G_CALLBACK(target_setup_done), globals); 
 }
 
@@ -213,7 +215,7 @@ static void on_mkfs_finished(GObject *source_object, GAsyncResult *res, gpointer
         cmd[1] = NULL;
     }
 
-    subp = g_subprocess_newv(cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
+    subp = g_subprocess_newv((const gchar *const *)cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
     g_subprocess_wait_async(subp, NULL, on_mount_finished, globals);
     g_strfreev(cmd);
 }
@@ -313,7 +315,7 @@ NEW_CALLBACK(format_device_cb) {
     ped_device_close(tgt_device);
 
     cmd = format_target_device(info->target_device, fs_choice);
-    subp = g_subprocess_newv(cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
+    subp = g_subprocess_newv((const gchar *const *)cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
     g_subprocess_wait_async(subp, NULL, on_mkfs_finished, globals);
     g_strfreev(cmd);
 }
@@ -453,10 +455,10 @@ NEW_CALLBACK(image_info_cb)
     set_next_hb_title(globals);
 }
 
-static void on_imaging_finished(GObject *s, GAsyncResult *r, gpointer udata)
+static void imaging_done(GtkDialog *d, gint i, gpointer udata)
 {
-    (void) s;
-    (void) r;
+    (void) d;
+    (void) i;
     app_objects *globals = udata;
 
     gtk_widget_destroy(globals->dialog);
@@ -465,6 +467,16 @@ static void on_imaging_finished(GObject *s, GAsyncResult *r, gpointer udata)
 
     push_stack(globals->pages, SUMM_PAGE);
     set_next_hb_title(globals);
+}
+
+static void on_imaging_finished(GObject *s, GAsyncResult *r, gpointer udata)
+{
+    (void) s;
+    (void) r;
+    app_objects *globals = udata;
+
+    gtk_widget_set_sensitive(globals->dialog_button, TRUE);
+    g_signal_connect(globals->dialog, "response", G_CALLBACK(imaging_done), globals); 
 }
 
 NEW_CALLBACK(create_image_cb)
@@ -478,12 +490,13 @@ NEW_CALLBACK(create_image_cb)
 
     diag = create_progress_spinner_dialog(window, globals); 
     globals->dialog = diag;
+
     
     gtk_box_pack_start(GTK_BOX(globals->dialog_box), 
             gtk_label_new("Imaging..."), TRUE, TRUE, 10);
     gtk_widget_show_all(diag);
 
-    subp = g_subprocess_newv(cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
+    subp = g_subprocess_newv((const gchar *const *)cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
     g_subprocess_wait_async(subp, NULL, on_imaging_finished, globals);
 
     g_strfreev(cmd);
