@@ -2,6 +2,7 @@
 #include<string.h>
 #include<dirent.h>
 #include<stdlib.h>
+#include<stdbool.h>
 
 #include "pages.h"
 #include "callbacks.h"
@@ -53,9 +54,9 @@ static GtkTreeModel *create_block_devices_liststore(
     GtkTreeIter    iter;
 
     int num_blockdevs;
-    int is_eviddev;
+    bool is_eviddev;
     
-    int is_first = 1;
+    bool is_first = true;
     char *label;
     char *partlabels;
 
@@ -73,6 +74,7 @@ static GtkTreeModel *create_block_devices_liststore(
         dev = blockdev_info[i];
  
         is_eviddev = ( evid != NULL  &&  (strcmp(evid, dev->name) == 0) ); 
+        if (evid != NULL) printf("%s\n", evid);
         
         for (int j = 0; j < dev->numparts; j++) {
             label = dev->labels[j];
@@ -80,7 +82,7 @@ static GtkTreeModel *create_block_devices_liststore(
                 if (is_first) {
                     partlabels = malloc(strlen(label)+1);
                     strcpy(partlabels, label);
-                    is_first = 0;
+                    is_first = false;
                 } 
                 else {
                     /* Need to allocate 2 extra spaces for the ", " part and
@@ -93,7 +95,7 @@ static GtkTreeModel *create_block_devices_liststore(
             }
         }
         /* Forget to reset this */
-        is_first = 1;
+        is_first = true;
 
         /* If we've been asked to hide the internal devices, then this is the
          * target selection interface. In that case we should skip any device
