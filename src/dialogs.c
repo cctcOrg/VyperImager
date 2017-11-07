@@ -83,6 +83,7 @@ GtkWidget *create_progress_spinner_dialog(GtkWidget *window, app_objects *global
     GtkWidget *dialog;
     GtkWidget *dialog_area;
     GtkWidget *spinner;
+    GtkButton *button;
 
     spinner = gtk_spinner_new();
     globals->spinner = spinner;
@@ -94,8 +95,16 @@ GtkWidget *create_progress_spinner_dialog(GtkWidget *window, app_objects *global
                                           "OK", GTK_RESPONSE_ACCEPT, NULL);
     gtk_widget_set_size_request(dialog, 200, 200);
 
+
     dialog_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
     globals->dialog_box = dialog_area;
+
+    /* Seek to the location of the button */
+    button = gtk_dialog_get_widget_for_response(dialog, GTK_RESPONSE_ACCEPT);
+
+    globals->dialog_button = button;
+    gtk_widget_set_sensitive(button, FALSE);
+    
     gtk_box_pack_start(GTK_BOX(dialog_area), gtk_label_new(msg), TRUE, TRUE, 0);
     gtk_box_pack_start(GTK_BOX(dialog_area), spinner, TRUE, TRUE, 30);
 
