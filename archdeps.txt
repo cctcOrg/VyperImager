@@ -1,0 +1,48 @@
+X at-spi2-atk
+X at-spi2-core
+atk
+bzip2
+cairo
+dbus
+X device-mapper
+expat
+fontconfig
+freetype2
+gdk-pixbuf2
+glib2
+glibc
+graphite
+gtk3
+harfbuzz
+X libdatrie
+libepoxy
+libffi
+libgcrypt
+libgpg-error
+libpng
+X libsystemd
+X libthai
+libutil-linux
+libx11
+libxau
+libxcb
+libxcomposite
+libxcursor
+libxdamage
+libxdmcp
+libxext
+libxfixes
+libxi
+libxinerama
+libxkbcommon
+libxrandr
+libxrender
+lz4
+mesa
+pango
+parted
+pcre
+pixman
+wayland
+xz
+zlib
