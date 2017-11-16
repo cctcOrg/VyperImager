@@ -470,13 +470,13 @@ static void imaging_done(GtkDialog *d, gint i, gpointer udata)
     set_next_hb_title(globals);
 }
 
-/*static void on_imaging_finished(GObject *s, GAsyncResult *r, gpointer udata)*/
-/*{*/
-    /*(void) s;*/
-    /*(void) r;*/
-    /*app_objects *globals = udata;*/
+static void on_status_read(GObject *s, GAsyncResult *r, gpointer udata)
+{
+    (void) s;
+    (void) r;
+    app_objects *globals = udata;
 
-/*}*/
+}
 
 NEW_CALLBACK(create_image_cb)
 {
@@ -506,8 +506,10 @@ NEW_CALLBACK(create_image_cb)
             G_SUBPROCESS_FLAGS_STDOUT_PIPE, NULL);
     std_out = g_subprocess_get_stdout_pipe(subp);
 
-    for (gsize i=0; g_input_stream_read(std_out, so_buf, 274, NULL, NULL) != 0; i++)
+    /* TODO: Use async version of this */
+    while (g_input_stream_read(std_out, so_buf, 274, NULL, NULL) != 0)
     {
+        /* TODO: This needs to be put into a callback */
         so_buf[273] = '\0';
         percent_complete = strstr(so_buf, "s: at");
         if (percent_complete == NULL || *percent_complete == '\0')
@@ -527,6 +529,7 @@ NEW_CALLBACK(create_image_cb)
         l_per = strtol(percent, NULL, 10);
         gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(globals->prog_bar),
                 l_per/100.0);
+        g_print("Progress bar at %lf\n", l_per/100.0);
         g_usleep(1*G_USEC_PER_SEC);
 
         memset(percent, 0, sizeof(percent));
