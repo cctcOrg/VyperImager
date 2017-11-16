@@ -87,6 +87,7 @@ typedef struct app_objects {
     GtkWidget *dialog_box;
     GtkWidget *dialog_button;
     GtkWidget *spinner;
+    GtkWidget *prog_bar;
     
     ImageInfo *user_info;
     SummaryLabels *labels;

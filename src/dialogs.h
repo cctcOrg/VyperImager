@@ -24,4 +24,6 @@ GtkWidget *create_please_choose_system_dialog(GtkWidget *window);
  * to its content area so that it can be updated as a process completes */
 GtkWidget *create_progress_spinner_dialog(GtkWidget *window, app_objects *globals);
 
+GtkWidget *create_progress_bar_dialog(GtkWidget *window, app_objects *globals);
+
 #endif /* DIALOGS_H */

@@ -74,7 +74,7 @@ static GtkTreeModel *create_block_devices_liststore(
         dev = blockdev_info[i];
  
         is_eviddev = ( evid != NULL  &&  (strcmp(evid, dev->name) == 0) ); 
-        if (evid != NULL) printf("%s\n", evid);
+        /*if (evid != NULL) printf("%s\n", evid);*/
         
         for (int j = 0; j < dev->numparts; j++) {
             label = dev->labels[j];
@@ -117,7 +117,7 @@ static GtkTreeModel *create_block_devices_liststore(
 } 
 
 static GtkWidget *create_block_devices_treeview(int hide_internal) {
-    GtkTreeSelection    *selection;
+    /*GtkTreeSelection    *selection;*/
     GtkCellRenderer     *renderer;
     /*GtkTreeModel        *model;*/
     /*GtkTreePath         *evid_path = NULL;*/

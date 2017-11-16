@@ -83,7 +83,7 @@ GtkWidget *create_progress_spinner_dialog(GtkWidget *window, app_objects *global
     GtkWidget *dialog;
     GtkWidget *dialog_area;
     GtkWidget *spinner;
-    GtkButton *button;
+    GtkWidget *button;
 
     spinner = gtk_spinner_new();
     globals->spinner = spinner;
@@ -100,7 +100,7 @@ GtkWidget *create_progress_spinner_dialog(GtkWidget *window, app_objects *global
     globals->dialog_box = dialog_area;
 
     /* Seek to the location of the button */
-    button = gtk_dialog_get_widget_for_response(dialog, GTK_RESPONSE_ACCEPT);
+    button = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_ACCEPT);
 
     globals->dialog_button = button;
     gtk_widget_set_sensitive(button, FALSE);
@@ -114,6 +114,47 @@ GtkWidget *create_progress_spinner_dialog(GtkWidget *window, app_objects *global
     gtk_widget_set_margin_bottom(dialog_area, 30); 
 
     gtk_spinner_start(GTK_SPINNER(spinner));
+    
+    gtk_widget_show_all(dialog);
+
+    return dialog;
+}
+
+GtkWidget *create_progress_bar_dialog(GtkWidget *window, app_objects *globals) {
+    GtkWidget *dialog;
+    GtkWidget *dialog_area;
+    GtkWidget *prog_bar;
+    GtkWidget *button;
+
+    prog_bar = gtk_progress_bar_new();
+    globals->prog_bar = prog_bar;
+
+    char *msg = "Working..."; 
+
+    GtkDialogFlags flags = GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT;
+    dialog = gtk_dialog_new_with_buttons("Loading", GTK_WINDOW(window), flags,
+                                          "OK", GTK_RESPONSE_ACCEPT, NULL);
+    gtk_widget_set_size_request(dialog, 200, 200);
+
+
+    dialog_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    globals->dialog_box = dialog_area;
+
+    /* Seek to the location of the button */
+    button = gtk_dialog_get_widget_for_response(GTK_DIALOG(dialog), GTK_RESPONSE_ACCEPT);
+
+    globals->dialog_button = button;
+    gtk_widget_set_sensitive(button, FALSE);
+    
+    gtk_box_pack_start(GTK_BOX(dialog_area), gtk_label_new(msg), TRUE, TRUE, 0);
+    gtk_box_pack_start(GTK_BOX(dialog_area), prog_bar, TRUE, TRUE, 30);
+
+    gtk_widget_set_margin_start(dialog_area, 30); 
+    gtk_widget_set_margin_end(dialog_area, 30); 
+    gtk_widget_set_margin_top(dialog_area, 30); 
+    gtk_widget_set_margin_bottom(dialog_area, 30); 
+
+    gtk_progress_bar_set_show_text(GTK_PROGRESS_BAR(prog_bar), TRUE);
     
     gtk_widget_show_all(dialog);
 

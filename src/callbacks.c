@@ -158,6 +158,7 @@ NEW_CALLBACK(evidence_device_cb) {
     }
 
     writeblock_evidence_device(info->evidence_device);
+    printf("\33[31m[DEBUG] Confirming evidence name: %s\33[0m\n", info->evidence_device);
 
     set_treeview_model(globals->ttv, TRUE, globals);
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
@@ -469,26 +470,31 @@ static void imaging_done(GtkDialog *d, gint i, gpointer udata)
     set_next_hb_title(globals);
 }
 
-static void on_imaging_finished(GObject *s, GAsyncResult *r, gpointer udata)
-{
-    (void) s;
-    (void) r;
-    app_objects *globals = udata;
+/*static void on_imaging_finished(GObject *s, GAsyncResult *r, gpointer udata)*/
+/*{*/
+    /*(void) s;*/
+    /*(void) r;*/
+    /*app_objects *globals = udata;*/
 
-    gtk_widget_set_sensitive(globals->dialog_button, TRUE);
-    g_signal_connect(globals->dialog, "response", G_CALLBACK(imaging_done), globals); 
-}
+/*}*/
 
 NEW_CALLBACK(create_image_cb)
 {
     (void) w;
+    char so_buf[274];
     GSubprocess *subp;
     GtkWidget *diag;
     app_objects *globals = udata;
     GtkWidget *window = globals->window;
+    GInputStream *std_out = NULL;
     char **cmd = create_forensic_image(globals);
 
-    diag = create_progress_spinner_dialog(window, globals); 
+    char *percent_complete = NULL;
+    char percent[3];
+    char *ppercent = percent;
+    long l_per;
+
+    diag = create_progress_bar_dialog(window, globals); 
     globals->dialog = diag;
 
     
@@ -496,8 +502,41 @@ NEW_CALLBACK(create_image_cb)
             gtk_label_new("Imaging..."), TRUE, TRUE, 10);
     gtk_widget_show_all(diag);
 
-    subp = g_subprocess_newv((const gchar *const *)cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
-    g_subprocess_wait_async(subp, NULL, on_imaging_finished, globals);
+    subp = g_subprocess_newv((const gchar *const *)cmd, 
+            G_SUBPROCESS_FLAGS_STDOUT_PIPE, NULL);
+    std_out = g_subprocess_get_stdout_pipe(subp);
+
+    for (gsize i=0; g_input_stream_read(std_out, so_buf, 274, NULL, NULL) != 0; i++)
+    {
+        so_buf[273] = '\0';
+        percent_complete = strstr(so_buf, "s: at");
+        if (percent_complete == NULL || *percent_complete == '\0')
+        {
+            continue;
+        }
+        percent_complete += 6;
+
+
+        while (*percent_complete != '%')
+        {
+            *(ppercent++) = *percent_complete;
+            percent_complete++;
+        }
+        percent[2] = '\0';
+
+        l_per = strtol(percent, NULL, 10);
+        gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(globals->prog_bar),
+                l_per/100.0);
+        g_usleep(1*G_USEC_PER_SEC);
+
+        memset(percent, 0, sizeof(percent));
+        ppercent = percent;
+    }
+
+    g_subprocess_wait(subp, NULL, NULL);
+
+    gtk_widget_set_sensitive(globals->dialog_button, TRUE);
+    g_signal_connect(globals->dialog, "response", G_CALLBACK(imaging_done), globals); 
 
     g_strfreev(cmd);
 
