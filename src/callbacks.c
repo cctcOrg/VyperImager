@@ -456,7 +456,7 @@ NEW_CALLBACK(image_info_cb)
     set_next_hb_title(globals);
 }
 
-static void imaging_done(GtkDialog *d, gint i, gpointer udata)
+static void app_done(GtkDialog *d, gint i, gpointer udata)
 {
     (void) d;
     (void) i;
@@ -470,11 +470,52 @@ static void imaging_done(GtkDialog *d, gint i, gpointer udata)
     set_next_hb_title(globals);
 }
 
-static void on_status_read(GObject *s, GAsyncResult *r, gpointer udata)
+
+static void imaging_done(GObject *o, GAsyncResult *r, gpointer udata)
 {
-    (void) s;
+    (void) o;
     (void) r;
     app_objects *globals = udata;
+
+    gtk_widget_set_sensitive(globals->dialog_button, TRUE);
+    g_signal_connect(globals->dialog, "response", G_CALLBACK(app_done), globals); 
+}
+
+static void on_status_read(GObject *cmd_std, GAsyncResult *r, gpointer udata)
+{
+    GInputStream *std_out = G_INPUT_STREAM(cmd_std);
+    app_objects *globals = udata;
+    (void) r;
+
+    char so_buf[274];
+    char *percent_complete_str = NULL;
+    char percent[3];
+    char *ppercent = percent;
+    long l_per;
+
+    g_usleep(1*G_USEC_PER_SEC);
+    g_input_stream_read_async(std_out, so_buf, 274, G_PRIORITY_DEFAULT, 
+            NULL, on_status_read, globals);
+
+    so_buf[273] = '\0';
+    percent_complete_str = strstr(so_buf, "s: at");
+    if ( ! (percent_complete_str == NULL || *percent_complete_str == '\0') )
+    {
+        /* Offset to start reading in number */
+        percent_complete_str += 6;
+
+        while (*percent_complete_str != '%')
+        {
+            *(ppercent++) = *percent_complete_str;
+            percent_complete_str++;
+        }
+        percent[2] = '\0';
+
+        l_per = strtol(percent, NULL, 10);
+        gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(globals->prog_bar),
+                l_per/100.0);
+        g_print("Progress bar at %lf\n", l_per/100.0);
+    }
 
 }
 
@@ -489,7 +530,7 @@ NEW_CALLBACK(create_image_cb)
     GInputStream *std_out = NULL;
     char **cmd = create_forensic_image(globals);
 
-    char *percent_complete = NULL;
+    char *percent_complete_str = NULL;
     char percent[3];
     char *ppercent = percent;
     long l_per;
@@ -497,7 +538,6 @@ NEW_CALLBACK(create_image_cb)
     diag = create_progress_bar_dialog(window, globals); 
     globals->dialog = diag;
 
-    
     gtk_box_pack_start(GTK_BOX(globals->dialog_box), 
             gtk_label_new("Imaging..."), TRUE, TRUE, 10);
     gtk_widget_show_all(diag);
@@ -506,23 +546,19 @@ NEW_CALLBACK(create_image_cb)
             G_SUBPROCESS_FLAGS_STDOUT_PIPE, NULL);
     std_out = g_subprocess_get_stdout_pipe(subp);
 
-    /* TODO: Use async version of this */
-    while (g_input_stream_read(std_out, so_buf, 274, NULL, NULL) != 0)
+    g_input_stream_read_async(std_out, so_buf, 274, G_PRIORITY_DEFAULT, 
+            NULL, on_status_read, globals);
+    so_buf[273] = '\0';
+    percent_complete_str = strstr(so_buf, "s: at");
+    if ( ! (percent_complete_str == NULL || *percent_complete_str == '\0') )
     {
-        /* TODO: This needs to be put into a callback */
-        so_buf[273] = '\0';
-        percent_complete = strstr(so_buf, "s: at");
-        if (percent_complete == NULL || *percent_complete == '\0')
-        {
-            continue;
-        }
-        percent_complete += 6;
+        /* Offset to start reading in number */
+        percent_complete_str += 6;
 
-
-        while (*percent_complete != '%')
+        while (*percent_complete_str != '%')
         {
-            *(ppercent++) = *percent_complete;
-            percent_complete++;
+            *(ppercent++) = *percent_complete_str;
+            percent_complete_str++;
         }
         percent[2] = '\0';
 
@@ -530,17 +566,9 @@ NEW_CALLBACK(create_image_cb)
         gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(globals->prog_bar),
                 l_per/100.0);
         g_print("Progress bar at %lf\n", l_per/100.0);
-        g_usleep(1*G_USEC_PER_SEC);
-
-        memset(percent, 0, sizeof(percent));
-        ppercent = percent;
     }
 
-    g_subprocess_wait(subp, NULL, NULL);
-
-    gtk_widget_set_sensitive(globals->dialog_button, TRUE);
-    g_signal_connect(globals->dialog, "response", G_CALLBACK(imaging_done), globals); 
-
+    g_subprocess_wait_async(subp, NULL, imaging_done, globals);
     g_strfreev(cmd);
 
 }
