@@ -93,6 +93,8 @@ char **create_forensic_image(app_objects *globals)
 {
     ImageInfo *info = globals->user_info;
     Case *ci = info->case_info;
+    gchar *ct = NULL;
+    gchar *dt = NULL;
 
     char **cmd_array;
     /* Command format:
@@ -109,18 +111,23 @@ char **create_forensic_image(app_objects *globals)
      *  Final arg: the device to image
      *  */
     char *cmd_format = "ewfacquire -u -t %s/%s -C \"%s\" -E \"%s\" -e \"%s\" "
-       "-D \"%s\" -N \"%s\" -m \"%s\" -d \"%s\" -c \"%s\" "
+       "-D \"%s\" -N \"%s\" -m %s -d \"%s\" -c %s "
        "-l aquisition.log /dev/%s "; 
+    
+    ct = g_ascii_strdown(info->compression_type, -1);
+    dt = g_ascii_strdown(info->device_type, -1);
+
     char *cmd_string = calloc((strlen(info->target_directory) + strlen(info->target_filename)
                 + strlen(ci->casenum) + strlen(ci->itemnum) + strlen(ci->examiner)
-                + strlen(ci->desc) + strlen(ci->notes) + strlen(info->device_type)
-                + strlen(info->compression_type) + strlen(info->target_device)) + 1,
+                + strlen(ci->desc) + strlen(ci->notes) + strlen(dt)
+                + strlen(ct) + strlen(info->target_device)) + 1,
                 sizeof(char));
 
     sprintf(cmd_string, cmd_format, info->target_directory, info->target_filename,
-            ci->casenum, ci->itemnum, ci->examiner, ci->desc, ci->notes, info->device_type,
-            info->hash_type, info->compression_type, info->target_device);
+            ci->casenum, ci->itemnum, ci->examiner, ci->desc, ci->notes, dt,
+            info->hash_type, ct, info->target_device);
     g_shell_parse_argv(cmd_string, NULL, &cmd_array, NULL);
+
     /*free(cmd_string);*/
     return cmd_array; 
 }
