@@ -22,6 +22,14 @@ enum {
     SUMM_PAGE
 };
 
+static void safe_ish_free(void *p)
+{
+    if (p != NULL)
+    {
+        free(p);
+    }
+}
+
 static void set_next_hb_title(app_objects *g) {
     int current_page;
     GtkWidget *current_child;
@@ -464,12 +472,31 @@ static void app_done(GtkDialog *d, gint i, gpointer udata)
 
     gtk_widget_destroy(globals->dialog);
 
-    gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
+    ImageInfo *in = globals->user_info;
+    Case *cs = in->case_info;
 
-    push_stack(globals->pages, SUMM_PAGE);
+    /* Clear out collected info */
+    safe_ish_free(cs->casenum);
+    safe_ish_free(cs->itemnum);
+    safe_ish_free(cs->examiner);
+    safe_ish_free(cs->desc);
+    safe_ish_free(cs->notes);
+
+    safe_ish_free(in->evidence_device);
+    safe_ish_free(in->target_device);
+    safe_ish_free(in->evd_path);
+    safe_ish_free(in->tgt_path);
+    safe_ish_free(in->target_filesystem);
+    safe_ish_free(in->target_filename);
+    safe_ish_free(in->target_directory);
+    safe_ish_free(in->device_type);
+    safe_ish_free(in->hash_type);
+    safe_ish_free(in->compression_type);
+
+    clear_stack(globals->pages);
+    gtk_notebook_set_current_page(GTK_NOTEBOOK(globals->notebook), 0);
     set_next_hb_title(globals);
 }
-
 
 static void imaging_done(GObject *o, GAsyncResult *r, gpointer udata)
 {

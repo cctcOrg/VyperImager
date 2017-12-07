@@ -20,4 +20,9 @@ int pop_stack(page_stack *p);
 /* Return the value on the top of the stack */
 int peek_stack(page_stack *p);
 
+/* Just pop all of the values, reset the stack to its uninitialized state.
+ * NOTE: Does NOT zero out old stack, misuse could result in old values being
+ * retreived */
+void clear_stack(page_stack *p);
+
 #endif /* STACK_H */

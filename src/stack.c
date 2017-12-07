@@ -18,3 +18,11 @@ int pop_stack(page_stack *p) {
 int peek_stack(page_stack *p) {
     return p->pages[p->tos];
 }
+
+void clear_stack(page_stack *p)
+{
+    while (p->tos != -1)
+    {
+        pop_stack(p);
+    }
+}
