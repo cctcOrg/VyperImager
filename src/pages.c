@@ -117,10 +117,7 @@ static GtkTreeModel *create_block_devices_liststore(
 } 
 
 static GtkWidget *create_block_devices_treeview(int hide_internal) {
-    /*GtkTreeSelection    *selection;*/
     GtkCellRenderer     *renderer;
-    /*GtkTreeModel        *model;*/
-    /*GtkTreePath         *evid_path = NULL;*/
     GtkWidget           *treeview;
     
     treeview = gtk_tree_view_new();
@@ -251,7 +248,10 @@ GtkWidget *create_target_selector(app_objects *globals) {
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button), TRUE);
     globals->format_dev = button;
 
-    targ_device_tv = create_block_devices_treeview(HIDE_INT);
+    /*targ_device_tv = create_block_devices_treeview(HIDE_INT);*/
+    /* Workaround until I can probe for USB devices */
+    targ_device_tv = create_block_devices_treeview(SHOW_INT);
+
     gtk_box_pack_start(GTK_BOX(app_box), targ_device_tv, TRUE, TRUE, 10);
     globals->ttv = targ_device_tv;
 

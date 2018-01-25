@@ -1,6 +1,7 @@
 # Bugs
 - ~When pressing back button on the Target Device Information it doesn't work the first time~
 - Recognize any USB device as removable
+- Big devices can't use MBR
 
 # Features
 - Better ordering on the TreeView

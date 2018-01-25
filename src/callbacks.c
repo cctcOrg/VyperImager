@@ -168,7 +168,10 @@ NEW_CALLBACK(evidence_device_cb) {
     writeblock_evidence_device(info->evidence_device);
     printf("\33[31m[DEBUG] Confirming evidence name: %s\33[0m\n", info->evidence_device);
 
-    set_treeview_model(globals->ttv, TRUE, globals);
+    /*set_treeview_model(globals->ttv, TRUE, globals);*/
+    /* TODO: Detect USB drives so I don't have to show all devices again */
+    set_treeview_model(globals->ttv, FALSE, globals);
+
     gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
     push_stack(globals->pages, EVID_PAGE);
     set_next_hb_title(globals);
