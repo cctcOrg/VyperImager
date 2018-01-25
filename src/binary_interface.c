@@ -120,12 +120,12 @@ char **create_forensic_image(app_objects *globals)
     char *cmd_string = calloc((strlen(info->target_directory) + strlen(info->target_filename)
                 + strlen(ci->casenum) + strlen(ci->itemnum) + strlen(ci->examiner)
                 + strlen(ci->desc) + strlen(ci->notes) + strlen(dt)
-                + strlen(ct) + strlen(info->target_device)) + 1,
+                + strlen(ct) + strlen(info->evidence_device)) + 1,
                 sizeof(char));
 
     sprintf(cmd_string, cmd_format, info->target_directory, info->target_filename,
             ci->casenum, ci->itemnum, ci->examiner, ci->desc, ci->notes, dt,
-            info->hash_type, ct, info->target_device);
+            info->hash_type, ct, info->evidence_device);
     g_shell_parse_argv(cmd_string, NULL, &cmd_array, NULL);
 
     /*free(cmd_string);*/
