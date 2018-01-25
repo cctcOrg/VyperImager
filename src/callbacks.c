@@ -249,7 +249,7 @@ NEW_CALLBACK(format_device_cb) {
     PedDevice *tgt_device = NULL;
 
     PedDisk *tgt = NULL;
-    PedDiskType *mbr = NULL;
+    PedDiskType *disk_type = NULL;
 
     PedPartition *part = NULL;
     PedFileSystemType *fstype = NULL;
@@ -310,8 +310,8 @@ NEW_CALLBACK(format_device_cb) {
 
     tgt_device = ped_device_get(info->tgt_path);
     ped_device_open(tgt_device);
-    mbr = ped_disk_type_get("msdos");
-    tgt = ped_disk_new_fresh(tgt_device, mbr);
+    disk_type = ped_disk_type_get("gpt");
+    tgt = ped_disk_new_fresh(tgt_device, disk_type);
     fstype = ped_file_system_type_get(fs);
 
     /* Apparently starting at sector 2048 is a good idea */
@@ -325,6 +325,8 @@ NEW_CALLBACK(format_device_cb) {
      * differently for the struct type */
     ped_disk_destroy(tgt);
     ped_device_close(tgt_device);
+
+    getchar();
 
     cmd = format_target_device(info->target_device, fs_choice);
     subp = g_subprocess_newv((const gchar *const *)cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
@@ -559,6 +561,8 @@ NEW_CALLBACK(create_image_cb)
     GtkWidget *window = globals->window;
     GInputStream *std_out = NULL;
     char **cmd = create_forensic_image(globals);
+    g_print("%s\n", g_strjoinv(" ", cmd));
+    getchar();
 
     char *percent_complete_str = NULL;
     char percent[3];
