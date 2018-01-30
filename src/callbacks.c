@@ -326,8 +326,6 @@ NEW_CALLBACK(format_device_cb) {
     ped_disk_destroy(tgt);
     ped_device_close(tgt_device);
 
-    getchar();
-
     cmd = format_target_device(info->target_device, fs_choice);
     subp = g_subprocess_newv((const gchar *const *)cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
     g_subprocess_wait_async(subp, NULL, on_mkfs_finished, globals);
@@ -511,6 +509,7 @@ static void imaging_done(GObject *o, GAsyncResult *r, gpointer udata)
 
     gtk_widget_set_sensitive(globals->dialog_button, TRUE);
     g_signal_connect(globals->dialog, "response", G_CALLBACK(app_done), globals); 
+    g_print("Done!\n");
 }
 
 static void on_status_read(GObject *cmd_std, GAsyncResult *r, gpointer udata)
@@ -561,8 +560,7 @@ NEW_CALLBACK(create_image_cb)
     GtkWidget *window = globals->window;
     GInputStream *std_out = NULL;
     char **cmd = create_forensic_image(globals);
-    g_print("%s\n", g_strjoinv(" ", cmd));
-    getchar();
+    /*g_print("%s\n", g_strjoinv(" ", cmd));*/
 
     char *percent_complete_str = NULL;
     char percent[3];
@@ -583,6 +581,7 @@ NEW_CALLBACK(create_image_cb)
     g_input_stream_read_async(std_out, so_buf, 274, G_PRIORITY_DEFAULT, 
             NULL, on_status_read, globals);
     so_buf[273] = '\0';
+
     percent_complete_str = strstr(so_buf, "s: at");
     if ( ! (percent_complete_str == NULL || *percent_complete_str == '\0') )
     {

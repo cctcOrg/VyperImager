@@ -93,4 +93,7 @@ typedef struct app_objects {
     SummaryLabels *labels;
 } app_objects;
 
+// Implemented in main.c
+void print_globals(app_objects *a);
+
 #endif /* APPDEFS_H */

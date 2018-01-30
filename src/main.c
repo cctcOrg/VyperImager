@@ -102,3 +102,58 @@ static void notebook_append_with_title(app_objects *globals, GtkWidget *ch, cons
     gtk_notebook_append_page(GTK_NOTEBOOK(globals->notebook), ch, gtk_label_new(title));
 }
 
+// Defined in appdefs.h, somewhat arbitrarily implemented here
+void print_globals(app_objects *a) {
+    g_print("\33[31mMain objects:\33[0m\n");
+    g_print("App: %p\n", a->app);
+
+    g_print("Window: %p\n", a->window);
+    g_print("Notebook: %p\n", a->notebook);
+    g_print("Header: %p\n", a->header);
+
+    g_print("%p\n", a->etv);
+    g_print("%p\n", a->ttv);
+    g_print("%p\n", a->format_dev);
+
+    g_print("%p\n", a->os_buttons);
+
+    g_print("%p\n", a->filename_entry);
+    g_print("%p\n", a->directory_entry);
+
+    g_print("%p", a->casenum_entry);
+    g_print("%p", a->itemnum_entry);
+    g_print("%p", a->examiner_entry);
+    g_print("%p", a->desc_entry);
+    g_print("%p", a->notes_entry);
+
+    g_print("%p", a->devtype_combobox);
+    g_print("%p", a->hashtype_combobox);
+    g_print("%p", a->comptype_combobox);
+
+    g_print("\nDialog: %p\n", a->dialog);
+    g_print("Dialog box: %p\n", a->dialog_box);
+    g_print("Dialog button: %p\n", a->dialog_button);
+    g_print("Spinner: %p\n", a->spinner);
+    g_print("Progress bar: %p\n", a->prog_bar);
+
+    g_print("\n\33[31mImage Info :\33[0m\n");
+
+    g_print("%s\n", a->user_info->evidence_device);
+    g_print("%s\n", a->user_info->target_device);
+    g_print("%s\n", a->user_info->evd_path);
+    g_print("%s\n", a->user_info->tgt_path);
+    g_print("%s\n", a->user_info->target_filesystem);
+    g_print("%s\n", a->user_info->target_filename);
+    g_print("%s\n", a->user_info->target_directory);
+    g_print("%s\n", a->user_info->device_type);
+    g_print("%s\n", a->user_info->hash_type);
+    g_print("%s\n", a->user_info->compression_type);
+
+    g_print("\n\33[31mCase Info :\33[0m\n");
+
+    g_print("%s\n", a->user_info->case_info->casenum);
+    g_print("%s\n", a->user_info->case_info->itemnum);
+    g_print("%s\n", a->user_info->case_info->examiner);
+    g_print("%s\n", a->user_info->case_info->desc);
+    g_print("%s\n", a->user_info->case_info->notes);
+}
