@@ -11,4 +11,10 @@ pkg_check_modules(GTKMM gtkmm-3.0)
 link_directories(${GTKMM_LIBRARY_DIRS})
 include_directories(${GTKMM_INCLUDE_DIRS})
 
-add_subdirectory(src)
+file(GLOB_RECURSE SOURCES "src/*.cc")
+file(GLOB_RECURSE HEADERS "src/*.h")
+
+add_executable(vyper ${SOURCES} ${HEADERS})
+target_link_libraries(vyper ${GTKMM_LIBRARIES})
+
+#add_subdirectory(src)
