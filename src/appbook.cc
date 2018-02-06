@@ -1,34 +1,48 @@
-#include "appwin.h"
+#include "appbook.h"
 #include <iostream>
 
-AppWin::AppWin()
-    : app_box(Gtk::ORIENTATION_VERTICAL, 0)
-{
-    fullscreen();
-
-    add(app_box);
-
-    app_box.pack_start(hb, FALSE, FALSE, 0);
-    app_box.pack_end(notebook, TRUE, TRUE, 0);
+AppBook::AppBook()
+    : prev_button("Previous"), 
+    next_button("Next"),
+    quit_button("Quit")
     
-    hb.set_title("Evidence and Target Devices");
+{
+    set_show_tabs(false);
 
-    //m_button.signal_clicked().connect(sigc::mem_fun(*this,
-    //&AppWin::on_button_clicked));
+    add(bbox);
 
-    //// This packs the button into the Window (a container).
-    //add(m_button);
+    bbox.set_layout(Gtk::BUTTONBOX_EDGE);
+    bbox.set_size_request(-1, 100);
 
-    //// The final step is to display this newly created widget...
-    //m_button.show();
-    show_all();
+    bbox.pack_start(prev_button, FALSE, FALSE, 0);
+    bbox.pack_start(next_button, FALSE, FALSE, 0);
+    bbox.pack_start(quit_button, FALSE, FALSE, 0);
+    
+    prev_button.signal_clicked().connect(sigc::mem_fun(*this,
+    &AppBook::on_prev));
+
+    next_button.signal_clicked().connect(sigc::mem_fun(*this,
+    &AppBook::on_next));
+
+    quit_button.signal_clicked().connect(sigc::mem_fun(*this,
+    &AppBook::on_quit));
 }
 
-AppWin::~AppWin()
+AppBook::~AppBook()
 {
 }
 
-//void AppWin::on_button_clicked()
-//{
-//std::cout << "Don't do that" << std::endl;
-//}
+void AppBook::on_prev()
+{
+    std::cout << "Back to the future" << std::endl;
+}
+
+void AppBook::on_next()
+{
+    std::cout << "Here we goooooo...." << std::endl;
+}
+
+void AppBook::on_quit()
+{
+    std::cout << "I'm sorry Dave, I'm afraid I can't let you do that" << std::endl;
+}

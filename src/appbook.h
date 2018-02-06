@@ -1,27 +1,30 @@
-#ifndef APPWIN_H 
-#define APPWIN_H 
+#ifndef APPBOOK_H 
+#define APPBOOK_H 
 
 #include <gtkmm/notebook.h>
 #include <gtkmm/button.h>
 #include <gtkmm/headerbar.h>
 #include <gtkmm/box.h>
+#include <gtkmm/buttonbox.h>
 #include <gtkmm/window.h>
 
-class  AppWin: public Gtk::Window
+class AppBook: public Gtk::Notebook
 {
-
     public:
-        AppWin();
-        virtual ~AppWin();
+        AppBook();
+        virtual ~AppBook();
 
     protected:
         //Signal handlers:
-        void on_button_clicked();
+        void on_prev();
+        void on_next();
+        void on_quit();
 
         //Member widgets:
-        Gtk::Notebook notebook;
-        Gtk::HeaderBar hb;
-        Gtk::Box app_box;
+        Gtk::ButtonBox bbox;
+        Gtk::Button prev_button;
+        Gtk::Button next_button;
+        Gtk::Button quit_button;
 };
 
 #endif // APPWIN_H 
