@@ -507,9 +507,37 @@ static void imaging_done(GObject *o, GAsyncResult *r, gpointer udata)
     (void) r;
     app_objects *globals = udata;
 
-    gtk_widget_set_sensitive(globals->dialog_button, TRUE);
-    g_signal_connect(globals->dialog, "response", G_CALLBACK(app_done), globals); 
-    g_print("Done!\n");
+    /*gtk_widget_destroy(globals->dialog);*/
+    /*gtk_widget_set_sensitive(globals->dialog_button, TRUE);*/
+    /*gtk_progress_bar_set_fraction(GTK_PROGRESS_BAR(globals->prog_bar), 1.0);*/
+    /*g_signal_connect(globals->dialog, "response", G_CALLBACK(app_done), globals); */
+    gtk_widget_destroy(globals->dialog);
+
+    ImageInfo *in = globals->user_info;
+    Case *cs = in->case_info;
+
+    /* Clear out collected info */
+    safe_ish_free(cs->casenum);
+    safe_ish_free(cs->itemnum);
+    safe_ish_free(cs->examiner);
+    safe_ish_free(cs->desc);
+    safe_ish_free(cs->notes);
+
+    safe_ish_free(in->evidence_device);
+    safe_ish_free(in->target_device);
+    safe_ish_free(in->evd_path);
+    safe_ish_free(in->tgt_path);
+    safe_ish_free(in->target_filesystem);
+    safe_ish_free(in->target_filename);
+    safe_ish_free(in->target_directory);
+    safe_ish_free(in->device_type);
+    safe_ish_free(in->hash_type);
+    safe_ish_free(in->compression_type);
+
+    clear_stack(globals->pages);
+    gtk_notebook_set_current_page(GTK_NOTEBOOK(globals->notebook), 0);
+    set_next_hb_title(globals);
+    g_print("Did some useful things...\n");
 }
 
 static void on_status_read(GObject *cmd_std, GAsyncResult *r, gpointer udata)
