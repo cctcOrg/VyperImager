@@ -7,6 +7,8 @@
 #include <gtkmm/box.h>
 #include <gtkmm/window.h>
 
+#include "appbook.h"
+
 class  AppWin: public Gtk::Window
 {
 
@@ -16,10 +18,10 @@ class  AppWin: public Gtk::Window
 
     protected:
         //Signal handlers:
-        void on_button_clicked();
+        //void on_button_clicked();
 
         //Member widgets:
-        Gtk::Notebook notebook;
+        AppBook notebook;
         Gtk::HeaderBar hb;
         Gtk::Box app_box;
 };
