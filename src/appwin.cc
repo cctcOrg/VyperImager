@@ -1,27 +1,34 @@
 #include "appwin.h"
-//#include "appbook.h"
 #include <iostream>
+#include <typeinfo>
+#include <gtkmm.h>
 
-AppWin::AppWin()
-    : app_box(Gtk::ORIENTATION_VERTICAL, 0)
+AppWin::AppWin(Glib::RefPtr<Gtk::Application> a)
+    : app_box(Gtk::ORIENTATION_VERTICAL, 0),
+    quit_button("Quit")
 {
+    app = a;
+
     fullscreen();
+
+    bbox = Gtk::manage(new Gtk::ButtonBox()); 
+    notebook = Gtk::manage(new AppBook(bbox));
+    bbox->set_layout(Gtk::BUTTONBOX_EDGE);
+    bbox->set_size_request(-1, 100);
+
+    bbox->pack_end(quit_button, FALSE, FALSE, 0);
 
     add(app_box);
 
     app_box.pack_start(hb, FALSE, FALSE, 0);
-    app_box.pack_end(notebook, TRUE, TRUE, 0);
+    app_box.pack_start(*notebook, TRUE, TRUE, 0);
+    app_box.pack_end(*bbox, FALSE, FALSE, 0);
     
     hb.set_title("Evidence and Target Devices");
 
-    //m_button.signal_clicked().connect(sigc::mem_fun(*this,
-    //&AppWin::on_button_clicked));
+    quit_button.signal_clicked().connect(sigc::mem_fun(*this,
+    &AppWin::on_quit));
 
-    //// This packs the button into the Window (a container).
-    //add(m_button);
-
-    //// The final step is to display this newly created widget...
-    //m_button.show();
     show_all();
 }
 
@@ -29,7 +36,7 @@ AppWin::~AppWin()
 {
 }
 
-//void AppWin::on_button_clicked()
-//{
-//std::cout << "Don't do that" << std::endl;
-//}
+void AppWin::on_quit()
+{
+    app->quit();
+}
