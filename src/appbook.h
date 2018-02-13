@@ -9,25 +9,34 @@
 #include <gtkmm/window.h>
 #include <stack>
 
+#include "control_button.h"
+#include "pages.h"
+
 class AppBook: public Gtk::Notebook
 {
     public:
-        AppBook(Gtk::ButtonBox *b);
+        AppBook(Gtk::ButtonBox* b, Gtk::HeaderBar* hb);
         virtual ~AppBook();
 
     protected:
         // Signal handlers:
         void on_prev();
         void on_next();
+        int append_page_obj(Page& p);
         
         // Member widgets:
-        Gtk::ButtonBox *bbox;
-        Gtk::Button prev_button;
-        Gtk::Button next_button;
+        Gtk::ButtonBox* bbox;
+        Gtk::HeaderBar* header;
+        ControlButton prev_button;
+        ControlButton next_button;
 
         // Pages stack
         size_t current_page;
         std::stack<size_t> pg_stack;
+
+        // Pages
+        WelcomePage wp;
+        EvidPage ep;
 };
 
 #endif // APPWIN_H 

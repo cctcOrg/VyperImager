@@ -8,8 +8,9 @@
 #include <gtkmm/window.h>
 
 #include "appbook.h"
+#include "control_button.h"
 
-class  AppWin: public Gtk::Window
+class AppWin: public Gtk::Window
 {
 
     public:
@@ -24,12 +25,12 @@ class  AppWin: public Gtk::Window
 
         //Member widgets:
         Gtk::ButtonBox* bbox;
+        Gtk::HeaderBar* hb;
+        AppBook* notebook;
 
         Glib::RefPtr<Gtk::Application> app;
-        AppBook* notebook;
-        Gtk::HeaderBar hb;
         Gtk::Box app_box;
-        Gtk::Button quit_button;
+        ControlButton quit_button;
 };
 
 #endif // APPWIN_H 
