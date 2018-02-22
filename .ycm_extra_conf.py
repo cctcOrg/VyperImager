@@ -1,6 +1,6 @@
 def FlagsForFile( filename, **kwargs ):
   return {
-    'flags': [ '-x', 'c', '-Wall', '-Wextra', '-Werror',
+    'flags': [ '-x', 'c++', '-Wall', '-Wextra', '-Werror', 
             # Gtk flags
             '-pthread',
             '-I/usr/include/gtkmm-3.0',
