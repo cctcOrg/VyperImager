@@ -44,18 +44,28 @@ void AppBook::on_prev()
     if (pg_stack.empty()) {
         prev_button.set_sensitive(false);
     }
+
+    set_current_page(current_page);
+    const Page* p = (Page*) get_nth_page(current_page);
+    std::cout << p->title << std::endl;
+    header->set_title(p->title);
 }
 
 void AppBook::on_next()
 {
     pg_stack.push(current_page);
-    current_page += 1;
-    prev_button.set_sensitive(true);
-    std::cout << current_page << std::endl;
-    
-    next_page();
+    std::cout << "Pushing page " << current_page << std::endl;
+
+    // Go to the next page, as specificed by the current page
     const Page* p = (Page*) get_nth_page(current_page);
-    header->set_title(p->title);
+    current_page = p->next_page;
+    std::cout<< "Going to page " << current_page << std::endl;
+
+    set_current_page(current_page);
+    prev_button.set_sensitive(true);
+
+    const Page* pn = (Page*) get_nth_page(current_page);
+    header->set_title(pn->title);
 }
 
 int AppBook::append_page_obj(Page& p)
