@@ -3,6 +3,7 @@
 #include <vector>
 #include <sstream>
 #include <iterator>
+#include <iomanip>
 
 #include<stdio.h>
 #include<string.h>
@@ -22,11 +23,24 @@
 #define MODEL_SIZE 60
 #define REM_SIZE 10
 
-Device::Device() {}
-Device::~Device() {}
-
 using std::vector;
 using std::string;
+using std::stringstream;
+
+Device::Device(string n, string m, string s, string fsp, vector<string> ls, size_t nps, bool r, bool it, PedDevice *p)
+{
+    name = n;
+    model = m;
+    size = s;
+    fspath = fsp;
+    labels = ls;
+    numparts = nps;
+    removable = r;
+    is_target = it;
+    dev = p;
+}
+Device::~Device() {}
+
 
 /* Takes a path, resolving any symbolic links, and strips away everything before
  * and including the second '/' found -- for example /dev/mmcblk0 -> mmcblk0.
@@ -51,7 +65,7 @@ static string get_target_dev(string filename) {
     exit(EXIT_FAILURE);
 }
 
-Device **get_blockdev_info(size_t *num_blockdevs) {
+vector<Device*> get_blockdev_info(size_t *num_blockdevs) {
     PedDevice *ped = NULL;
     string target_device;
     int i = 0;
@@ -59,56 +73,44 @@ Device **get_blockdev_info(size_t *num_blockdevs) {
     Device *dev;
     
     vector<Device*> device_info;
-    Device **devinf_real;
 
     target_device = get_target_dev("/dev/disk/by-label/EVID_TARGET");
     
     ped_device_probe_all();
 
     while ( (ped = ped_device_get_next(ped)) ) {
-        dev = get_blockdev_struct(ped);
-        dev->is_target = target_device.compare(dev->name) == 0;
+        dev = get_blockdev_struct(ped, target_device);
         device_info.push_back(dev);
     }
 
     *num_blockdevs = i;
-    devinf_real = realloc(device_info, i*sizeof(Device*));
-    /* If we couldn't make it smaller for some weird reason, then we'll just 
-     * return the one that's too big */
-    if (devinf_real == NULL)
-        return device_info;
-    else
-        return devinf_real;
+    return device_info;
 }
 
-Device *get_blockdev_struct(PedDevice *dev) {
+Device *get_blockdev_struct(PedDevice *dev, string& td) {
     FILE *info_file;
     char *tmp;
     const char *tmpc;
     blkid_partlist ls;
     char info_path[PATH_SIZE];
     char rem[REM_SIZE]; 
-    char *devname;
-    char **labels = NULL;
-    char *wholedev_label;
+    string wholedev_label;
+    vector<string> labels;
     int numparts = 0;
     int i;
     int err;
 
-    char *size = malloc(SIZE_SIZE*sizeof(char));
+    stringstream size;
+    //size = malloc(SIZE_SIZE*sizeof(char));
     float size_value;
 
     /* Literally just get /dev/<x> */
-    char *dev_path = malloc((strlen(dev->path)+1)*sizeof(char));
+    char *dev_path = new char[strlen(dev->path)+1];
     strcpy(dev_path, dev->path);
     strtok(dev_path, "/"); // "dev"
     tmp = strtok(NULL, "/"); // <name>
-    devname = malloc((strlen(tmp)+1)*sizeof(char));
-    strcpy(devname, tmp);
-    free(dev_path);
-
-    dev_path = malloc((strlen(dev->path)+1)*sizeof(char));
-    strcpy(dev_path, dev->path);
+    string devname(tmp);
+    delete[] dev_path;
 
     /* Find the size */
     blkid_probe pr = blkid_new_probe_from_filename(dev->path);
@@ -128,12 +130,12 @@ Device *get_blockdev_struct(PedDevice *dev) {
     err = blkid_probe_lookup_value(pr, "LABEL", &tmpc, NULL);
 
     if (err == 0) {
-        wholedev_label = malloc(strlen(tmpc)+1);
-        strcpy(wholedev_label, tmpc);
+        wholedev_label = string(tmpc);
     }
 
-    sprintf(size, "%.2f", size_value);
-    strcat(size, " G");
+    size << std::setprecision(2) << size_value << " G";
+    //sprintf(size, "%.2f", size_value);
+    //strcat(size, " G");
 
     /* See what labels we can find */
     ls = blkid_probe_get_partitions(pr);
@@ -141,13 +143,9 @@ Device *get_blockdev_struct(PedDevice *dev) {
         i = 0;
         numparts = blkid_partlist_numof_partitions(ls);
 
-        if (wholedev_label != NULL) {
-            labels = malloc((numparts+1)*sizeof(char*));
-            labels[i] = wholedev_label;
+        if (! wholedev_label.empty()) {
+            labels.push_back(wholedev_label);
             i++;
-        }
-        else {
-            labels = malloc(numparts*sizeof(char*));
         }
 
         for (i = 0; i < numparts; i++) {
@@ -158,35 +156,30 @@ Device *get_blockdev_struct(PedDevice *dev) {
             err = blkid_probe_lookup_value(pr, "LABEL", &tmpc, NULL);
 
             if (err == 0) {
-                tmp = malloc(strlen(tmpc)+1);
-                strcpy(tmp, tmpc);
-                labels[i] = tmp;
+                labels.push_back(string(tmpc));
             }
-            else {
+            //else {
                 /*printf("%s has no valid label\n", info_path);*/
-                labels[i] = NULL;
-            }
+                //labels[i] = NULL;
+            //}
 
             blkid_free_probe(pr);
         }
     }
 
     /* Removable */
-    sprintf(info_path, "/sys/block/%s/removable", devname);
-    info_file = fopen(info_path, "r");
+    stringstream info_stream;
+    info_stream << "/sys/block/" << devname << "/removable";
+    info_file = fopen(info_stream.str().c_str(), "r");
     fgets(rem, REM_SIZE, info_file);
     fclose(info_file);
     
-    Device *devinfo = malloc(sizeof(Device));
-
-    devinfo->dev = dev;
-    devinfo->name = devname;
-    devinfo->model = dev->model;
-    devinfo->fspath = dev_path;
-    devinfo->size = size;
-    devinfo->numparts = numparts;
-    devinfo->labels = labels;
-    devinfo->removable = (rem[0] == '0') ? 0 : 1;
+    Device *devinfo = new Device(
+        devname,
+        string(dev->model), size.str(), string(dev_path),
+        labels, numparts,
+        (rem[0] == '0') ? 0 : 1, td.compare(devname), dev
+    );
 
     return devinfo;
 }
