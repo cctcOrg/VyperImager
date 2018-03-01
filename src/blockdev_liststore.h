@@ -1,6 +1,11 @@
+#ifndef BD_LIST
+#define BD_LIST
+
 #include <gtkmm/treemodelcolumn.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/treeiter.h>
+
+#include <vector>
 
 #include "device.h"
 
@@ -20,7 +25,7 @@ class BlockdevCols : public Gtk::TreeModel::ColumnRecord {
         Gtk::TreeModelColumn<Glib::ustring> fspath;
 };
 
-class BlockdevListStore : Gtk::ListStore
+class BlockdevListStore : public Gtk::ListStore
 {
     public:
         BlockdevListStore(bool hide_internal, char *evid);
@@ -32,11 +37,7 @@ class BlockdevListStore : Gtk::ListStore
         bool is_eviddev;
         size_t num_blockdevs;
         
-        Device **blockdev_info;
-        Device *dev;
-
-        // Changing all this to take advantage of C++
-        bool is_first;
-        char *label;
-        char *partlabels;
+        std::vector<Device*> blockdev_info;
 };
+
+#endif /* BD_LIST */
