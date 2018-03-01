@@ -15,6 +15,6 @@ file(GLOB_RECURSE SOURCES "src/*.cc")
 file(GLOB_RECURSE HEADERS "src/*.h")
 
 add_executable(vyper ${SOURCES} ${HEADERS})
-target_link_libraries(vyper ${GTKMM_LIBRARIES})
+target_link_libraries(vyper parted blkid ${GTKMM_LIBRARIES})
 
 #add_subdirectory(src)
