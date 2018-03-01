@@ -4,7 +4,9 @@
 #define HIDE_INT 1
 #define SHOW_INT 0
 
+extern "C" {
 #include<parted/device.h>
+}
 
 #include<iostream>
 #include <string>
@@ -17,6 +19,9 @@ class Device {
     public:
         Device(string name, string model, string size, string fspath, vector<string> labels, size_t numparts, bool removable, bool is_target, PedDevice *p);
         ~Device();
+
+        bool is_evid(char *evid);
+        friend class BlockdevListStore;
 
     protected:
         string name;

@@ -5,6 +5,7 @@
 #include <iterator>
 #include <iomanip>
 
+extern "C" {
 #include<stdio.h>
 #include<string.h>
 #include<error.h>
@@ -14,6 +15,7 @@
 
 #include<parted/device.h>
 #include<blkid/blkid.h>
+}
 
 #include "device.h"
 
@@ -41,6 +43,10 @@ Device::Device(string n, string m, string s, string fsp, vector<string> ls, size
 }
 Device::~Device() {}
 
+bool Device::is_evid(char *evid)
+{
+    return name.compare(evid) == 0;
+}
 
 /* Takes a path, resolving any symbolic links, and strips away everything before
  * and including the second '/' found -- for example /dev/mmcblk0 -> mmcblk0.
