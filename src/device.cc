@@ -43,7 +43,7 @@ Device::Device(string n, string m, string s, string fsp, vector<string> ls, size
 }
 Device::~Device() {}
 
-bool Device::is_evid(char *evid)
+bool Device::is_evid(string& evid)
 {
     return name.compare(evid) == 0;
 }

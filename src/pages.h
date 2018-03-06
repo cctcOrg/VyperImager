@@ -5,6 +5,8 @@
 #include <gtkmm/box.h>
 #include <gtkmm/label.h>
 
+#include "blockdev_treeview.h"
+
 class Page : public Gtk::Box {
     public:
         Page(const Glib::ustring &t);
@@ -29,6 +31,10 @@ class EvidPage : public Page
     public:
         EvidPage();
         ~EvidPage();
+
+    protected:
+        Gtk::Label evid_prompt;
+        BlockdevTreeView evid_device_tv;
 };
 
 #endif // PAGES_H

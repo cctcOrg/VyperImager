@@ -21,7 +21,7 @@ BlockdevCols::~BlockdevCols()
 {
 }
 
-BlockdevListStore::BlockdevListStore(bool hide_internal, char *evid)
+BlockdevListStore::BlockdevListStore(bool hide_internal, string evid)
 {
     Device *dev;
     bool is_first;
@@ -33,7 +33,7 @@ BlockdevListStore::BlockdevListStore(bool hide_internal, char *evid)
     for (size_t i=0; i<num_blockdevs; i++) {
         dev = blockdev_info[i];
  
-        is_eviddev = ( evid != NULL  &&  dev->is_evid(evid) ); 
+        is_eviddev = (evid.size() &&  dev->is_evid(evid) ); 
         /*if (evid != NULL) printf("%s\n", evid);*/
         
         for (size_t j = 0; j < dev->labels.size(); j++) {
@@ -68,3 +68,4 @@ BlockdevListStore::BlockdevListStore(bool hide_internal, char *evid)
 BlockdevListStore::~BlockdevListStore()
 {
 }
+

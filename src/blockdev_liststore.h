@@ -28,7 +28,7 @@ class BlockdevCols : public Gtk::TreeModel::ColumnRecord {
 class BlockdevListStore : public Gtk::ListStore
 {
     public:
-        BlockdevListStore(bool hide_internal, char *evid);
+        BlockdevListStore(bool hide_internal, string evid);
         ~BlockdevListStore();
 
     protected:

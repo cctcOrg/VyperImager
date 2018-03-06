@@ -19,6 +19,10 @@ AppWin::AppWin(Glib::RefPtr<Gtk::Application> a)
     bbox->set_layout(Gtk::BUTTONBOX_EDGE);
     bbox->set_size_request(-1, 100);
     bbox->pack_end(quit_button, FALSE, FALSE, 0);
+    bbox->set_margin_start(30);
+    bbox->set_margin_end(30);
+    bbox->set_margin_bottom(50);
+    bbox->set_margin_top(20);
 
     add(app_box);
 

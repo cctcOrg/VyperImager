@@ -2,6 +2,11 @@
 
 Page::Page(const Glib::ustring &t) : title(t)
 {
+    set_orientation(Gtk::Orientation::ORIENTATION_VERTICAL);
+    set_margin_start(30);
+    set_margin_end(30);
+    set_margin_bottom(50);
+    set_margin_top(20);
 }
 Page::~Page() {}
 
@@ -18,8 +23,12 @@ WelcomePage::~WelcomePage()
 }
 
 EvidPage::EvidPage()
-    : Page("Evidence Device Selection")
+    : Page("Evidence Device Selection"),
+    evid_prompt("Please choose the evidence device"),
+    evid_device_tv(false)
 {
+    pack_start(evid_prompt, true, true, 10);
+    pack_start(evid_device_tv, true, true, 10);
     next_page = 2;
 }
 
