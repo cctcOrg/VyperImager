@@ -39,7 +39,7 @@ class Device {
  * structures for each one, storing the number of found block devices in the
  * given num_blockdevs output parameter. Returns a newly allocated array of 
  * Devices of the size indicated by the retuned num_blockdevs*/
-vector<Device*> get_blockdev_info(size_t *num_blockdevs);
+vector<Device*> get_blockdev_info();
 
 /* Uses a combination of blkid and parted to probe a given device for information
  * so that the Device struct can be populated. Returns a newly allocated Device

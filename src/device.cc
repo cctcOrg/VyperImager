@@ -71,10 +71,9 @@ static string get_target_dev(string filename) {
     exit(EXIT_FAILURE);
 }
 
-vector<Device*> get_blockdev_info(size_t *num_blockdevs) {
+vector<Device*> get_blockdev_info() {
     PedDevice *ped = NULL;
     string target_device;
-    int i = 0;
 
     Device *dev;
     
@@ -89,7 +88,6 @@ vector<Device*> get_blockdev_info(size_t *num_blockdevs) {
         device_info.push_back(dev);
     }
 
-    *num_blockdevs = i;
     return device_info;
 }
 
