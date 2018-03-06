@@ -13,7 +13,6 @@ class BlockdevTreeView : public Gtk::TreeView
         ~BlockdevTreeView();
 
     protected:
-        BlockdevListStore store;
         Glib::RefPtr<BlockdevListStore> model;
 
         Gtk::TreeView::Column devcol;
