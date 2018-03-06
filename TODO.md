@@ -1,6 +1,5 @@
 # Bugs
 - ~When pressing back button on the Target Device Information it doesn't work the first time~
-- Segfaults on quit due to TreeView issues
 - Big devices can't use MBR, and formatting isn't perfect
 - It never finishes 
 - Dialog sometimes segfaults 
