@@ -37,6 +37,7 @@ class AppBook: public Gtk::Notebook
         // Pages
         WelcomePage wp;
         EvidPage ep;
+        TargPage tp;
 };
 
 #endif // APPWIN_H 

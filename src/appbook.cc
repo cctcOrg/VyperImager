@@ -18,6 +18,7 @@ AppBook::AppBook(Gtk::ButtonBox* b, Gtk::HeaderBar* hb)
 
     append_page_obj(wp);
     append_page_obj(ep);
+    append_page_obj(tp);
 
     hb->set_title(wp.title);
     
@@ -38,7 +39,6 @@ void AppBook::on_prev()
 {
     current_page = pg_stack.top();
     pg_stack.pop();
-    std::cout << current_page << std::endl;
 
     // If we just emptied it turn off prev button
     if (pg_stack.empty()) {
@@ -47,19 +47,16 @@ void AppBook::on_prev()
 
     set_current_page(current_page);
     const Page* p = (Page*) get_nth_page(current_page);
-    std::cout << p->title << std::endl;
     header->set_title(p->title);
 }
 
 void AppBook::on_next()
 {
     pg_stack.push(current_page);
-    std::cout << "Pushing page " << current_page << std::endl;
 
     // Go to the next page, as specificed by the current page
     const Page* p = (Page*) get_nth_page(current_page);
     current_page = p->next_page;
-    std::cout<< "Going to page " << current_page << std::endl;
 
     set_current_page(current_page);
     prev_button.set_sensitive(true);
@@ -70,5 +67,5 @@ void AppBook::on_next()
 
 int AppBook::append_page_obj(Page& p)
 {
-    append_page(p, p.title);
+    return append_page(p, p.title);
 }

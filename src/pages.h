@@ -4,6 +4,7 @@
 #include <glib.h>
 #include <gtkmm/box.h>
 #include <gtkmm/label.h>
+#include <gtkmm/checkbutton.h>
 
 #include "blockdev_treeview.h"
 
@@ -37,4 +38,15 @@ class EvidPage : public Page
         BlockdevTreeView evid_device_tv;
 };
 
+class TargPage : public Page 
+{
+    public:
+        TargPage();
+        ~TargPage();
+
+    protected:
+        Gtk::Label targ_prompt;
+        BlockdevTreeView targ_device_tv;
+        Gtk::CheckButton format_button;
+};
 #endif // PAGES_H

@@ -35,3 +35,20 @@ EvidPage::EvidPage()
 EvidPage::~EvidPage()
 {
 }
+
+TargPage::TargPage()
+    : Page("Target Device Selection"),
+    targ_prompt("Please choose the target device"),
+    targ_device_tv(false),
+    format_button("Format?")
+{
+    pack_start(targ_prompt, true, true, 10);
+    pack_start(targ_device_tv, true, true, 10);
+    pack_start(format_button, true, true, 20);
+
+    next_page = 3;
+}
+
+TargPage::~TargPage()
+{
+}
