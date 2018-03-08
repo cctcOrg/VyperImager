@@ -39,6 +39,7 @@ class AppBook: public Gtk::Notebook
         EvidPage ep;
         TargPage tp;
         FormatPage fp;
+        CaseMetadataPage cmdp;
 };
 
 #endif // APPWIN_H 

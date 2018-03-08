@@ -92,3 +92,41 @@ FormatPage::FormatPage()
 FormatPage::~FormatPage()
 {
 }
+
+CaseMetadataPage::CaseMetadataPage()
+    : Page("CaseMetadataet Device Selection"),
+    grid(), frame(), swindow()
+{
+    grid.set_halign(Gtk::ALIGN_CENTER); 
+    grid.set_valign(Gtk::ALIGN_CENTER); 
+    grid.set_size_request(600, 600);
+    
+    grid.attach(*Gtk::manage(new Gtk::Label("Case number: ")), 0, 0, 1, 1);
+    grid.attach(*Gtk::manage(new Gtk::Label("Item number: ")), 0, 1, 1, 1);
+    grid.attach(*Gtk::manage(new Gtk::Label("Examiner: ")),    0, 2, 1, 1);
+    grid.attach(*Gtk::manage(new Gtk::Label("Description: ")), 0, 3, 1, 1);
+    grid.attach(*Gtk::manage(new Gtk::Label("Notes: ")),       0, 4, 1, 1);
+
+    grid.attach(casenum, 1, 0, 1, 1);
+    grid.attach(itemnum, 1, 1, 1, 1);
+    grid.attach(examiner,1, 2, 1, 1);
+
+    frame.set_size_request(200, 200);
+    swindow.set_hexpand();
+    swindow.set_border_width(3);
+    
+    desc.set_wrap_mode(Gtk::WRAP_WORD);
+    swindow.add(desc);
+    frame.add(swindow);
+
+    grid.attach(frame, 1, 3, 1, 1);
+
+    grid.attach(notes, 1, 4, 1, 1);
+
+    pack_start(grid);
+    next_page = 5;
+}
+
+CaseMetadataPage::~CaseMetadataPage()
+{
+}

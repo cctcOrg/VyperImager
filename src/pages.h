@@ -8,6 +8,12 @@
 
 #include <gtkmm/checkbutton.h>
 
+#include <gtkmm/grid.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/textview.h>
+
 #include "blockdev_treeview.h"
 
 class Page : public Gtk::Box {
@@ -63,4 +69,24 @@ class FormatPage : public Page
         Gtk::Label format_prompt;
         Gtk::ButtonBox os_button_box;
 };
+
+class CaseMetadataPage : public Page 
+{
+    public:
+        CaseMetadataPage();
+        ~CaseMetadataPage();
+
+    protected:
+        Gtk::Grid grid;
+        Gtk::Frame frame;
+        Gtk::ScrolledWindow swindow;
+
+        // Entries
+        Gtk::Entry casenum; 
+        Gtk::Entry itemnum;
+        Gtk::Entry examiner;
+        Gtk::TextView desc;
+        Gtk::Entry notes;
+};
+
 #endif // PAGES_H

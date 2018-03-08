@@ -20,8 +20,9 @@ AppBook::AppBook(Gtk::ButtonBox* b, Gtk::HeaderBar* hb)
     append_page_obj(ep);
     append_page_obj(tp);
     append_page_obj(fp);
+    append_page_obj(cmdp);
 
-    hb->set_title(wp.title);
+    header->set_title(wp.title);
     
     prev_button.signal_clicked().connect(sigc::mem_fun(*this,
     &AppBook::on_prev));
