@@ -19,6 +19,7 @@ AppBook::AppBook(Gtk::ButtonBox* b, Gtk::HeaderBar* hb)
     append_page_obj(wp);
     append_page_obj(ep);
     append_page_obj(tp);
+    append_page_obj(fp);
 
     hb->set_title(wp.title);
     
