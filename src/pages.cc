@@ -1,3 +1,5 @@
+#include<sstream>
+
 #include "pages.h"
 
 Page::Page(const Glib::ustring &t) : title(t)
@@ -50,5 +52,43 @@ TargPage::TargPage()
 }
 
 TargPage::~TargPage()
+{
+}
+
+FormatPage::FormatPage()
+    : Page("Format"),
+    os_box(Gtk::ORIENTATION_VERTICAL, 10),
+    format_prompt("Please select which types of systems you would like to read this drive from (Linux/Windows/Apple)"),
+    os_button_box(Gtk::ORIENTATION_HORIZONTAL)
+{
+    std::stringstream format;
+    string os_names[] = {"Linux", "Windows", "Apple"};
+
+    Gtk::Button *os_button;
+    Gtk::Image *os_image;
+
+    os_box.pack_start(format_prompt, true, true, 20);
+    os_box.set_valign(Gtk::ALIGN_CENTER);
+
+    os_button_box.set_layout(Gtk::BUTTONBOX_SPREAD);
+    for (size_t i=0; i<3; i++)
+    {
+        format << "icons/" << os_names[i] << "_200px.svg";
+        os_button = Gtk::manage(new Gtk::Button());
+        os_image = Gtk::manage(new Gtk::Image(format.str()));
+
+        os_button->set_image(*os_image);
+        os_button->set_tooltip_text(os_names[i]);
+        os_button_box.pack_start(*os_button);
+        format.str("");
+    }
+
+    os_box.pack_start(os_button_box);
+    pack_start(os_box);
+
+    next_page = 4;
+}
+
+FormatPage::~FormatPage()
 {
 }
