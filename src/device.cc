@@ -137,7 +137,7 @@ Device *get_blockdev_struct(PedDevice *dev, string& td) {
         wholedev_label = string(tmpc);
     }
 
-    size << std::setprecision(2) << size_value << " G";
+    size << std::fixed << std::setprecision(1) << size_value << " G";
     //sprintf(size, "%.2f", size_value);
     //strcat(size, " G");
 
