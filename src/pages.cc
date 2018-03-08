@@ -130,3 +130,86 @@ CaseMetadataPage::CaseMetadataPage()
 CaseMetadataPage::~CaseMetadataPage()
 {
 }
+
+ImageMetadataPage::ImageMetadataPage()
+    : Page("Imaging"),
+    grid(), type_cb(), veri_cb(), comp_cb()
+{
+    // Set grid properties
+    grid.set_halign(Gtk::ALIGN_CENTER);
+    grid.set_valign(Gtk::ALIGN_CENTER);
+    grid.set_row_spacing(20);
+    grid.set_column_spacing(20);
+
+    // To be used for labels to follow
+    Gtk::Label* label;
+
+    label = Gtk::manage(new Gtk::Label(
+            "Please select from one of the following:\n" 
+            "- Fixed: internal drives\n"
+            "- Removable: Flash drives/SD cards/External hard drives\n"
+            "- Optical: CD/DVD, any kind of disc\n"
+            "- Memory: RAM")
+            );
+    label->set_xalign(0.0f);
+    grid.attach(*label, 0, 0, 1, 1);
+
+    type_cb.append("Fixed");
+    type_cb.append("Removable");
+    type_cb.append("Optical");
+    type_cb.append("Memory");
+
+    type_cb.set_active(0);
+    grid.attach(type_cb, 1, 0, 1, 1);
+
+    label = Gtk::manage(new Gtk::Label(
+            "Please select a verification hash:\n"
+            "- SHA1: Fastest, but will not give complete confidence \n"
+            "- SHA256: Use this for a real case")
+            );
+    label->set_xalign(0.0f);
+    grid.attach(*label, 0, 1, 1, 1);
+
+    veri_cb.append("SHA1");
+    veri_cb.append("SHA256");
+
+    veri_cb.set_active(0);
+    grid.attach(veri_cb, 1, 1, 1, 1);
+
+
+    label = Gtk::manage(new Gtk::Label( 
+            "Please select a compression type:\n"
+            "- None: Fastest, image will be the size of the drive\n"
+            "- Fast: Middle ground for speed and size\n"
+            "- Best: Will make image as small as possible, "
+                "may take significantly longer on older hardware")
+            ); 
+    label->set_xalign(0.0f);
+    grid.attach(*label, 0, 2, 1, 1);
+
+    comp_cb.append("None");
+    comp_cb.append("Best");
+    comp_cb.append("Fast");
+
+    comp_cb.set_active(0);
+    grid.attach(comp_cb, 1, 2, 1, 1);
+
+    pack_start(grid);
+    next_page = 6;
+}
+
+ImageMetadataPage::~ImageMetadataPage()
+{
+}
+
+SummaryPage::SummaryPage()
+    : Page("Summary"),
+    welcome_label("Summary to the First Responder Imaging Toolkit!", false)
+{
+    pack_start(welcome_label, true, true, 30);
+    next_page = 0;
+}
+
+SummaryPage::~SummaryPage()
+{
+}

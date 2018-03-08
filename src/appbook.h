@@ -40,6 +40,8 @@ class AppBook: public Gtk::Notebook
         TargPage tp;
         FormatPage fp;
         CaseMetadataPage cmdp;
+        ImageMetadataPage imdp;
+        SummaryPage sp;
 };
 
 #endif // APPWIN_H 

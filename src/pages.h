@@ -14,6 +14,8 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/textview.h>
 
+#include <gtkmm/comboboxtext.h>
+
 #include "blockdev_treeview.h"
 
 class Page : public Gtk::Box {
@@ -87,6 +89,31 @@ class CaseMetadataPage : public Page
         Gtk::Entry examiner;
         Gtk::TextView desc;
         Gtk::Entry notes;
+};
+
+class ImageMetadataPage : public Page 
+{
+    public:
+        ImageMetadataPage();
+        ~ImageMetadataPage();
+
+    protected:
+        Gtk::Grid grid;
+        Gtk::Label overview_label;
+
+        Gtk::ComboBoxText type_cb;
+        Gtk::ComboBoxText veri_cb;
+        Gtk::ComboBoxText comp_cb;
+};
+
+class SummaryPage : public Page 
+{
+    public:
+        SummaryPage();
+        ~SummaryPage();
+
+    protected:
+        Gtk::Label welcome_label;
 };
 
 #endif // PAGES_H
