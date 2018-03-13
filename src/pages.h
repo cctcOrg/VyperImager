@@ -14,6 +14,8 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/textview.h>
 
+#include <gtkmm/filechooserbutton.h>
+
 #include <gtkmm/comboboxtext.h>
 
 #include "infocont.h"
@@ -79,6 +81,19 @@ class FormatPage : public Page
         Gtk::Box os_box;
         Gtk::Label format_prompt;
         Gtk::ButtonBox os_button_box;
+};
+
+class TargetLocPage : public Page
+{
+    public:
+        TargetLocPage();
+        ~TargetLocPage();
+        void update_info();
+
+    protected:
+        Gtk::Grid grid;
+        Gtk::Entry filename;
+        Gtk::FileChooserButton directory;
 };
 
 class CaseMetadataPage : public Page 

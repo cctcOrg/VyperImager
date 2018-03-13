@@ -7,6 +7,18 @@
 // it in the constructor
 InfoCont Page::info;
 
+
+enum {
+    WELCOME_PAGE = 0,
+    EVID_PAGE,
+    TGT_PAGE,
+    TGTF_PAGE,
+    LOC_PAGE,
+    CASE_PAGE,
+    IMGI_PAGE,
+    SUMM_PAGE
+};
+
 Page::Page(const Glib::ustring &t) : title(t)
 {
     set_orientation(Gtk::Orientation::ORIENTATION_VERTICAL);
@@ -22,7 +34,7 @@ WelcomePage::WelcomePage()
     welcome_label("Welcome to the First Responder Imaging Toolkit!", false)
 {
     pack_start(welcome_label, true, true, 30);
-    next_page = 1;
+    next_page = EVID_PAGE;
 
     info.desc = "Test";
     std::cout << "Initial value of string: " << info.desc << std::endl;
@@ -45,7 +57,7 @@ EvidPage::EvidPage()
 {
     pack_start(evid_prompt, true, true, 10);
     pack_start(evid_device_tv, true, true, 10);
-    next_page = 2;
+    next_page = TGT_PAGE;
 }
 
 void EvidPage::update_info()
@@ -67,7 +79,7 @@ TargPage::TargPage()
     pack_start(targ_device_tv, true, true, 10);
     pack_start(format_button, true, true, 20);
 
-    next_page = 3;
+    next_page = TGTF_PAGE;
 }
 
 void TargPage::update_info()
@@ -110,7 +122,7 @@ FormatPage::FormatPage()
     os_box.pack_start(os_button_box);
     pack_start(os_box);
 
-    next_page = 4;
+    next_page = LOC_PAGE;
 }
 
 void FormatPage::update_info()
@@ -119,6 +131,39 @@ void FormatPage::update_info()
 }
 
 FormatPage::~FormatPage()
+{
+}
+
+TargetLocPage::TargetLocPage()
+    : Page("Target Location"), grid(), filename(), directory(Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER)
+{
+    Gtk::Label *label;
+
+    grid.set_halign(Gtk::ALIGN_CENTER);
+    grid.set_valign(Gtk::ALIGN_CENTER);
+    
+    label = Gtk::manage(new Gtk::Label("Filename (no extension): "));
+    grid.attach(*label, 0, 0, 1, 1);
+
+    grid.attach(filename, 1, 0, 1, 1);
+
+    label = Gtk::manage(new Gtk::Label("Directory: "));
+    grid.attach(*label, 0, 1, 1, 1);
+
+    directory.set_current_folder("/media/EVID_TARGET");
+    grid.attach(directory, 1, 1, 1, 1);
+
+    pack_start(grid);
+
+    next_page = CASE_PAGE;
+}
+
+void TargetLocPage::update_info()
+{
+    ;
+}
+
+TargetLocPage::~TargetLocPage()
 {
 }
 
@@ -153,7 +198,7 @@ CaseMetadataPage::CaseMetadataPage()
     grid.attach(notes, 1, 4, 1, 1);
 
     pack_start(grid);
-    next_page = 5;
+    next_page = IMGI_PAGE;
 }
 
 void CaseMetadataPage::update_info()
@@ -233,7 +278,7 @@ ImageMetadataPage::ImageMetadataPage()
     grid.attach(comp_cb, 1, 2, 1, 1);
 
     pack_start(grid);
-    next_page = 6;
+    next_page = SUMM_PAGE;
 }
 
 void ImageMetadataPage::update_info()
@@ -299,9 +344,9 @@ SummaryPage::SummaryPage()
     label = new_managed_xaligned_label("Notes: ");
     grid.attach(*label, 0, 14, 1, 1);
 
-    add(grid);
+    pack_start(grid);
 
-    next_page = 0;
+    next_page = WELCOME_PAGE;
 }
 
 void SummaryPage::update_info()

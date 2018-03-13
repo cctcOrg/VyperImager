@@ -20,6 +20,7 @@ AppBook::AppBook(Gtk::ButtonBox* b, Gtk::HeaderBar* hb)
     append_page_obj(ep);
     append_page_obj(tp);
     append_page_obj(fp);
+    append_page_obj(tlp);
     append_page_obj(cmdp);
     append_page_obj(imdp);
     append_page_obj(sp);
