@@ -20,6 +20,7 @@
 
 #include "infocont.h"
 #include "blockdev_treeview.h"
+#include <gtkmm/treeselection.h>
 
 class Page : public Gtk::Box {
     public:

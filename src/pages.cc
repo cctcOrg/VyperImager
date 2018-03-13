@@ -35,10 +35,6 @@ WelcomePage::WelcomePage()
 {
     pack_start(welcome_label, true, true, 30);
     next_page = EVID_PAGE;
-
-    info.desc = "Test";
-    std::cout << "Initial value of string: " << info.desc << std::endl;
-    std::cout << "Is it empty? " << info.desc.empty() << std::endl;
 }
 
 void WelcomePage::update_info()
@@ -62,7 +58,44 @@ EvidPage::EvidPage()
 
 void EvidPage::update_info()
 {
-    std::cout << "Welcome" << std::endl;
+    Glib::RefPtr<Gtk::TreeSelection> sel;
+    Glib::RefPtr<Gtk::TreeModel> model;
+    GtkTreeIter iter;
+    GtkWidget *diag;
+
+    char *name;
+    GSubprocess *subp;
+    char **cmd;
+
+    // TODO: Adapt for C++
+
+    /* Get target device name */
+    sel = evid_device_tv.get_selection(); 
+    if (sel->get_selected(model)) {
+        gtk_tree_model_get(model, &iter, COL_DEV, &name, -1);
+        info.target_device = name;
+        gtk_tree_model_get(model, &iter, COL_PATH, &name, -1);
+        info.target_filename = name;
+    } 
+    else {
+        //diag = create_no_device_dialog(window, "target");
+        //gtk_dialog_run(GTK_DIALOG(diag));
+        //gtk_widget_destroy(diag);
+        return;
+    }
+
+    if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->format_dev)))
+        gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
+    /* If you don't need to format skip to the location page */
+    else {
+        cmd = mount_target_device(info->target_device);
+        subp = g_subprocess_newv((const gchar *const *) cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
+        g_subprocess_wait(subp, NULL, NULL);
+        g_strfreev(cmd);
+
+        globals->user_info->target_filesystem = "N/A";
+        gtk_notebook_set_current_page(GTK_NOTEBOOK(globals->notebook), LOC_PAGE);
+    }
 }
 
 EvidPage::~EvidPage()
@@ -84,7 +117,7 @@ TargPage::TargPage()
 
 void TargPage::update_info()
 {
-    std::cout << "Welcome" << std::endl;
+    std::cout << "Target" << std::endl;
 }
 
 TargPage::~TargPage()

@@ -60,7 +60,8 @@ void AppBook::on_next()
     pg_stack.push(current_page);
 
     // Go to the next page, as specificed by the current page
-    const Page* p = (Page*) get_nth_page(current_page);
+    Page* p = (Page*) get_nth_page(current_page);
+    p->update_info();
     current_page = p->next_page;
 
     set_current_page(current_page);
