@@ -1,6 +1,11 @@
 #include<sstream>
 
 #include "pages.h"
+#include <gtkmm/separator.h>
+
+// This tells compiler to allocate InfoCont struct, but not sure why I can't do
+// it in the constructor
+InfoCont Page::info;
 
 Page::Page(const Glib::ustring &t) : title(t)
 {
@@ -18,6 +23,15 @@ WelcomePage::WelcomePage()
 {
     pack_start(welcome_label, true, true, 30);
     next_page = 1;
+
+    info.desc = "Test";
+    std::cout << "Initial value of string: " << info.desc << std::endl;
+    std::cout << "Is it empty? " << info.desc.empty() << std::endl;
+}
+
+void WelcomePage::update_info()
+{
+    std::cout << "Welcome" << std::endl;
 }
 
 WelcomePage::~WelcomePage()
@@ -32,6 +46,11 @@ EvidPage::EvidPage()
     pack_start(evid_prompt, true, true, 10);
     pack_start(evid_device_tv, true, true, 10);
     next_page = 2;
+}
+
+void EvidPage::update_info()
+{
+    std::cout << "Welcome" << std::endl;
 }
 
 EvidPage::~EvidPage()
@@ -51,12 +70,17 @@ TargPage::TargPage()
     next_page = 3;
 }
 
+void TargPage::update_info()
+{
+    std::cout << "Welcome" << std::endl;
+}
+
 TargPage::~TargPage()
 {
 }
 
 FormatPage::FormatPage()
-    : Page("Format"),
+    : Page("Target Device Format"),
     os_box(Gtk::ORIENTATION_VERTICAL, 10),
     format_prompt("Please select which types of systems you would like to read this drive from (Linux/Windows/Apple)"),
     os_button_box(Gtk::ORIENTATION_HORIZONTAL)
@@ -89,12 +113,17 @@ FormatPage::FormatPage()
     next_page = 4;
 }
 
+void FormatPage::update_info()
+{
+    std::cout << "Welcome" << std::endl;
+}
+
 FormatPage::~FormatPage()
 {
 }
 
 CaseMetadataPage::CaseMetadataPage()
-    : Page("CaseMetadataet Device Selection"),
+    : Page("Case Metadata"),
     grid(), frame(), swindow()
 {
     grid.set_halign(Gtk::ALIGN_CENTER); 
@@ -127,12 +156,24 @@ CaseMetadataPage::CaseMetadataPage()
     next_page = 5;
 }
 
+void CaseMetadataPage::update_info()
+{
+    std::cout << "Welcome" << std::endl;
+}
+
 CaseMetadataPage::~CaseMetadataPage()
 {
 }
 
+static Gtk::Label* new_managed_xaligned_label(const char* text)
+{
+    Gtk::Label *l = Gtk::manage(new Gtk::Label(text));
+    l->set_xalign(0.0f);
+    return l;
+}
+
 ImageMetadataPage::ImageMetadataPage()
-    : Page("Imaging"),
+    : Page("Image Metadata"),
     grid(), type_cb(), veri_cb(), comp_cb()
 {
     // Set grid properties
@@ -144,14 +185,13 @@ ImageMetadataPage::ImageMetadataPage()
     // To be used for labels to follow
     Gtk::Label* label;
 
-    label = Gtk::manage(new Gtk::Label(
+    label = new_managed_xaligned_label(
             "Please select from one of the following:\n" 
             "- Fixed: internal drives\n"
             "- Removable: Flash drives/SD cards/External hard drives\n"
             "- Optical: CD/DVD, any kind of disc\n"
-            "- Memory: RAM")
+            "- Memory: RAM"
             );
-    label->set_xalign(0.0f);
     grid.attach(*label, 0, 0, 1, 1);
 
     type_cb.append("Fixed");
@@ -162,12 +202,11 @@ ImageMetadataPage::ImageMetadataPage()
     type_cb.set_active(0);
     grid.attach(type_cb, 1, 0, 1, 1);
 
-    label = Gtk::manage(new Gtk::Label(
+    label = new_managed_xaligned_label(
             "Please select a verification hash:\n"
             "- SHA1: Fastest, but will not give complete confidence \n"
-            "- SHA256: Use this for a real case")
+            "- SHA256: Use this for a real case"
             );
-    label->set_xalign(0.0f);
     grid.attach(*label, 0, 1, 1, 1);
 
     veri_cb.append("SHA1");
@@ -177,14 +216,13 @@ ImageMetadataPage::ImageMetadataPage()
     grid.attach(veri_cb, 1, 1, 1, 1);
 
 
-    label = Gtk::manage(new Gtk::Label( 
+    label = new_managed_xaligned_label(
             "Please select a compression type:\n"
             "- None: Fastest, image will be the size of the drive\n"
             "- Fast: Middle ground for speed and size\n"
             "- Best: Will make image as small as possible, "
-                "may take significantly longer on older hardware")
+                "may take significantly longer on older hardware"
             ); 
-    label->set_xalign(0.0f);
     grid.attach(*label, 0, 2, 1, 1);
 
     comp_cb.append("None");
@@ -198,16 +236,77 @@ ImageMetadataPage::ImageMetadataPage()
     next_page = 6;
 }
 
+void ImageMetadataPage::update_info()
+{
+    std::cout << "Welcome" << std::endl;
+}
+
 ImageMetadataPage::~ImageMetadataPage()
 {
 }
 
 SummaryPage::SummaryPage()
-    : Page("Summary"),
-    welcome_label("Summary to the First Responder Imaging Toolkit!", false)
+    : Page("Summary"), grid()
 {
-    pack_start(welcome_label, true, true, 30);
+    Gtk::Label *label;
+
+    grid.set_margin_start(200);
+    grid.set_margin_end(200);
+
+    grid.set_row_spacing(30);
+    grid.set_column_spacing(20);
+
+    label = new_managed_xaligned_label("Evidence device: ");
+    grid.attach(*label, 0, 0, 1, 1);
+
+    label = new_managed_xaligned_label("Target device: ");
+    grid.attach(*label, 0, 1, 1, 1);
+
+    label = new_managed_xaligned_label("Target filesystem: ");
+    grid.attach(*label, 0, 2, 1, 1);
+
+    label = new_managed_xaligned_label("Target directory: ");
+    grid.attach(*label, 0, 3, 1, 1);
+
+    label = new_managed_xaligned_label("Target filename: ");
+    grid.attach(*label, 0, 4, 1, 1);
+
+    grid.attach(*Gtk::manage(new Gtk::Separator()), 0, 5, 2, 1); 
+
+    label = new_managed_xaligned_label("Case number: ");
+    grid.attach(*label, 0, 6, 1, 1);
+
+    label = new_managed_xaligned_label("Item number: ");
+    grid.attach(*label, 0, 7, 1, 1);
+
+    label = new_managed_xaligned_label("Examiner: ");
+    grid.attach(*label, 0, 8, 1, 1);
+
+    label = new_managed_xaligned_label("Description: ");
+    grid.attach(*label, 0, 9, 1, 1);
+
+    label = new_managed_xaligned_label("Notes: ");
+    grid.attach(*label, 0, 10, 1, 1);
+
+    grid.attach(*Gtk::manage(new Gtk::Separator()), 0, 11, 2, 1); 
+
+    label = new_managed_xaligned_label("Examiner: ");
+    grid.attach(*label, 0, 12, 1, 1);
+
+    label = new_managed_xaligned_label("Description: ");
+    grid.attach(*label, 0, 13, 1, 1);
+
+    label = new_managed_xaligned_label("Notes: ");
+    grid.attach(*label, 0, 14, 1, 1);
+
+    add(grid);
+
     next_page = 0;
+}
+
+void SummaryPage::update_info()
+{
+    std::cout << "Welcome" << std::endl;
 }
 
 SummaryPage::~SummaryPage()

@@ -16,6 +16,7 @@
 
 #include <gtkmm/comboboxtext.h>
 
+#include "infocont.h"
 #include "blockdev_treeview.h"
 
 class Page : public Gtk::Box {
@@ -24,6 +25,10 @@ class Page : public Gtk::Box {
         ~Page();
         const Glib::ustring title;
         size_t next_page;
+
+        // To allow pages to accumulate information
+        static InfoCont info;
+        virtual void update_info() = 0;
 };
 
 
@@ -32,6 +37,7 @@ class WelcomePage : public Page
     public:
         WelcomePage();
         ~WelcomePage();
+        void update_info();
 
     protected:
         Gtk::Label welcome_label;
@@ -42,6 +48,7 @@ class EvidPage : public Page
     public:
         EvidPage();
         ~EvidPage();
+        void update_info();
 
     protected:
         Gtk::Label evid_prompt;
@@ -53,6 +60,7 @@ class TargPage : public Page
     public:
         TargPage();
         ~TargPage();
+        void update_info();
 
     protected:
         Gtk::Label targ_prompt;
@@ -65,6 +73,7 @@ class FormatPage : public Page
     public:
         FormatPage();
         ~FormatPage();
+        void update_info();
 
     protected:
         Gtk::Box os_box;
@@ -77,6 +86,7 @@ class CaseMetadataPage : public Page
     public:
         CaseMetadataPage();
         ~CaseMetadataPage();
+        void update_info();
 
     protected:
         Gtk::Grid grid;
@@ -96,6 +106,7 @@ class ImageMetadataPage : public Page
     public:
         ImageMetadataPage();
         ~ImageMetadataPage();
+        void update_info();
 
     protected:
         Gtk::Grid grid;
@@ -111,9 +122,10 @@ class SummaryPage : public Page
     public:
         SummaryPage();
         ~SummaryPage();
+        void update_info();
 
     protected:
-        Gtk::Label welcome_label;
+        Gtk::Grid grid;
 };
 
 #endif // PAGES_H
