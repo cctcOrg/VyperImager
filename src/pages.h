@@ -153,6 +153,20 @@ class SummaryPage : public Page
 
     protected:
         Gtk::Grid grid;
+
+        Gtk::Label eviddev;
+        Gtk::Label targdev;
+        Gtk::Label targfisys;
+        Gtk::Label targdir;
+        Gtk::Label targfiname;
+        Gtk::Label casenum;
+        Gtk::Label itemnum;
+        Gtk::Label examiner;
+        Gtk::Label desc;
+        Gtk::Label notes;
+        Gtk::Label devtype;
+        Gtk::Label comptype;
+        Gtk::Label hashtype;
 };
 
 #endif // PAGES_H

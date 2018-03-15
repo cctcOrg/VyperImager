@@ -311,11 +311,6 @@ CaseMetadataPage::CaseMetadataPage()
 
 void CaseMetadataPage::update_info()
 {
-    std::cout << "Welcome" << std::endl;
-}
-
-CaseMetadataPage::~CaseMetadataPage()
-{
     Glib::RefPtr<Gtk::TextBuffer> buff;
 
     info.casenum = casenum.get_text();
@@ -325,6 +320,10 @@ CaseMetadataPage::~CaseMetadataPage()
 
     buff = desc.get_buffer();
     info.desc = buff->get_text();
+}
+
+CaseMetadataPage::~CaseMetadataPage()
+{
 }
 
 static Gtk::Label* new_managed_xaligned_label(const char* text)
@@ -400,7 +399,9 @@ ImageMetadataPage::ImageMetadataPage()
 
 void ImageMetadataPage::update_info()
 {
-    std::cout << "Welcome" << std::endl;
+    info.device_type = type_cb.get_active_text(); 
+    info.hash_type = veri_cb.get_active_text();
+    info.compression_type = comp_cb.get_active_text();
 }
 
 ImageMetadataPage::~ImageMetadataPage()
@@ -412,6 +413,8 @@ SummaryPage::SummaryPage()
 {
     Gtk::Label *label;
 
+    grid.set_halign(Gtk::ALIGN_CENTER);
+    grid.set_valign(Gtk::ALIGN_CENTER);
     grid.set_margin_start(200);
     grid.set_margin_end(200);
 
@@ -420,46 +423,59 @@ SummaryPage::SummaryPage()
 
     label = new_managed_xaligned_label("Evidence device: ");
     grid.attach(*label, 0, 0, 1, 1);
+    grid.attach(eviddev, 1, 0, 1, 1);
 
     label = new_managed_xaligned_label("Target device: ");
     grid.attach(*label, 0, 1, 1, 1);
+    grid.attach(targdev, 1, 1, 1, 1);
 
     label = new_managed_xaligned_label("Target filesystem: ");
     grid.attach(*label, 0, 2, 1, 1);
+    grid.attach(targfisys, 1, 2, 1, 1);
 
     label = new_managed_xaligned_label("Target directory: ");
     grid.attach(*label, 0, 3, 1, 1);
+    grid.attach(targdir, 1, 3, 1, 1);
 
     label = new_managed_xaligned_label("Target filename: ");
     grid.attach(*label, 0, 4, 1, 1);
+    grid.attach(targfiname, 1, 4, 1, 1);
 
     grid.attach(*Gtk::manage(new Gtk::Separator()), 0, 5, 2, 1); 
 
     label = new_managed_xaligned_label("Case number: ");
     grid.attach(*label, 0, 6, 1, 1);
+    grid.attach(casenum, 1, 6, 1, 1);
 
     label = new_managed_xaligned_label("Item number: ");
     grid.attach(*label, 0, 7, 1, 1);
+    grid.attach(itemnum, 1, 7, 1, 1);
 
     label = new_managed_xaligned_label("Examiner: ");
     grid.attach(*label, 0, 8, 1, 1);
+    grid.attach(examiner, 1, 8, 1, 1);
 
     label = new_managed_xaligned_label("Description: ");
     grid.attach(*label, 0, 9, 1, 1);
+    grid.attach(desc, 1, 9, 1, 1);
 
     label = new_managed_xaligned_label("Notes: ");
     grid.attach(*label, 0, 10, 1, 1);
+    grid.attach(notes, 1, 10, 1, 1);
 
     grid.attach(*Gtk::manage(new Gtk::Separator()), 0, 11, 2, 1); 
 
-    label = new_managed_xaligned_label("Examiner: ");
+    label = new_managed_xaligned_label("Device Type: ");
     grid.attach(*label, 0, 12, 1, 1);
+    grid.attach(devtype, 1, 12, 1, 1);
 
-    label = new_managed_xaligned_label("Description: ");
+    label = new_managed_xaligned_label("Compression Type: ");
     grid.attach(*label, 0, 13, 1, 1);
+    grid.attach(comptype, 1, 13, 1, 1);
 
-    label = new_managed_xaligned_label("Notes: ");
+    label = new_managed_xaligned_label("Hash Type: ");
     grid.attach(*label, 0, 14, 1, 1);
+    grid.attach(hashtype, 1, 14, 1, 1);
 
     pack_start(grid);
 
@@ -469,7 +485,21 @@ SummaryPage::SummaryPage()
 
 void SummaryPage::update_info()
 {
-    std::cout << "Hallo! Ich habe eine Aktualisierung" << std::endl;
+    eviddev.set_text(info.evidence_device);
+    targdev.set_text(info.target_device);
+    targfisys.set_text(info.target_filesystem);
+    targdir.set_text(info.target_directory);
+    targfiname.set_text(info.target_filename);
+
+    casenum.set_text(info.casenum);
+    itemnum.set_text(info.itemnum);
+    examiner.set_text(info.examiner);
+    desc.set_text(info.desc);
+    notes.set_text(info.notes);
+
+    devtype.set_text(info.device_type);
+    comptype.set_text(info.compression_type);
+    hashtype.set_text(info.hash_type);
 }
 
 SummaryPage::~SummaryPage()
