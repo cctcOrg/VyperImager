@@ -34,6 +34,7 @@ AppBook::AppBook(Gtk::ButtonBox* b, Gtk::HeaderBar* hb)
     next_button.signal_clicked().connect(sigc::mem_fun(*this,
     &AppBook::on_next));
 
+    signal_switch_page().connect(sigc::mem_fun(*this, &AppBook::on_page_switch));
 }
 
 AppBook::~AppBook()
@@ -69,6 +70,17 @@ void AppBook::on_next()
 
     const Page* pn = (Page*) get_nth_page(current_page);
     header->set_title(pn->title);
+}
+
+void AppBook::on_page_switch(Gtk::Widget *w, guint pn)
+{
+    (void) w;
+    (void) pn;
+
+    if (current_page == SUMM_PAGE)
+    {
+        sp.update_info();
+    }
 }
 
 int AppBook::append_page_obj(Page& p)

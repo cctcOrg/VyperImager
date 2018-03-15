@@ -22,6 +22,7 @@ class AppBook: public Gtk::Notebook
         // Signal handlers:
         void on_prev();
         void on_next();
+        void on_page_switch(Gtk::Widget *w, guint pn);
         int append_page_obj(Page& p);
         
         // Member widgets:

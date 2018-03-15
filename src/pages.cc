@@ -1,23 +1,12 @@
 #include<sstream>
 
+#include "blockdev_liststore.h"
 #include "pages.h"
 #include <gtkmm/separator.h>
 
 // This tells compiler to allocate InfoCont struct, but not sure why I can't do
 // it in the constructor
 InfoCont Page::info;
-
-
-enum {
-    WELCOME_PAGE = 0,
-    EVID_PAGE,
-    TGT_PAGE,
-    TGTF_PAGE,
-    LOC_PAGE,
-    CASE_PAGE,
-    IMGI_PAGE,
-    SUMM_PAGE
-};
 
 Page::Page(const Glib::ustring &t) : title(t)
 {
@@ -58,44 +47,49 @@ EvidPage::EvidPage()
 
 void EvidPage::update_info()
 {
+    BlockdevCols cols;
+    std::stringstream ss;
+
     Glib::RefPtr<Gtk::TreeSelection> sel;
     Glib::RefPtr<Gtk::TreeModel> model;
-    GtkTreeIter iter;
-    GtkWidget *diag;
+    Gtk::TreeIter iter;
+    Gtk::TreeRow row;
 
-    char *name;
-    GSubprocess *subp;
-    char **cmd;
+    //GtkWidget *diag;
+
+    //char *name;
+    //GSubprocess *subp;
+    //char **cmd;
 
     // TODO: Adapt for C++
 
     /* Get target device name */
     sel = evid_device_tv.get_selection(); 
-    if (sel->get_selected(model)) {
-        gtk_tree_model_get(model, &iter, COL_DEV, &name, -1);
-        info.target_device = name;
-        gtk_tree_model_get(model, &iter, COL_PATH, &name, -1);
-        info.target_filename = name;
+    if ((iter = sel->get_selected(model)))
+    {
+        row = *iter;
+        ss << row[cols.device_name];
+        info.evidence_device = ss.str();
+        ss.str(""); 
+        
+        ss << "/dev/" << row[cols.device_name];
+        info.evd_path = ss.str();
     } 
-    else {
+    else
+    {
         //diag = create_no_device_dialog(window, "target");
         //gtk_dialog_run(GTK_DIALOG(diag));
         //gtk_widget_destroy(diag);
         return;
     }
 
-    if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(globals->format_dev)))
-        gtk_notebook_next_page(GTK_NOTEBOOK(globals->notebook));
-    /* If you don't need to format skip to the location page */
-    else {
-        cmd = mount_target_device(info->target_device);
-        subp = g_subprocess_newv((const gchar *const *) cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
-        g_subprocess_wait(subp, NULL, NULL);
-        g_strfreev(cmd);
+    //cmd = mount_target_device(info->target_device);
+    //subp = g_subprocess_newv((const gchar *const *) cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
+    //g_subprocess_wait(subp, NULL, NULL);
+    //g_strfreev(cmd);
 
-        globals->user_info->target_filesystem = "N/A";
-        gtk_notebook_set_current_page(GTK_NOTEBOOK(globals->notebook), LOC_PAGE);
-    }
+    //globals->user_info->target_filesystem = "N/A";
+    //gtk_notebook_set_current_page(GTK_NOTEBOOK(globals->notebook), LOC_PAGE);
 }
 
 EvidPage::~EvidPage()
@@ -117,7 +111,49 @@ TargPage::TargPage()
 
 void TargPage::update_info()
 {
-    std::cout << "Target" << std::endl;
+    BlockdevCols cols;
+    std::stringstream ss;
+
+    Glib::RefPtr<Gtk::TreeSelection> sel;
+    Glib::RefPtr<Gtk::TreeModel> model;
+    Gtk::TreeIter iter;
+    Gtk::TreeRow row;
+
+    //GtkWidget *diag;
+
+    //char *name;
+    //GSubprocess *subp;
+    //char **cmd;
+
+    // TODO: Adapt for C++
+
+    /* Get target device name */
+    sel = targ_device_tv.get_selection(); 
+    if ((iter = sel->get_selected(model)))
+    {
+        row = *iter;
+        ss << row[cols.device_name];
+        info.target_device = ss.str();
+        ss.str(""); 
+        
+        ss << "/dev/" << row[cols.device_name];
+        info.tgt_path = ss.str();
+    } 
+    else
+    {
+        //diag = create_no_device_dialog(window, "target");
+        //gtk_dialog_run(GTK_DIALOG(diag));
+        //gtk_widget_destroy(diag);
+        return;
+    }
+
+    //cmd = mount_target_device(info->target_device);
+    //subp = g_subprocess_newv((const gchar *const *) cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
+    //g_subprocess_wait(subp, NULL, NULL);
+    //g_strfreev(cmd);
+
+    //globals->user_info->target_filesystem = "N/A";
+    //gtk_notebook_set_current_page(GTK_NOTEBOOK(globals->notebook), LOC_PAGE);
 }
 
 TargPage::~TargPage()
@@ -143,7 +179,7 @@ FormatPage::FormatPage()
     for (size_t i=0; i<3; i++)
     {
         format << "icons/" << os_names[i] << "_200px.svg";
-        os_button = Gtk::manage(new Gtk::Button());
+        os_button = Gtk::manage(new Gtk::ToggleButton());
         os_image = Gtk::manage(new Gtk::Image(format.str()));
 
         os_button->set_image(*os_image);
@@ -160,7 +196,45 @@ FormatPage::FormatPage()
 
 void FormatPage::update_info()
 {
-    std::cout << "Welcome" << std::endl;
+    size_t buttons_state = 0;
+    string fs_choice;
+    Gtk::ToggleButton *b;
+
+    size_t i = 0;
+    for (Gtk::Widget* w : os_button_box.get_children())
+    {
+        b = dynamic_cast<Gtk::ToggleButton*>(w);
+        if (b->get_active())
+            buttons_state |= 1<<i;
+        i++;
+    }
+    
+    switch (buttons_state)
+    {
+        /* Windows, Mac, Linux */
+        case 0b011:
+        case 0b111:
+        case 0b110:
+        case 0b010:
+            fs_choice = "ntfs";
+            break;
+        /* Mac, Linux */
+        case 0b100:
+        case 0b101:
+            fs_choice = "hfsplus";
+            break;
+        /* Linux */
+        case 0b001:
+            fs_choice = "ext4";
+            break;
+        default:
+            //diag = create_please_choose_system_dialog(globals->window);
+            //gtk_dialog_run(GTK_DIALOG(diag));
+            //gtk_widget_destroy(diag);
+            return;
+    }
+
+    info.target_filesystem = fs_choice; 
 }
 
 FormatPage::~FormatPage()
@@ -193,7 +267,8 @@ TargetLocPage::TargetLocPage()
 
 void TargetLocPage::update_info()
 {
-    ;
+    info.target_filename = filename.get_text();
+    info.target_directory = directory.get_current_folder();
 }
 
 TargetLocPage::~TargetLocPage()
@@ -241,6 +316,15 @@ void CaseMetadataPage::update_info()
 
 CaseMetadataPage::~CaseMetadataPage()
 {
+    Glib::RefPtr<Gtk::TextBuffer> buff;
+
+    info.casenum = casenum.get_text();
+    info.itemnum = itemnum.get_text();
+    info.examiner = examiner.get_text();
+    info.notes = notes.get_text();
+
+    buff = desc.get_buffer();
+    info.desc = buff->get_text();
 }
 
 static Gtk::Label* new_managed_xaligned_label(const char* text)
@@ -380,11 +464,12 @@ SummaryPage::SummaryPage()
     pack_start(grid);
 
     next_page = WELCOME_PAGE;
+
 }
 
 void SummaryPage::update_info()
 {
-    std::cout << "Welcome" << std::endl;
+    std::cout << "Hallo! Ich habe eine Aktualisierung" << std::endl;
 }
 
 SummaryPage::~SummaryPage()

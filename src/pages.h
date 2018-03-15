@@ -22,6 +22,17 @@
 #include "blockdev_treeview.h"
 #include <gtkmm/treeselection.h>
 
+enum {
+    WELCOME_PAGE = 0,
+    EVID_PAGE,
+    TGT_PAGE,
+    TGTF_PAGE,
+    LOC_PAGE,
+    CASE_PAGE,
+    IMGI_PAGE,
+    SUMM_PAGE
+};
+
 class Page : public Gtk::Box {
     public:
         Page(const Glib::ustring &t);
