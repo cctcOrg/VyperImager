@@ -18,6 +18,7 @@
 
 #include <gtkmm/comboboxtext.h>
 
+#include "dialogs.h"
 #include "infocont.h"
 #include "blockdev_treeview.h"
 #include <gtkmm/treeselection.h>
@@ -42,7 +43,7 @@ class Page : public Gtk::Box {
 
         // To allow pages to accumulate information
         static InfoCont info;
-        virtual void update_info() = 0;
+        virtual bool update_info() = 0;
 };
 
 
@@ -51,7 +52,7 @@ class WelcomePage : public Page
     public:
         WelcomePage();
         ~WelcomePage();
-        void update_info();
+        bool update_info();
 
     protected:
         Gtk::Label welcome_label;
@@ -62,9 +63,10 @@ class EvidPage : public Page
     public:
         EvidPage();
         ~EvidPage();
-        void update_info();
+        bool update_info();
 
     protected:
+        ErrorDialog no_device_dialog; 
         Gtk::Label evid_prompt;
         BlockdevTreeView evid_device_tv;
 };
@@ -74,9 +76,10 @@ class TargPage : public Page
     public:
         TargPage();
         ~TargPage();
-        void update_info();
+        bool update_info();
 
     protected:
+        ErrorDialog no_device_dialog; 
         Gtk::Label targ_prompt;
         BlockdevTreeView targ_device_tv;
         Gtk::CheckButton format_button;
@@ -87,9 +90,12 @@ class FormatPage : public Page
     public:
         FormatPage();
         ~FormatPage();
-        void update_info();
+        bool update_info();
 
     protected:
+        ErrorDialog no_format_dialog; 
+        ConfirmDialog confirm_dialog; 
+
         Gtk::Box os_box;
         Gtk::Label format_prompt;
         Gtk::ButtonBox os_button_box;
@@ -100,7 +106,7 @@ class TargetLocPage : public Page
     public:
         TargetLocPage();
         ~TargetLocPage();
-        void update_info();
+        bool update_info();
 
     protected:
         Gtk::Grid grid;
@@ -113,7 +119,7 @@ class CaseMetadataPage : public Page
     public:
         CaseMetadataPage();
         ~CaseMetadataPage();
-        void update_info();
+        bool update_info();
 
     protected:
         Gtk::Grid grid;
@@ -133,7 +139,7 @@ class ImageMetadataPage : public Page
     public:
         ImageMetadataPage();
         ~ImageMetadataPage();
-        void update_info();
+        bool update_info();
 
     protected:
         Gtk::Grid grid;
@@ -149,7 +155,7 @@ class SummaryPage : public Page
     public:
         SummaryPage();
         ~SummaryPage();
-        void update_info();
+        bool update_info();
 
     protected:
         Gtk::Grid grid;

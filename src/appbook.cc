@@ -58,11 +58,16 @@ void AppBook::on_prev()
 
 void AppBook::on_next()
 {
-    pg_stack.push(current_page);
-
     // Go to the next page, as specificed by the current page
     Page* p = (Page*) get_nth_page(current_page);
-    p->update_info();
+    
+    // If the update info fails, that means the user made an error
+    if (! p->update_info())
+    {
+        return;
+    }
+
+    pg_stack.push(current_page);
     current_page = p->next_page;
 
     set_current_page(current_page);

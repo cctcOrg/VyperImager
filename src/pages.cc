@@ -26,9 +26,9 @@ WelcomePage::WelcomePage()
     next_page = EVID_PAGE;
 }
 
-void WelcomePage::update_info()
+bool WelcomePage::update_info()
 {
-    std::cout << "Welcome" << std::endl;
+    return true;
 }
 
 WelcomePage::~WelcomePage()
@@ -37,6 +37,7 @@ WelcomePage::~WelcomePage()
 
 EvidPage::EvidPage()
     : Page("Evidence Device Selection"),
+    no_device_dialog("An evidence device must be selected!"), 
     evid_prompt("Please choose the evidence device"),
     evid_device_tv(false)
 {
@@ -45,7 +46,7 @@ EvidPage::EvidPage()
     next_page = TGT_PAGE;
 }
 
-void EvidPage::update_info()
+bool EvidPage::update_info()
 {
     BlockdevCols cols;
     std::stringstream ss;
@@ -54,14 +55,6 @@ void EvidPage::update_info()
     Glib::RefPtr<Gtk::TreeModel> model;
     Gtk::TreeIter iter;
     Gtk::TreeRow row;
-
-    //GtkWidget *diag;
-
-    //char *name;
-    //GSubprocess *subp;
-    //char **cmd;
-
-    // TODO: Adapt for C++
 
     /* Get target device name */
     sel = evid_device_tv.get_selection(); 
@@ -77,10 +70,8 @@ void EvidPage::update_info()
     } 
     else
     {
-        //diag = create_no_device_dialog(window, "target");
-        //gtk_dialog_run(GTK_DIALOG(diag));
-        //gtk_widget_destroy(diag);
-        return;
+        no_device_dialog.confirm();
+        return false;
     }
 
     //cmd = mount_target_device(info->target_device);
@@ -90,6 +81,7 @@ void EvidPage::update_info()
 
     //globals->user_info->target_filesystem = "N/A";
     //gtk_notebook_set_current_page(GTK_NOTEBOOK(globals->notebook), LOC_PAGE);
+    return true;
 }
 
 EvidPage::~EvidPage()
@@ -98,6 +90,7 @@ EvidPage::~EvidPage()
 
 TargPage::TargPage()
     : Page("Target Device Selection"),
+    no_device_dialog("A target device must be selected!"), 
     targ_prompt("Please choose the target device"),
     targ_device_tv(false),
     format_button("Format?")
@@ -109,7 +102,7 @@ TargPage::TargPage()
     next_page = TGTF_PAGE;
 }
 
-void TargPage::update_info()
+bool TargPage::update_info()
 {
     BlockdevCols cols;
     std::stringstream ss;
@@ -118,14 +111,6 @@ void TargPage::update_info()
     Glib::RefPtr<Gtk::TreeModel> model;
     Gtk::TreeIter iter;
     Gtk::TreeRow row;
-
-    //GtkWidget *diag;
-
-    //char *name;
-    //GSubprocess *subp;
-    //char **cmd;
-
-    // TODO: Adapt for C++
 
     /* Get target device name */
     sel = targ_device_tv.get_selection(); 
@@ -141,10 +126,8 @@ void TargPage::update_info()
     } 
     else
     {
-        //diag = create_no_device_dialog(window, "target");
-        //gtk_dialog_run(GTK_DIALOG(diag));
-        //gtk_widget_destroy(diag);
-        return;
+        no_device_dialog.confirm();
+        return false;
     }
 
     //cmd = mount_target_device(info->target_device);
@@ -154,6 +137,7 @@ void TargPage::update_info()
 
     //globals->user_info->target_filesystem = "N/A";
     //gtk_notebook_set_current_page(GTK_NOTEBOOK(globals->notebook), LOC_PAGE);
+    return true;
 }
 
 TargPage::~TargPage()
@@ -162,6 +146,8 @@ TargPage::~TargPage()
 
 FormatPage::FormatPage()
     : Page("Target Device Format"),
+    no_format_dialog("Please select which systems the target drive should be readable by."), 
+    confirm_dialog("All data on selected device will be lost, are you sure you wish to continue?"),
     os_box(Gtk::ORIENTATION_VERTICAL, 10),
     format_prompt("Please select which types of systems you would like to read this drive from (Linux/Windows/Apple)"),
     os_button_box(Gtk::ORIENTATION_HORIZONTAL)
@@ -194,7 +180,7 @@ FormatPage::FormatPage()
     next_page = LOC_PAGE;
 }
 
-void FormatPage::update_info()
+bool FormatPage::update_info()
 {
     size_t buttons_state = 0;
     string fs_choice;
@@ -228,13 +214,12 @@ void FormatPage::update_info()
             fs_choice = "ext4";
             break;
         default:
-            //diag = create_please_choose_system_dialog(globals->window);
-            //gtk_dialog_run(GTK_DIALOG(diag));
-            //gtk_widget_destroy(diag);
-            return;
+            no_format_dialog.confirm();
+            return false;
     }
 
     info.target_filesystem = fs_choice; 
+    return true;
 }
 
 FormatPage::~FormatPage()
@@ -265,10 +250,11 @@ TargetLocPage::TargetLocPage()
     next_page = CASE_PAGE;
 }
 
-void TargetLocPage::update_info()
+bool TargetLocPage::update_info()
 {
     info.target_filename = filename.get_text();
     info.target_directory = directory.get_current_folder();
+    return true;
 }
 
 TargetLocPage::~TargetLocPage()
@@ -309,7 +295,7 @@ CaseMetadataPage::CaseMetadataPage()
     next_page = IMGI_PAGE;
 }
 
-void CaseMetadataPage::update_info()
+bool CaseMetadataPage::update_info()
 {
     Glib::RefPtr<Gtk::TextBuffer> buff;
 
@@ -320,6 +306,7 @@ void CaseMetadataPage::update_info()
 
     buff = desc.get_buffer();
     info.desc = buff->get_text();
+    return true;
 }
 
 CaseMetadataPage::~CaseMetadataPage()
@@ -397,11 +384,12 @@ ImageMetadataPage::ImageMetadataPage()
     next_page = SUMM_PAGE;
 }
 
-void ImageMetadataPage::update_info()
+bool ImageMetadataPage::update_info()
 {
     info.device_type = type_cb.get_active_text(); 
     info.hash_type = veri_cb.get_active_text();
     info.compression_type = comp_cb.get_active_text();
+    return true;
 }
 
 ImageMetadataPage::~ImageMetadataPage()
@@ -483,7 +471,7 @@ SummaryPage::SummaryPage()
 
 }
 
-void SummaryPage::update_info()
+bool SummaryPage::update_info()
 {
     eviddev.set_text(info.evidence_device);
     targdev.set_text(info.target_device);
@@ -500,6 +488,8 @@ void SummaryPage::update_info()
     devtype.set_text(info.device_type);
     comptype.set_text(info.compression_type);
     hashtype.set_text(info.hash_type);
+
+    return true;
 }
 
 SummaryPage::~SummaryPage()
