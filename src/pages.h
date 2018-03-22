@@ -20,6 +20,7 @@
 
 #include "dialogs.h"
 #include "infocont.h"
+
 #include "blockdev_treeview.h"
 #include <gtkmm/treeselection.h>
 
@@ -156,6 +157,7 @@ class SummaryPage : public Page
         SummaryPage();
         ~SummaryPage();
         bool update_info();
+        bool image();
 
     protected:
         Gtk::Grid grid;

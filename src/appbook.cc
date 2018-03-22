@@ -58,10 +58,17 @@ void AppBook::on_prev()
 
 void AppBook::on_next()
 {
+    if (current_page == SUMM_PAGE)
+    {
+        //sp.image();
+    }
+    
     // Go to the next page, as specificed by the current page
     Page* p = (Page*) get_nth_page(current_page);
     
     // If the update info fails, that means the user made an error
+    // NOTE: This may also update the next page, so it must be run before
+    // accessing next_page to get the intended next page
     if (! p->update_info())
     {
         return;
@@ -84,7 +91,12 @@ void AppBook::on_page_switch(Gtk::Widget *w, guint pn)
 
     if (current_page == SUMM_PAGE)
     {
+        next_button.set_label("Image");
         sp.update_info();
+    }
+    else
+    {
+        next_button.set_label("Next");
     }
 }
 

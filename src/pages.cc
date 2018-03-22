@@ -2,10 +2,11 @@
 
 #include "blockdev_liststore.h"
 #include "pages.h"
+#include "binary_interface.h"
 #include <gtkmm/separator.h>
 
-// This tells compiler to allocate InfoCont struct, but not sure why I can't do
-// it in the constructor
+// This tells compiler to allocate InfoCont struct. Only happens once, not on
+// every object construction
 InfoCont Page::info;
 
 Page::Page(const Glib::ustring &t) : title(t)
@@ -74,13 +75,10 @@ bool EvidPage::update_info()
         return false;
     }
 
-    //cmd = mount_target_device(info->target_device);
-    //subp = g_subprocess_newv((const gchar *const *) cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
-    //g_subprocess_wait(subp, NULL, NULL);
-    //g_strfreev(cmd);
-
-    //globals->user_info->target_filesystem = "N/A";
-    //gtk_notebook_set_current_page(GTK_NOTEBOOK(globals->notebook), LOC_PAGE);
+    if (bint::writeblock_evidence_device(info.evidence_device))
+    {
+        std::cerr << "Error writeblocking " + info.evidence_device << std::endl;
+    }
     return true;
 }
 
@@ -104,6 +102,9 @@ TargPage::TargPage()
 
 bool TargPage::update_info()
 {
+    char **cmd = nullptr;
+    GSubprocess *subp = nullptr;
+
     BlockdevCols cols;
     std::stringstream ss;
 
@@ -130,13 +131,26 @@ bool TargPage::update_info()
         return false;
     }
 
-    //cmd = mount_target_device(info->target_device);
-    //subp = g_subprocess_newv((const gchar *const *) cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
-    //g_subprocess_wait(subp, NULL, NULL);
-    //g_strfreev(cmd);
+    // If the format button is not checked, mount and ignore formatting later
+    if (! format_button.get_active())
+    {
+        cmd = bint::mount_target_device(info.target_device);
+        // If it is nullptr, that means the target is already mounted
+        if (cmd != nullptr)
+        {
+            subp = g_subprocess_newv((const gchar *const *) cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
+            g_subprocess_wait(subp, NULL, NULL);
+            g_strfreev(cmd);
+        }
+        info.target_filesystem = "N/A";
 
-    //globals->user_info->target_filesystem = "N/A";
-    //gtk_notebook_set_current_page(GTK_NOTEBOOK(globals->notebook), LOC_PAGE);
+        next_page = LOC_PAGE; 
+    }
+    else
+    {
+        next_page = TGTF_PAGE;
+    }
+
     return true;
 }
 

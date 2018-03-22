@@ -1,3 +1,6 @@
+#ifndef INFOCONT_H
+#define INFOCONT_H
+
 #include <string>
 
 using std::string;
@@ -20,3 +23,5 @@ typedef struct InfoCont
     string hash_type;
     string compression_type;
 } InfoCont;
+
+#endif /* INFOCONT_H */
