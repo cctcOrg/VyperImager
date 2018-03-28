@@ -181,7 +181,7 @@ FormatPage::FormatPage()
     os_button_box.set_layout(Gtk::BUTTONBOX_SPREAD);
     for (size_t i=0; i<3; i++)
     {
-        format << "icons/" << os_names[i] << "_200px.svg";
+        format << "/usr/local/icons/" << os_names[i] << "_200px.svg";
         os_button = Gtk::manage(new Gtk::ToggleButton());
         os_image = Gtk::manage(new Gtk::Image(format.str()));
 
