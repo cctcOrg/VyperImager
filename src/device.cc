@@ -67,8 +67,8 @@ static string get_target_dev(string filename) {
         return token;
     }
     
-    std::cerr << "Error! Cannot get actual path: " << filename << std::endl;
-    exit(EXIT_FAILURE);
+    std::cerr << "[WARNING] Path does not exist: " << filename << std::endl;
+    return string();
 }
 
 vector<Device*> get_blockdev_info() {

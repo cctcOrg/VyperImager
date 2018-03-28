@@ -2,6 +2,7 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/dialog.h>
+#include <gtkmm/button.h>
 #include <gtkmm/spinner.h>
 #include <gtkmm/progressbar.h>
 
@@ -42,5 +43,12 @@ class ProgBarDialog : public _Dialog
     public:
         ProgBarDialog();
         ~ProgBarDialog();
+        
+        // Control the progress bar
+        void set_progress(double val);
+        void complete();
+
+    protected:
+        Gtk::Button *button;
         Gtk::ProgressBar prog_bar;
 };

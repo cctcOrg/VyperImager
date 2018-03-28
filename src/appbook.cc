@@ -14,7 +14,7 @@ AppBook::AppBook(Gtk::ButtonBox* b, Gtk::HeaderBar* hb)
     set_show_tabs(false);
 
     bbox->pack_start(prev_button, FALSE, FALSE, 0);
-    bbox->pack_start(next_button, FALSE, FALSE, 0);
+    bbox->pack_end(next_button, FALSE, FALSE, 0);
 
     append_page_obj(wp);
     append_page_obj(ep);
@@ -60,7 +60,7 @@ void AppBook::on_next()
 {
     if (current_page == SUMM_PAGE)
     {
-        //sp.image();
+        sp.image();
     }
     
     // Go to the next page, as specificed by the current page

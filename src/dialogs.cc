@@ -51,6 +51,31 @@ ProgSpinnerDialog::~ProgSpinnerDialog()
 ProgBarDialog::ProgBarDialog()
     : _Dialog("Loading")
 {
+    button = dynamic_cast<Gtk::Button*>(get_widget_for_response(GTK_RESPONSE_ACCEPT));
+
+    set_size_request(200, 200);
+
+    button->set_sensitive(false);
+    
+    dialog_area->pack_start(*Gtk::manage(new Gtk::Label("Working...")));
+    dialog_area->pack_start(prog_bar, true, true, 30);
+
+    dialog_area->set_margin_start(30);
+    dialog_area->set_margin_end(30);
+    dialog_area->set_margin_top(30);
+    dialog_area->set_margin_bottom(30);
+
+    prog_bar.set_show_text(true);
+}
+
+void ProgBarDialog::set_progress(double val)
+{
+    prog_bar.set_fraction(val);
+}
+
+void ProgBarDialog::complete()
+{
+    button->set_sensitive(true);
 }
 
 ProgBarDialog::~ProgBarDialog()

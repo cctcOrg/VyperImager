@@ -1,4 +1,7 @@
-#include<sstream>
+#include <sstream>
+#include <iostream>
+#include <typeinfo>
+#include <gtkmm.h>
 
 #include "blockdev_liststore.h"
 #include "pages.h"
@@ -504,6 +507,104 @@ bool SummaryPage::update_info()
     hashtype.set_text(info.hash_type);
 
     return true;
+}
+
+static double get_percent(char *buffer)
+{
+    char *percent_complete_str = nullptr;
+    char percent[3];
+    char *ppercent = percent;
+    long l_per;
+
+    percent_complete_str = strstr(buffer, "s: at");
+    if ( ! (percent_complete_str == nullptr || *percent_complete_str == '\0') )
+    {
+        /* Offset to start reading in number */
+        percent_complete_str += 6;
+
+        while (*percent_complete_str != '%')
+        {
+            *(ppercent++) = *percent_complete_str;
+            percent_complete_str++;
+        }
+        percent[2] = '\0';
+
+        l_per = strtol(percent, NULL, 10);
+        return l_per/100.0;
+    }
+
+    return 0.0;
+}
+
+bool SummaryPage::image()
+{
+    char so_buf[274];
+    GInputStream *std_out = NULL;
+    char **cmd_new = bint::create_forensic_image(info);
+    std::cout << cmd_new[0] << cmd_new[1] << std::endl;
+
+    const char *cmd[] = {"sleep", "10", NULL};
+    //double prog_val = 0.0;
+
+    prog_diag.dialog_area->pack_start(*Gtk::manage(new Gtk::Label("Imaging...")),
+            true, true, 10);
+    prog_diag.show_all();
+
+    subp = g_subprocess_newv((const gchar *const *)cmd, 
+            G_SUBPROCESS_FLAGS_STDOUT_PIPE, NULL);
+            //G_SUBPROCESS_FLAGS_NONE, NULL);
+    std_out = g_subprocess_get_stdout_pipe(subp);
+
+    g_input_stream_read_async(std_out, so_buf, 274, G_PRIORITY_DEFAULT, 
+            NULL, on_status_read, this);
+    //so_buf[273] = '\0';
+
+    //std::cout << "Ran " << cmd[0] << ", got \"" << so_buf << "\"" << std::endl;
+
+
+    //prog_val = get_percent(so_buf);
+    //prog_diag.set_progress(l_per/100.0);
+    //std::cout << "Progress bar at " << prog_val << std::endl;
+
+    g_subprocess_wait_async(subp, NULL, imaging_done, this);
+    //g_strfreev(cmd);
+    return true;
+}
+
+void SummaryPage::on_status_read(GObject *cmd_std, GAsyncResult *r, gpointer udata)
+{
+    //(void) cmd_std;
+    GInputStream *std_out = G_INPUT_STREAM(cmd_std);
+    SummaryPage *page = (SummaryPage*) udata;
+    (void) r;
+
+    char so_buf[274];
+    double prog_val = 0.0;
+
+    if (g_subprocess_get_if_exited(page->subp) == true)
+    {
+        return;
+    }
+
+    g_usleep(1*G_USEC_PER_SEC);
+    g_input_stream_read_async(std_out, so_buf, 274, G_PRIORITY_DEFAULT, 
+            NULL, on_status_read, page);
+
+    so_buf[273] = '\0';
+    std::cout << "Ran callback, got \"" << so_buf << "\"" << std::endl;
+
+    //prog_val = get_percent(so_buf);
+    //page->prog_diag.set_progress(prog_val);
+    std::cout << "Progress bar at " << prog_val << std::endl;
+}
+
+void SummaryPage::imaging_done(GObject *cmd_std, GAsyncResult *r, gpointer udata)
+{
+    (void) cmd_std;
+    (void) r;
+
+    SummaryPage *page = (SummaryPage*) udata;
+    page->prog_diag.complete();
 }
 
 SummaryPage::~SummaryPage()
