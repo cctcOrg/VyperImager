@@ -65,7 +65,7 @@ bool EvidPage::update_info()
     if ((iter = sel->get_selected(model)))
     {
         row = *iter;
-        ss << row[cols.device_name];
+        ss << "/dev/" << row[cols.device_name];
         info.evidence_device = ss.str();
         ss.str(""); 
         
@@ -121,7 +121,7 @@ bool TargPage::update_info()
     if ((iter = sel->get_selected(model)))
     {
         row = *iter;
-        ss << row[cols.device_name];
+        ss << "/dev/" << row[cols.device_name];
         info.target_device = ss.str();
         ss.str(""); 
         
@@ -551,8 +551,7 @@ void SummaryPage::on_mount_finished(GObject *source_object, GAsyncResult *res, g
     
     page->mount_diag.complete();
     
-    // TODO: Make the OK button do this
-    page->mount_diag.hide();
+    page->mount_diag.confirm();
 }
 
 
@@ -593,6 +592,9 @@ bool SummaryPage::image()
         bint::partition_device(info.target_device, info.target_filesystem);
 
         cmd = bint::format_target_device(info.target_device, info.target_filesystem);
+        //std::cout << g_strjoinv(" ", cmd) << std::endl; 
+        //exit(0);
+
         subp = g_subprocess_newv((const gchar *const *)cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
         g_subprocess_wait_async(subp, NULL, on_mkfs_finished, this);
         g_strfreev(cmd);
@@ -601,7 +603,6 @@ bool SummaryPage::image()
     char so_buf[274];
     GInputStream *std_out = NULL;
     cmd = bint::create_forensic_image(info);
-
 
     prog_diag.dialog_area->pack_start(*Gtk::manage(new Gtk::Label("Imaging...")),
             true, true, 10);
@@ -614,23 +615,15 @@ bool SummaryPage::image()
 
     g_input_stream_read_async(std_out, so_buf, 274, G_PRIORITY_DEFAULT, 
             NULL, on_status_read, this);
-    //so_buf[273] = '\0';
-
-    //std::cout << "Ran " << cmd[0] << ", got \"" << so_buf << "\"" << std::endl;
-
-
-    //prog_val = get_percent(so_buf);
-    //prog_diag.set_progress(l_per/100.0);
-    //std::cout << "Progress bar at " << prog_val << std::endl;
 
     g_subprocess_wait_async(subp, NULL, imaging_done, this);
-    //g_strfreev(cmd);
+    g_strfreev(cmd);
+
     return true;
 }
 
 void SummaryPage::on_status_read(GObject *cmd_std, GAsyncResult *r, gpointer udata)
 {
-    //(void) cmd_std;
     GInputStream *std_out = G_INPUT_STREAM(cmd_std);
     SummaryPage *page = (SummaryPage*) udata;
     (void) r;
@@ -662,6 +655,8 @@ void SummaryPage::imaging_done(GObject *cmd_std, GAsyncResult *r, gpointer udata
 
     SummaryPage *page = (SummaryPage*) udata;
     page->prog_diag.complete();
+
+    page->prog_diag.confirm();
 }
 
 SummaryPage::~SummaryPage()

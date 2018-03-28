@@ -69,7 +69,7 @@ void bint::partition_device(string &devpath, string &fs)
     ped_device_close(tgt_device);
 }
 
-int bint::writeblock_evidence_device(string &dev)
+int bint::writeblock_evidence_device(string dev)
 {
     stringstream command;
     command << "blockdev --setro " << dev;
@@ -79,13 +79,11 @@ int bint::writeblock_evidence_device(string &dev)
 /* Note: Need to create a partition table with a partiton */
 char** bint::format_target_device(string &blockdev, string &format)
 {
-    const string partnum = "1";
-
     cout << "Format: " + blockdev << endl;
 
     char** cmd_array;
-    string label_flag = " -L \"EVID_TARGET\" -F ";
-    string hfsp_label_flag = " -v \"EVID_TARGET\" ";
+    string label_flag = " -L \"EVID_TARGET\" -F";
+    string hfsp_label_flag = "-v \"EVID_TARGET\"";
 
     stringstream command; 
 
@@ -94,9 +92,7 @@ char** bint::format_target_device(string &blockdev, string &format)
         command << hfsp_label_flag;
     else
         command << label_flag;
-
-    // Don't forget to include the partition number 
-    command << blockdev + partnum;
+    command << blockdev;
 
     g_shell_parse_argv(command.str().c_str(), NULL, &cmd_array, NULL);
 
@@ -159,7 +155,7 @@ char** bint::create_forensic_image(InfoCont &i)
     command << "ewfacquire -u -t " + i.target_directory + "/" + i.target_filename
         + " -C \"" + i.casenum + "\" -E \"" + i.itemnum + "\" -e \"" + i.examiner
         + " -D \"" + i.desc + "\" -N \"" + i.notes + "\" -m " + dt
-        + " -d \"" + i.hash_type + " -c " + ct + " -l aquisition.log "
+        + " -d \"" + i.hash_type + " -c " + ct + " -l aquisition.log /dev/"
         + i.evidence_device;
 
     g_shell_parse_argv(command.str().c_str(), NULL, &cmd_array, NULL);
