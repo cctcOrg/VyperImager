@@ -550,8 +550,6 @@ void SummaryPage::on_mount_finished(GObject *source_object, GAsyncResult *res, g
     page->mount_diag.show_all();
     
     page->mount_diag.complete();
-    
-    page->mount_diag.confirm();
 }
 
 
@@ -592,17 +590,17 @@ bool SummaryPage::image()
         bint::partition_device(info.target_device, info.target_filesystem);
 
         cmd = bint::format_target_device(info.target_device, info.target_filesystem);
-        //std::cout << g_strjoinv(" ", cmd) << std::endl; 
-        //exit(0);
-
         subp = g_subprocess_newv((const gchar *const *)cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
         g_subprocess_wait_async(subp, NULL, on_mkfs_finished, this);
         g_strfreev(cmd);
+        
+        mount_diag.confirm();
     }
 
     char so_buf[274];
     GInputStream *std_out = NULL;
     cmd = bint::create_forensic_image(info);
+    //std::cout << g_strjoinv(" ", cmd) << std::endl; 
 
     prog_diag.dialog_area->pack_start(*Gtk::manage(new Gtk::Label("Imaging...")),
             true, true, 10);
@@ -618,6 +616,8 @@ bool SummaryPage::image()
 
     g_subprocess_wait_async(subp, NULL, imaging_done, this);
     g_strfreev(cmd);
+
+    prog_diag.confirm();
 
     return true;
 }
@@ -655,8 +655,6 @@ void SummaryPage::imaging_done(GObject *cmd_std, GAsyncResult *r, gpointer udata
 
     SummaryPage *page = (SummaryPage*) udata;
     page->prog_diag.complete();
-
-    page->prog_diag.confirm();
 }
 
 SummaryPage::~SummaryPage()

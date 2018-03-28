@@ -157,10 +157,13 @@ char** bint::create_forensic_image(InfoCont &i)
        //"-l aquisition.log /dev/%s "; 
     
     command << "ewfacquire -u -t " + i.target_directory + "/" + i.target_filename
-        + " -C \"" + i.casenum + "\" -E \"" + i.itemnum + "\" -e \"" + i.examiner
+        + " -C \"" + i.casenum + "\" -E \"" + i.itemnum + "\" -e \"" + i.examiner + "\""
         + " -D \"" + i.desc + "\" -N \"" + i.notes + "\" -m " + dt
-        + " -d \"" + i.hash_type + " -c " + ct + " -l aquisition.log "
+        + " -d " + i.hash_type + " -c " + ct + " -l aquisition.log "
         + i.evidence_device;
+
+    cout << "What my command SHOULD look like:" << endl << command.str() << endl;
+    //exit(1);
 
     g_shell_parse_argv(command.str().c_str(), NULL, &cmd_array, NULL);
 
