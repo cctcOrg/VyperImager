@@ -11,3 +11,6 @@
 
 aquisition.log
 build
+
+arch-system/out
+arch-system/work
