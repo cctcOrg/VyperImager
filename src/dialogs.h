@@ -35,7 +35,12 @@ class ProgSpinnerDialog : public _Dialog
     public:
         ProgSpinnerDialog();
         ~ProgSpinnerDialog();
+        void complete();
+
         Gtk::Spinner spinner;
+
+    protected:
+        Gtk::Button *button;
 };
 
 class ProgBarDialog : public _Dialog

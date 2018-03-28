@@ -509,6 +509,53 @@ bool SummaryPage::update_info()
     return true;
 }
 
+void SummaryPage::on_mkfs_finished(GObject *source_object, GAsyncResult *res, gpointer udata)
+{
+    (void) source_object;
+    (void) res;
+
+    GSubprocess *subp;
+    char **cmd;
+    SummaryPage *page = (SummaryPage*) udata;
+
+    page->mount_diag.dialog_area->pack_start(*Gtk::manage(new Gtk::Label("Mounting...")));
+    page->mount_diag.show_all();
+
+    cmd = bint::mount_target_device(page->info.target_device);
+    /* mount_target_device may return NULL, but if it does we still want the 
+     * final callback to execute -- so just do nothing */
+    if (cmd == nullptr) {
+        cmd = new char*[2];
+        cmd[0] = new char[5]; 
+        strcpy(cmd[0], "true"); 
+        cmd[1] = NULL;
+    }
+
+    subp = g_subprocess_newv((const gchar *const *)cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
+    g_subprocess_wait_async(subp, NULL, on_mount_finished, page);
+    g_strfreev(cmd);
+}
+
+void SummaryPage::on_mount_finished(GObject *source_object, GAsyncResult *res, gpointer udata)
+{
+    (void) source_object;
+    (void) res;
+
+    SummaryPage *page = (SummaryPage*) udata;
+
+    page->mount_diag.dialog_area->pack_start(*Gtk::manage(
+                new Gtk::Label("Done!")), true, true, 20);
+
+    page->mount_diag.spinner.stop();
+    page->mount_diag.show_all();
+    
+    page->mount_diag.complete();
+    
+    // TODO: Make the OK button do this
+    page->mount_diag.hide();
+}
+
+
 static double get_percent(char *buffer)
 {
     char *percent_complete_str = nullptr;
@@ -538,13 +585,23 @@ static double get_percent(char *buffer)
 
 bool SummaryPage::image()
 {
+    char **cmd = nullptr;
+
+    // Oh, we haven't formatted yet? 
+    if (info.target_filesystem.compare("N/A") != 0)
+    {
+        bint::partition_device(info.target_device, info.target_filesystem);
+
+        cmd = bint::format_target_device(info.target_device, info.target_filesystem);
+        subp = g_subprocess_newv((const gchar *const *)cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
+        g_subprocess_wait_async(subp, NULL, on_mkfs_finished, this);
+        g_strfreev(cmd);
+    }
+
     char so_buf[274];
     GInputStream *std_out = NULL;
-    char **cmd_new = bint::create_forensic_image(info);
-    std::cout << cmd_new[0] << cmd_new[1] << std::endl;
+    cmd = bint::create_forensic_image(info);
 
-    const char *cmd[] = {"sleep", "10", NULL};
-    //double prog_val = 0.0;
 
     prog_diag.dialog_area->pack_start(*Gtk::manage(new Gtk::Label("Imaging...")),
             true, true, 10);
@@ -593,8 +650,8 @@ void SummaryPage::on_status_read(GObject *cmd_std, GAsyncResult *r, gpointer uda
     so_buf[273] = '\0';
     std::cout << "Ran callback, got \"" << so_buf << "\"" << std::endl;
 
-    //prog_val = get_percent(so_buf);
-    //page->prog_diag.set_progress(prog_val);
+    prog_val = get_percent(so_buf);
+    page->prog_diag.set_progress(prog_val);
     std::cout << "Progress bar at " << prog_val << std::endl;
 }
 

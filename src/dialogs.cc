@@ -42,6 +42,24 @@ ConfirmDialog::~ConfirmDialog()
 ProgSpinnerDialog::ProgSpinnerDialog()
     : _Dialog("Loading")
 {
+    button = dynamic_cast<Gtk::Button*>(get_widget_for_response(GTK_RESPONSE_ACCEPT));
+    button->set_sensitive(false);
+
+    set_size_request(200, 200);
+
+    dialog_area->pack_start(*Gtk::manage(new Gtk::Label("Working...")));
+    dialog_area->pack_start(spinner, true, true, 30);
+    dialog_area->set_margin_start(30);
+    dialog_area->set_margin_end(30);
+    dialog_area->set_margin_top(30);
+    dialog_area->set_margin_bottom(30);
+
+    spinner.start();
+}
+
+void ProgSpinnerDialog::complete()
+{
+    button->set_sensitive(true);
 }
 
 ProgSpinnerDialog::~ProgSpinnerDialog()

@@ -160,11 +160,15 @@ class SummaryPage : public Page
         bool image();
 
     protected:
+        static void on_mkfs_finished(GObject *so, GAsyncResult *r, gpointer page);
+        static void on_mount_finished(GObject *so, GAsyncResult *r, gpointer page);
         static void on_status_read(GObject *o, GAsyncResult *r, gpointer udata);
         static void imaging_done(GObject *o, GAsyncResult *r, gpointer udata);
+
         void app_done(Gtk::Dialog *d, gint i, gpointer udata);
 
         Gtk::Grid grid;
+        ProgSpinnerDialog mount_diag;
         ProgBarDialog prog_diag;
         GSubprocess *subp;
 

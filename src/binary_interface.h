@@ -9,6 +9,8 @@ namespace bint
      * devices mounted at /media/EVID_TARGET, or 0 otherwise */
     int target_is_mounted();
 
+    void partition_device(string &devpath, string &fs);
+
     /* Takes a pointer to blockdev string, and another to a string 
      * that indicates what filesystem should be created. It returns a pointer to an
      * array, terminated by -1, that represents the arguments for a subprocess to

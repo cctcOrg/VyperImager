@@ -6,6 +6,8 @@ extern "C"
 #include<sys/stat.h>
 #include<sys/ioctl.h>
 #include<linux/fs.h>
+
+#include<parted/parted.h>
 }
 
 
@@ -27,12 +29,41 @@ int bint::target_is_mounted()
     if (!f)
         return -1;
 
-    char *buf = NULL;
+    char *buf = nullptr;
     while (fscanf(f, "%*s %ms %*s %*s %*s %*s\n", &buf) == 1)
         if (strstr(buf, "/media/EVID_TARGET") == buf)
             return 1;
 
     return 0;
+}
+
+void bint::partition_device(string &devpath, string &fs)
+{
+    PedDevice *tgt_device = nullptr;
+
+    PedDisk *tgt = nullptr;
+    PedDiskType *disk_type = nullptr;
+
+    PedPartition *part = nullptr;
+    PedFileSystemType *fstype = nullptr;
+
+    tgt_device = ped_device_get(devpath.c_str());
+    ped_device_open(tgt_device);
+    disk_type = ped_disk_type_get("gpt");
+    tgt = ped_disk_new_fresh(tgt_device, disk_type);
+    fstype = ped_file_system_type_get(fs.c_str());
+
+    /* Apparently starting at sector 2048 is a good idea */
+    part = ped_partition_new(tgt, PED_PARTITION_NORMAL, fstype, 2048, tgt_device->length-1); 
+    ped_disk_add_partition(tgt, part, ped_constraint_exact(&part->geom));
+
+    ped_disk_commit_to_dev(tgt);
+    ped_disk_commit_to_os(tgt);
+
+    /* Destroy and close do the same thing, just the functions are named
+     * differently for the struct type */
+    ped_disk_destroy(tgt);
+    ped_device_close(tgt_device);
 }
 
 int bint::writeblock_evidence_device(string dev)
