@@ -115,4 +115,5 @@ zlib
 xorg-server
 xorg-drivers
 xorg-xinit
-i3
+i3-gaps
+gtkmm3
