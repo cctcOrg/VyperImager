@@ -15,3 +15,4 @@ build
 arch-system/out
 arch-system/work
 !arch-system/airootfs/etc/skel/.config/i3/config
+!arch-system/airootfs/usr/bin/vyper
