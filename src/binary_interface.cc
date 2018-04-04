@@ -169,3 +169,15 @@ char** bint::create_forensic_image(InfoCont &i)
 
     return cmd_array; 
 }
+
+int bint::create_mountpoint()
+{
+    return system("mkdir -p /media/EVID_TARGET");
+}
+
+void bint::unmount_target()
+{
+    system("umount /media/EVID_TARGET || /bin/true");
+    system("umount /dev/disk/by-label/EVID_TARGET || /bin/true");
+}
+

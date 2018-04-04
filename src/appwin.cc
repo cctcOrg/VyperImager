@@ -1,3 +1,4 @@
+#include "binary_interface.h"
 #include "appwin.h"
 #include <iostream>
 #include <typeinfo>
@@ -42,5 +43,6 @@ AppWin::~AppWin()
 
 void AppWin::on_quit()
 {
+    bint::unmount_target();
     app->quit();
 }

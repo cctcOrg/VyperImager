@@ -1,12 +1,17 @@
+#include "binary_interface.h"
 #include "appwin.h"
 #include <gtkmm/application.h>
 
 int main (int argc, char *argv[])
 {
-  auto app = Gtk::Application::create(argc, argv, "org.cctc.vyper");
+    // Set the initial state
+    bint::create_mountpoint();
+    bint::unmount_target();
 
-  AppWin appwin(app);
+    auto app = Gtk::Application::create(argc, argv, "org.cctc.vyper");
 
-  //Shows the window and returns when it is closed.
-  return app->run(appwin);
+    AppWin appwin(app);
+
+    //Shows the window and returns when it is closed.
+    return app->run(appwin);
 }
