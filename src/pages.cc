@@ -43,7 +43,7 @@ EvidPage::EvidPage()
     : Page("Evidence Device Selection"),
     no_device_dialog("An evidence device must be selected!"), 
     evid_prompt("Please choose the evidence device"),
-    evid_device_tv(false)
+    evid_device_tv(false, "null")
 {
     pack_start(evid_prompt, true, true, 10);
     pack_start(evid_device_tv, true, true, 10);
@@ -93,7 +93,7 @@ TargPage::TargPage()
     : Page("Target Device Selection"),
     no_device_dialog("A target device must be selected!"), 
     targ_prompt("Please choose the target device"),
-    targ_device_tv(false),
+    targ_device_tv(false, info.evidence_device),
     format_button("Format?")
 {
     pack_start(targ_prompt, true, true, 10);
@@ -141,9 +141,12 @@ bool TargPage::update_info()
         // If it is nullptr, that means the target is already mounted
         if (cmd != nullptr)
         {
+            mount_diag.dialog_area->pack_start(*Gtk::manage(new Gtk::Label("Mounting...")));
+
             subp = g_subprocess_newv((const gchar *const *) cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
-            g_subprocess_wait(subp, NULL, NULL);
-            g_strfreev(cmd);
+            g_subprocess_wait_async(subp, NULL, on_mount_finished, this);
+
+            mount_diag.confirm();
         }
         info.target_filesystem = "N/A";
 
@@ -155,6 +158,22 @@ bool TargPage::update_info()
     }
 
     return true;
+}
+
+void TargPage::on_mount_finished(GObject *source_object, GAsyncResult *res, gpointer udata)
+{
+    (void) source_object;
+    (void) res;
+
+    TargPage *page = (TargPage*) udata;
+
+    page->mount_diag.dialog_area->pack_start(*Gtk::manage(
+                new Gtk::Label("Done!")), true, true, 20);
+
+    page->mount_diag.spinner.stop();
+    page->mount_diag.show_all();
+    
+    page->mount_diag.complete();
 }
 
 TargPage::~TargPage()

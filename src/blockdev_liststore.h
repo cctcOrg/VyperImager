@@ -28,13 +28,13 @@ class BlockdevCols : public Gtk::TreeModel::ColumnRecord {
 class BlockdevListStore : public Gtk::ListStore
 {
     public:
-        BlockdevListStore(bool hide_internal, string evid);
         ~BlockdevListStore();
-        static Glib::RefPtr<BlockdevListStore> create();
+        static Glib::RefPtr<BlockdevListStore> create(string &evid);
 
         BlockdevCols cols;
 
     protected:
+        BlockdevListStore(bool hide_internal, string& evid);
         std::vector<Device*> blockdev_info;
 };
 

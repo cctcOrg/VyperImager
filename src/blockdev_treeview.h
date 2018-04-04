@@ -9,7 +9,7 @@
 class BlockdevTreeView : public Gtk::TreeView
 {
     public:
-        BlockdevTreeView(bool hide_internal);
+        BlockdevTreeView(bool hide_internal, string evid);
         ~BlockdevTreeView();
 
     protected:

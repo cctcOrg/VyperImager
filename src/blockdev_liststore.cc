@@ -21,7 +21,7 @@ BlockdevCols::~BlockdevCols()
 {
 }
 
-BlockdevListStore::BlockdevListStore(bool hide_internal, string evid)
+BlockdevListStore::BlockdevListStore(bool hide_internal, string& evid)
 {
     Device *dev;
     bool is_first = true;
@@ -67,9 +67,9 @@ BlockdevListStore::BlockdevListStore(bool hide_internal, string evid)
 
 }
 
-Glib::RefPtr<BlockdevListStore> BlockdevListStore::create()
+Glib::RefPtr<BlockdevListStore> BlockdevListStore::create(string &evid)
 {
-  return Glib::RefPtr<BlockdevListStore>( new BlockdevListStore(false, "test") );
+  return Glib::RefPtr<BlockdevListStore>( new BlockdevListStore(false, evid) );
 }
 
 

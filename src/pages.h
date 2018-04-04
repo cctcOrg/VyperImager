@@ -80,7 +80,10 @@ class TargPage : public Page
         bool update_info();
 
     protected:
+        static void on_mount_finished(GObject *so, GAsyncResult *r, gpointer page);
+
         ErrorDialog no_device_dialog; 
+        ProgSpinnerDialog mount_diag;
         Gtk::Label targ_prompt;
         BlockdevTreeView targ_device_tv;
         Gtk::CheckButton format_button;

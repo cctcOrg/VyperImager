@@ -45,6 +45,7 @@ Device::~Device() {}
 
 bool Device::is_evid(string& evid)
 {
+    std::cout << name + " vs " + evid << std::endl;
     return name.compare(evid) == 0;
 }
 
