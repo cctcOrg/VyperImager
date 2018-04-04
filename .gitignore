@@ -14,3 +14,4 @@ build
 
 arch-system/out
 arch-system/work
+!arch-system/airootfs/etc/skel/.config/i3/config

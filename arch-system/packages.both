@@ -117,3 +117,5 @@ xorg-drivers
 xorg-xinit
 i3-gaps
 gtkmm3
+xterm
+feh
