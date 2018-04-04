@@ -43,7 +43,7 @@ EvidPage::EvidPage()
     : Page("Evidence Device Selection"),
     no_device_dialog("An evidence device must be selected!"), 
     evid_prompt("Please choose the evidence device"),
-    evid_device_tv(false, "null")
+    evid_device_tv(false)
 {
     pack_start(evid_prompt, true, true, 10);
     pack_start(evid_device_tv, true, true, 10);
@@ -93,7 +93,7 @@ TargPage::TargPage()
     : Page("Target Device Selection"),
     no_device_dialog("A target device must be selected!"), 
     targ_prompt("Please choose the target device"),
-    targ_device_tv(false, info.evidence_device),
+    targ_device_tv(false),
     format_button("Format?")
 {
     pack_start(targ_prompt, true, true, 10);
@@ -141,6 +141,7 @@ bool TargPage::update_info()
         // If it is nullptr, that means the target is already mounted
         if (cmd != nullptr)
         {
+            mount_diag.present();
             mount_diag.dialog_area->pack_start(*Gtk::manage(new Gtk::Label("Mounting...")));
 
             subp = g_subprocess_newv((const gchar *const *) cmd, G_SUBPROCESS_FLAGS_NONE, NULL);
@@ -606,6 +607,7 @@ bool SummaryPage::image()
     // Oh, we haven't formatted yet? 
     if (info.target_filesystem.compare("N/A") != 0)
     {
+        mount_diag.present();
         bint::partition_device(info.target_device, info.target_filesystem);
 
         cmd = bint::format_target_device(info.target_device, info.target_filesystem);
@@ -624,6 +626,7 @@ bool SummaryPage::image()
     prog_diag.dialog_area->pack_start(*Gtk::manage(new Gtk::Label("Imaging...")),
             true, true, 10);
     prog_diag.show_all();
+    prog_diag.present();
 
     subp = g_subprocess_newv((const gchar *const *)cmd, 
             G_SUBPROCESS_FLAGS_STDOUT_PIPE, NULL);
@@ -660,11 +663,9 @@ void SummaryPage::on_status_read(GObject *cmd_std, GAsyncResult *r, gpointer uda
             NULL, on_status_read, page);
 
     so_buf[273] = '\0';
-    std::cout << "Ran callback, got \"" << so_buf << "\"" << std::endl;
 
     prog_val = get_percent(so_buf);
     page->prog_diag.set_progress(prog_val);
-    std::cout << "Progress bar at " << prog_val << std::endl;
 }
 
 void SummaryPage::imaging_done(GObject *cmd_std, GAsyncResult *r, gpointer udata)
@@ -673,6 +674,7 @@ void SummaryPage::imaging_done(GObject *cmd_std, GAsyncResult *r, gpointer udata
     (void) r;
 
     SummaryPage *page = (SummaryPage*) udata;
+    page->prog_diag.set_progress(1.0);
     page->prog_diag.complete();
 }
 

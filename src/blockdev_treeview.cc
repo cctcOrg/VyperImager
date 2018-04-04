@@ -1,9 +1,9 @@
 #include "blockdev_liststore.h"
 #include "blockdev_treeview.h"
 
-BlockdevTreeView::BlockdevTreeView(bool hide_internal, string evid)
+BlockdevTreeView::BlockdevTreeView(bool hide_internal)
 {
-    model = BlockdevListStore::create(evid);
+    model = BlockdevListStore::create();
     set_model(model);
 
     devcol = Gtk::TreeView::Column("Device", model->cols.device_name);
@@ -21,6 +21,11 @@ BlockdevTreeView::BlockdevTreeView(bool hide_internal, string evid)
 
     if (!hide_internal)
         append_column(remcol);
+}
+
+void BlockdevTreeView::hide_device(string& evid)
+{
+    (void) evid;
 }
 
 BlockdevTreeView::~BlockdevTreeView()

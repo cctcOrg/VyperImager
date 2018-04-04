@@ -29,12 +29,12 @@ class BlockdevListStore : public Gtk::ListStore
 {
     public:
         ~BlockdevListStore();
-        static Glib::RefPtr<BlockdevListStore> create(string &evid);
+        static Glib::RefPtr<BlockdevListStore> create();
 
         BlockdevCols cols;
 
     protected:
-        BlockdevListStore(bool hide_internal, string& evid);
+        BlockdevListStore(bool hide_internal);
         std::vector<Device*> blockdev_info;
 };
 

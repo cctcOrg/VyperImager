@@ -9,8 +9,10 @@
 class BlockdevTreeView : public Gtk::TreeView
 {
     public:
-        BlockdevTreeView(bool hide_internal, string evid);
+        BlockdevTreeView(bool hide_internal);
         ~BlockdevTreeView();
+
+        void hide_device(string& evid);
 
     protected:
         Glib::RefPtr<BlockdevListStore> model;

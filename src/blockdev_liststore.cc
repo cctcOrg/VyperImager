@@ -21,11 +21,10 @@ BlockdevCols::~BlockdevCols()
 {
 }
 
-BlockdevListStore::BlockdevListStore(bool hide_internal, string& evid)
+BlockdevListStore::BlockdevListStore(bool hide_internal)
 {
     Device *dev;
     bool is_first = true;
-    bool is_eviddev;
 
     std::stringstream partlabels;
     set_column_types(cols);
@@ -34,8 +33,6 @@ BlockdevListStore::BlockdevListStore(bool hide_internal, string& evid)
     for (size_t i=0; i<blockdev_info.size(); i++) {
         dev = blockdev_info[i];
  
-        is_eviddev = (evid.size() &&  dev->is_evid(evid) ); 
-        
         for (size_t j = 0; j < dev->labels.size(); j++) {
             if (is_first)
             {
@@ -49,7 +46,7 @@ BlockdevListStore::BlockdevListStore(bool hide_internal, string& evid)
         }
         is_first = true;
 
-        if (hide_internal && (!dev->removable || is_eviddev))
+        if (hide_internal && !dev->removable)
             continue;
 
         auto row = *append();
@@ -67,9 +64,9 @@ BlockdevListStore::BlockdevListStore(bool hide_internal, string& evid)
 
 }
 
-Glib::RefPtr<BlockdevListStore> BlockdevListStore::create(string &evid)
+Glib::RefPtr<BlockdevListStore> BlockdevListStore::create()
 {
-  return Glib::RefPtr<BlockdevListStore>( new BlockdevListStore(false, evid) );
+  return Glib::RefPtr<BlockdevListStore>( new BlockdevListStore(false) );
 }
 
 
