@@ -97,13 +97,15 @@ Device *get_blockdev_struct(PedDevice *dev, string& td) {
     char *tmp;
     const char *tmpc;
     blkid_partlist ls;
-    char info_path[PATH_SIZE];
     char rem[REM_SIZE]; 
     string wholedev_label;
     vector<string> labels;
     int numparts = 0;
     int i;
     int err;
+
+    PedDisk *disk = ped_disk_new(dev);
+    PedPartition *curr_part;
 
     stringstream size;
     //size = malloc(SIZE_SIZE*sizeof(char));
@@ -153,20 +155,26 @@ Device *get_blockdev_struct(PedDevice *dev, string& td) {
             i++;
         }
 
-        for (i = 0; i < numparts; i++) {
-            sprintf(info_path, "%s%d", dev->path, (i+1));
+        curr_part = NULL;
 
-            pr = blkid_new_probe_from_filename(info_path);
+
+
+        // Iterate through the partitions to get the labels
+        while ( (curr_part = ped_disk_next_partition(disk, curr_part)) != NULL) 
+        {
+            // I'm not sure where this comes from, but oh well
+            if  (curr_part->num < 1)
+                continue;
+
+            pr = blkid_new_probe_from_filename(ped_partition_get_path(curr_part));
+            //std::cout << "Probing " << pr << std::endl;
+
             blkid_do_probe(pr);
             err = blkid_probe_lookup_value(pr, "LABEL", &tmpc, NULL);
 
             if (err == 0) {
                 labels.push_back(string(tmpc));
             }
-            //else {
-                /*printf("%s has no valid label\n", info_path);*/
-                //labels[i] = NULL;
-            //}
 
             blkid_free_probe(pr);
         }

@@ -6,6 +6,7 @@ _Dialog::_Dialog(const std::string &msg)
 {
     dialog_area = get_content_area();
     add_button("OK", Gtk::RESPONSE_ACCEPT); 
+    set_keep_above(true);
 }
 
 void _Dialog::confirm()

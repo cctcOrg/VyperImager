@@ -623,6 +623,7 @@ bool SummaryPage::image()
     cmd = bint::create_forensic_image(info);
     //std::cout << g_strjoinv(" ", cmd) << std::endl; 
 
+
     prog_diag.dialog_area->pack_start(*Gtk::manage(new Gtk::Label("Imaging...")),
             true, true, 10);
     prog_diag.show_all();
@@ -630,7 +631,6 @@ bool SummaryPage::image()
 
     subp = g_subprocess_newv((const gchar *const *)cmd, 
             G_SUBPROCESS_FLAGS_STDOUT_PIPE, NULL);
-            //G_SUBPROCESS_FLAGS_NONE, NULL);
     std_out = g_subprocess_get_stdout_pipe(subp);
 
     g_input_stream_read_async(std_out, so_buf, 274, G_PRIORITY_DEFAULT, 
